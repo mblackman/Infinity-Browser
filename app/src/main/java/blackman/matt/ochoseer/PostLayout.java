@@ -7,6 +7,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.text.Html;
+import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,8 @@ import android.webkit.WebView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import org.jsoup.examples.HtmlToPlainText;
 
 import java.io.IOException;
 import java.net.URL;
@@ -113,17 +117,17 @@ public class PostLayout extends Fragment {
         TextView tuser = (TextView) myInflatedView.findViewById(R.id.tv_username);
         TextView tdate = (TextView) myInflatedView.findViewById(R.id.tv_datetime);
         TextView tpostno = (TextView) myInflatedView.findViewById(R.id.tv_postno);
-        WebView wposttext = (WebView) myInflatedView.findViewById(R.id.wv_postText);
+        TextView tposttext = (TextView) myInflatedView.findViewById(R.id.tv_postText_top);
 
         ttopic.setText(topic);
         tuser.setText(username);
         tdate.setText(postdate);
         tpostno.setText("No." + postNumber);
-        wposttext.loadData(postText, "text/html", null);
+        tposttext.setText(Html.fromHtml(postText));
 
         if(imageThumbs.length > 0) {
             String imgURL = "http://8chan.co" + imageThumbs[0];
-            new postImage(postImageButton).execute(imgURL);
+            new postImage(postImageButton, myInflatedView).execute(imgURL);
         }
         return myInflatedView;
     }
@@ -177,17 +181,15 @@ public class PostLayout extends Fragment {
             public void onClick(View btn) {
                 // Swap big and little pick + swap settings
                 if(isThumbnail) { // Little Mode -> Big mode
-                    postImageButton.setMaxWidth(1000); // Get to size of layout
-                    // LinearLayout postInfoView = (LinearLayout) curView.findViewById(R.id.ll_postBody);
+                    postImageButton.setMaxWidth(Integer.MAX_VALUE); // A big number
                     String imgURL = "http://8chan.co" + imageFull[0];
-                    new postImage((ImageButton) btn).execute(imgURL);
+                    new postImage((ImageButton) btn, curView).execute(imgURL);
                     isThumbnail = Boolean.FALSE;
                 }
                 else { // Big mode -> Little Mode
-                    float maxWidth = getResources().getDimension(R.dimen.post_bar_image_size_small);
-                    postImageButton.setMaxWidth((int) maxWidth);
+                    postImageButton.setMaxWidth(getResources().getDimensionPixelOffset(R.dimen.post_bar_image_size_small));
                     String imgURL = "http://8chan.co" + imageThumbs[0];
-                    new postImage((ImageButton) btn).execute(imgURL);
+                    new postImage((ImageButton) btn, curView).execute(imgURL);
                     isThumbnail = Boolean.TRUE;
                 }
             }
@@ -196,8 +198,10 @@ public class PostLayout extends Fragment {
 
     public class postImage extends AsyncTask<String, Void, Bitmap> {
         private ImageButton imb;
+        private View rootView;
 
-        public postImage(ImageButton imgbutton) {
+        public postImage(ImageButton imgbutton, View rootView) {
+            this.rootView = rootView;
             this.imb = imgbutton;
         }
 
@@ -218,6 +222,13 @@ public class PostLayout extends Fragment {
             if(img != null) {
                 imb.setVisibility(View.VISIBLE);
                 imb.setImageBitmap(img);
+                LinearLayout postInfoView = (LinearLayout) rootView.findViewById(R.id.ll_post_layout);
+                if(isThumbnail) {
+                    postInfoView.setOrientation(LinearLayout.HORIZONTAL);
+                }
+                else {
+                    postInfoView.setOrientation(LinearLayout.VERTICAL);
+                }
             }
             else {
                 imb.setVisibility(View.GONE);
