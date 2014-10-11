@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ochseer</string>
+    <string name="title_section1">/Tech/</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_example">Matty Action</string>
+    <string name="action_settings">Settings</string>
+    <string name="shared_preference_file">matt.blackman.ochseer.pref</string>
+    <string name="PREF_USER_BOARD_LIST">user_ocho_board_list</string>
+    <string name="wait_text">Loading...</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="post_thumb_desciption">Thumbnail of posts first picture</string>
+
+</resources>

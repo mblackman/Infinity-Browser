@@ -1,0 +1,62 @@
+<LinearLayout
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="@dimen/post_bar_vertical_margin"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ImageButton
+        android:layout_width="@dimen/post_bar_image_size"
+        android:layout_height="@dimen/post_bar_image_size"
+        android:id="@+id/post_thumbnail"
+        android:contentDescription="@string/post_thumb_desciption"
+        android:cropToPadding="false"
+        android:adjustViewBounds="false"
+        android:layout_gravity="left|top"
+        android:background="@android:color/transparent"
+        android:clickable="true" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_topic"
+                android:textSize="@dimen/post_header_font_size"
+                android:textColor="#0F0C5D" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_username"
+                android:textColor="#ff117743"
+                android:textSize="@dimen/post_header_font_size" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_datetime"
+                android:textSize="@dimen/post_header_font_size" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_postno"
+                android:textSize="@dimen/post_header_font_size" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_posttext"
+            android:textSize="@dimen/post_body_font_size" />
+    </LinearLayout>
+
+</LinearLayout>
