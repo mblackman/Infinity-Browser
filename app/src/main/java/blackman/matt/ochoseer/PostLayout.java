@@ -10,7 +10,9 @@ import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -104,19 +106,20 @@ public class PostLayout extends Fragment {
         // Setup
         isThumbnail = Boolean.TRUE;
         addListenerOnButton(myInflatedView);
+//        Screen_Width = myInflatedView.;
 
         // Init variables
         TextView ttopic = (TextView) myInflatedView.findViewById(R.id.tv_topic);
         TextView tuser = (TextView) myInflatedView.findViewById(R.id.tv_username);
         TextView tdate = (TextView) myInflatedView.findViewById(R.id.tv_datetime);
         TextView tpostno = (TextView) myInflatedView.findViewById(R.id.tv_postno);
-        TextView tposttext = (TextView) myInflatedView.findViewById(R.id.tv_posttext);
+        WebView wposttext = (WebView) myInflatedView.findViewById(R.id.wv_postText);
 
         ttopic.setText(topic);
         tuser.setText(username);
         tdate.setText(postdate);
         tpostno.setText("No." + postNumber);
-        tposttext.setText(postText);
+        wposttext.loadData(postText, "text/html", null);
 
         if(imageThumbs.length > 0) {
             String imgURL = "http://8chan.co" + imageThumbs[0];
@@ -149,6 +152,8 @@ public class PostLayout extends Fragment {
         mListener = null;
     }
 
+
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -164,20 +169,26 @@ public class PostLayout extends Fragment {
         public void onFragmentInteraction(Uri uri);
     }
 
-    public void addListenerOnButton(View curView) {
+    public void addListenerOnButton(final View curView) {
         postImageButton = (ImageButton) curView.findViewById(R.id.post_thumbnail);
 
         postImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View btn) {
                 // Swap big and little pick + swap settings
-                if(isThumbnail) {
-                    String oldUrl = btn.toString();
+                if(isThumbnail) { // Little Mode -> Big mode
+                    postImageButton.setMaxWidth(1000); // Get to size of layout
+                    // LinearLayout postInfoView = (LinearLayout) curView.findViewById(R.id.ll_postBody);
+                    String imgURL = "http://8chan.co" + imageFull[0];
+                    new postImage((ImageButton) btn).execute(imgURL);
+                    isThumbnail = Boolean.FALSE;
+                }
+                else { // Big mode -> Little Mode
+                    float maxWidth = getResources().getDimension(R.dimen.post_bar_image_size_small);
+                    postImageButton.setMaxWidth((int) maxWidth);
                     String imgURL = "http://8chan.co" + imageThumbs[0];
                     new postImage((ImageButton) btn).execute(imgURL);
-                }
-                else {
-
+                    isThumbnail = Boolean.TRUE;
                 }
             }
         });

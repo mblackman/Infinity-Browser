@@ -198,8 +198,8 @@ public class BoardBrowser extends Activity
                 String userName = postOp.getElementsByClass("name").first().text();
                 String postDate = postOp.select("time").first().text();
                 String postTopic = null;
-                String postText = postOp.getElementsByClass("body").first().text();
-                Integer MAXIMAGES = getResources().getInteger(R.integer.max_images_per_post);
+                String postText = postOp.getElementsByClass("body").first().html();
+                Integer MAXIMAGES = 10;
 
                 // Work with data as needed
                 if(postOp.getElementsByClass("topic").size() > 0) {
