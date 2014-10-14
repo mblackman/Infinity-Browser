@@ -4,7 +4,11 @@ package blackman.matt.ochoseer;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -20,7 +24,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ViewSwitcher;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -53,7 +67,8 @@ public class NavigationDrawerFragment extends Fragment {
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
     private View mFragmentContainerView;
-
+    private Button mBoardButton;
+    private ViewSwitcher vsMain;
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
@@ -87,7 +102,7 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
             Bundle savedInstanceState) {
         Context context;
         String[] boardList;
@@ -98,21 +113,38 @@ public class NavigationDrawerFragment extends Fragment {
 
         boardList = sharedPref.getString(getString(R.string.PREF_USER_BOARD_LIST), "").split(" ");
 
-        mDrawerListView = (ListView) inflater.inflate(
+        LinearLayout drawerview =  (LinearLayout) inflater.inflate(
                 R.layout.fragment_navigation_drawer, container, false);
+
+        mDrawerListView = (ListView) drawerview.findViewById(R.id.navigation_drawer_listview);
+
+        //mDrawerListView = (ListView) inflater.inflate(
+        //        R.layout.fragment_navigation_drawer, container, false);
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 selectItem(position);
             }
         });
+
+        // Set onclick listener to boards button
+        mBoardButton = (Button) drawerview.findViewById(R.id.navigation_drawer_board_button);
+
+        mBoardButton.setOnClickListener(new AdapterView.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vsMain.showNext();
+                mDrawerLayout.closeDrawers();
+            }
+        });
+
         mDrawerListView.setAdapter(new ArrayAdapter<String>(
                 getActionBar().getThemedContext(),
                 android.R.layout.simple_list_item_activated_1,
                 android.R.id.text1,
                 boardList));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-        return mDrawerListView;
+        return drawerview;
     }
 
     public boolean isDrawerOpen() {
@@ -125,9 +157,10 @@ public class NavigationDrawerFragment extends Fragment {
      * @param fragmentId   The android:id of this fragment in its activity's layout.
      * @param drawerLayout The DrawerLayout containing this fragment's UI.
      */
-    public void setUp(int fragmentId, DrawerLayout drawerLayout) {
+    public void setUp(int fragmentId, DrawerLayout drawerLayout, ViewSwitcher vsMain) {
         mFragmentContainerView = getActivity().findViewById(fragmentId);
         mDrawerLayout = drawerLayout;
+        this.vsMain = vsMain;
 
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);

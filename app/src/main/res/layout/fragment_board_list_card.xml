@@ -1,0 +1,51 @@
+<RelativeLayout
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/board_list_car_height"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ToggleButton
+        android:layout_width="@dimen/board_list_car_height"
+        android:layout_height="@dimen/board_list_car_height"
+        android:text="New ToggleButton"
+        android:id="@+id/tb_board_fav"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:textOn="Follow"
+        android:textOff="Ignore" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_toRightOf="@+id/tb_board_fav"
+        android:layout_centerVertical="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Board Link"
+            android:id="@+id/tv_board_link"
+            android:layout_weight="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="/Board Name/"
+            android:id="@+id/tv_board_name"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Board Value"
+        android:id="@+id/tv_board_value"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:gravity="right" />
+
+</RelativeLayout>
