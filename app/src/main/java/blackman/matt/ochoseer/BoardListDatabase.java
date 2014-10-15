@@ -148,19 +148,15 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
     public Boolean isEmpty() {
         SQLiteDatabase db = getReadableDatabase();
         Cursor mCursor = db.rawQuery("SELECT * FROM " + FeedEntry.TABLE_NAME, null);
-        Boolean rowExists;
+        Boolean isEmpty;
 
-        if (mCursor.moveToFirst())
-        {
-            // DO SOMETHING WITH CURSOR
-            rowExists = true;
-
-        } else
-        {
-            // I AM EMPTY
-            rowExists = false;
+        if (mCursor.moveToFirst()) {
+            isEmpty = false;
         }
-        return rowExists;
+        else {
+            isEmpty = true;
+        }
+        return isEmpty;
     }
 
     public BoardListDatabase openToRead() throws android.database.SQLException {

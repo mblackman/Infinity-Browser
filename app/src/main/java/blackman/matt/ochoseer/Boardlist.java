@@ -95,7 +95,9 @@ public class Boardlist extends Fragment implements BoardListCard.OnFragmentInter
                     mDBSortBy = DEFAULT_SELECTED_COLUMN;
                 }
             }
-            updateDatabaseView();
+            if(mDBSortBy != null && mDBOrderBy != null) {
+                updateDatabaseView();
+            }
         }
 
         public void onNothingSelected(AdapterView<?> parent) {
@@ -254,12 +256,6 @@ public class Boardlist extends Fragment implements BoardListCard.OnFragmentInter
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
-    }
-
-    public void onItemSelected(AdapterView<?> parent, View view,
-                               int pos, long id) {
-        // An item was selected. You can retrieve the selected item using
-        // parent.getItemAtPosition(pos)
     }
 
     public class getBoardList extends AsyncTask<Void, Void, Document> {
