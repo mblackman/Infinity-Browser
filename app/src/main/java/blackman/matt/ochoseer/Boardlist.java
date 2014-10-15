@@ -11,7 +11,12 @@ import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -32,8 +37,11 @@ import java.io.IOException;
  */
 public class Boardlist extends Fragment implements BoardListCard.OnFragmentInteractionListener {
     private BoardListDatabase list_db;
-    private String SELECTED_DISPLAY_COLUMN;
-    private static final String DEFAULT_SELECTED_COLUMN = "postslasthour";
+    private static final String DEFAULT_SELECTED_COLUMN = "uniqueips";
+
+    private LinearLayout mLLBoards;
+    private String mDBOrderBy;
+    private String mDBSortBy;
 
     private OnFragmentInteractionListener mListener;
 
@@ -45,6 +53,53 @@ public class Boardlist extends Fragment implements BoardListCard.OnFragmentInter
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             list_db.favoriteBoard(boardLink, isChecked);
+        }
+    }
+
+    /**
+     * TODO: make the assigns use strings.xml
+     */
+    class SpinnerActivity extends Activity implements Spinner.OnItemSelectedListener {
+        public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+            if(parent.getId() == R.id.spinner_sort_order) {
+                mDBOrderBy = ((TextView) view).getText().toString();
+            }
+            else if(parent.getId() == R.id.spinner_sort_by) {
+                String sortByName = parent.getItemAtPosition(pos).toString();
+
+                if(sortByName.toLowerCase().equals("board name")) {
+                    mDBSortBy = "boardname";
+                }
+                else if(sortByName.toLowerCase().equals("nationality")) {
+                    mDBSortBy = "nation";
+                }
+                else if(sortByName.toLowerCase().equals("board tag")) {
+                    mDBSortBy = "boardlink";
+                }
+                else if(sortByName.toLowerCase().equals("total posts")) {
+                    mDBSortBy = "totalposts";
+                }
+                else if(sortByName.toLowerCase().equals("posts/hour")) {
+                    mDBSortBy = "postslasthour";
+                }
+                else if(sortByName.toLowerCase().equals("unique ips")) {
+                    mDBSortBy = "uniqueips";
+                }
+                else if(sortByName.toLowerCase().equals("date created")) {
+                    mDBSortBy = "datecreated";
+                }
+                else if(sortByName.toLowerCase().equals("following")) {
+                    mDBSortBy = "favorited";
+                }
+                else {
+                    mDBSortBy = DEFAULT_SELECTED_COLUMN;
+                }
+            }
+            updateDatabaseView();
+        }
+
+        public void onNothingSelected(AdapterView<?> parent) {
+            // Another interface callback
         }
     }
 
@@ -79,23 +134,53 @@ public class Boardlist extends Fragment implements BoardListCard.OnFragmentInter
         View rootView;
         rootView = inflater.inflate(R.layout.fragment_board_list, container, false);
         list_db = new BoardListDatabase(rootView.getContext());
-        SELECTED_DISPLAY_COLUMN = DEFAULT_SELECTED_COLUMN;
-        updateDatabaseView();
+        mLLBoards = (LinearLayout) rootView.findViewById(R.id.ll_board_list);
 
-        new getBoardList().execute();
+        // Set up the spinners
+        Spinner spinnerSort = (Spinner)rootView.findViewById(R.id.spinner_sort_by);
+        Spinner spinnerOrder = (Spinner)rootView.findViewById(R.id.spinner_sort_order);
+        ArrayAdapter<CharSequence> sortAdapter;
+        ArrayAdapter<CharSequence> orderAdapter;
+        sortAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.sql_columns_array, android.R.layout.simple_spinner_item);
+        orderAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.sql_sort_order_array, android.R.layout.simple_spinner_item);
+        sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerSort.setAdapter(sortAdapter);
+        spinnerOrder.setAdapter(orderAdapter);
+
+        spinnerOrder.setOnItemSelectedListener(new SpinnerActivity());
+        spinnerSort.setOnItemSelectedListener(new SpinnerActivity());
+
+        // Gets an updated list of boards
+        if(list_db.isEmpty()) {
+            new getBoardList().execute();
+        }
+
         return rootView;
     }
 
     private static final int MAX_CARDS = 10;
 
     private void updateDatabaseView() {
-        Cursor qBoards = list_db.getBoardsInSortedOrder(SELECTED_DISPLAY_COLUMN, "DESC");
-
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
+        FragmentManager fragmentManager;
+        FragmentTransaction fragmentTransaction;
+        Cursor qBoards;
         int i = 0;
 
+        if(mDBSortBy == null){
+            mDBSortBy = DEFAULT_SELECTED_COLUMN;
+        }
+        if(mDBOrderBy == null){
+            mDBOrderBy = "DESC";
+        }
+        if(mLLBoards.getChildCount() != 0) {
+            mLLBoards.removeAllViews();
+        }
+
+        fragmentManager = getFragmentManager();
+        fragmentTransaction = fragmentManager.beginTransaction();
+
+        qBoards = list_db.getBoardsInSortedOrder(mDBSortBy, mDBOrderBy);
         qBoards.moveToFirst();
         while(!qBoards.isAfterLast() && i < MAX_CARDS) {
             String boardName;
@@ -108,7 +193,7 @@ public class Boardlist extends Fragment implements BoardListCard.OnFragmentInter
             boardName = qBoards.getString(qBoards.getColumnIndexOrThrow("boardname"));
             boardLink = qBoards.getString(qBoards.getColumnIndexOrThrow("boardlink"));
             nationality = qBoards.getString(qBoards.getColumnIndexOrThrow("nation"));
-            displayColumn = qBoards.getString(qBoards.getColumnIndexOrThrow(SELECTED_DISPLAY_COLUMN));
+            displayColumn = qBoards.getString(qBoards.getColumnIndexOrThrow(mDBSortBy));
             favorited = qBoards.getInt(qBoards.getColumnIndexOrThrow("favorited"));
 
             boardCard = BoardListCard.newInstance(boardName, boardLink, displayColumn, nationality, favorited);
@@ -171,6 +256,12 @@ public class Boardlist extends Fragment implements BoardListCard.OnFragmentInter
         public void onFragmentInteraction(Uri uri);
     }
 
+    public void onItemSelected(AdapterView<?> parent, View view,
+                               int pos, long id) {
+        // An item was selected. You can retrieve the selected item using
+        // parent.getItemAtPosition(pos)
+    }
+
     public class getBoardList extends AsyncTask<Void, Void, Document> {
         @Override
         protected Document doInBackground(Void... params) {
@@ -212,7 +303,6 @@ public class Boardlist extends Fragment implements BoardListCard.OnFragmentInter
                     }
                 }
             }
-            updateDatabaseView();
         }
     }
 }

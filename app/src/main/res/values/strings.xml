@@ -14,5 +14,29 @@
     <string name="wait_text">Loading...</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="post_thumb_desciption">Thumbnail of posts first picture</string>
+    <string name="board_list_sql_button_text">Refresh</string>
+    <string name="sql_table_name">boards</string>
+    <string name="sql_column_name">boardname</string>
+    <string name="sql_column_nation">nation</string>
+    <string name="sql_column_link">boardlink</string>
+    <string name="sql_column_posts_last_hour">postslasthour</string>
+    <string name="sql_column_total_posts">totalposts</string>
+    <string name="sql_column_unique_ips">uniqueips</string>
+    <string name="sql_column_date_created">datecreated</string>
+    <string name="sql_column_faved">favorited</string>
+    <string-array name="sql_columns_array">
+        <item>Unique ips</item>
+        <item>Posts/hour</item>
+        <item>Total Posts</item>
+        <item>Board tag</item>
+        <item>Board name</item>
+        <item>Nationality</item>
+        <item>Date created</item>
+        <item>Following</item>
+    </string-array>
+    <string-array name="sql_sort_order_array">
+        <item>DESC</item>
+        <item>ASC</item>
+    </string-array>
 
 </resources>

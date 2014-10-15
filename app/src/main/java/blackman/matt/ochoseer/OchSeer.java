@@ -6,6 +6,7 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,6 +15,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.ViewSwitcher;
 
 
@@ -33,8 +38,7 @@ public class OchSeer extends Activity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
-
-     private Board mBoard;
+    private Boardlist mBoardList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,14 +48,29 @@ public class OchSeer extends Activity
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
+        mBoardList = new Boardlist();
 
-         mBoard =  Board.newInstance("http://8chan.co/tech");
+        class MyClickClass implements CompoundButton.OnClickListener {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
 
+                // Replace whatever is in the fragment_container view with this fragment,
+                // and add the transaction to the back stack so the user can navigate back
+                if(fragmentManager.findFragmentById(R.id.container) != mBoardList) {
+                    transaction.replace(R.id.container, mBoardList, "");
+                    transaction.addToBackStack(null);
+                }
+                // Commit the transaction
+                transaction.commit();
+            }
+        }
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout),
-                (ViewSwitcher) findViewById(R.id.view_switcher_main));
+                new MyClickClass());
     }
 
     @Override
@@ -68,13 +87,33 @@ public class OchSeer extends Activity
      * @param number the position of the navigation drawer.
      */
     public void onSectionAttached(int number) {
-        mTitle = getResources().getString(R.string.app_name);
+        ListView boardListView;
+        String boardLink;
+        String formattedLink;
+        Board newBoard;
+        Cursor cursor;
+
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        fragmentTransaction.add(R.id.container, mBoard, mBoard.getBoardLink());
+        boardListView = (ListView) findViewById(R.id.navigation_drawer_listview);
+        if(boardListView.getCount() == 0) {
+            boardLink = "/tech/"; // Default board is tech :P
+        }
+        else {
+            cursor = ((SimpleCursorAdapter) boardListView.getAdapter()).getCursor();
+            cursor.moveToPosition(number - 1); // Some reason number starts at 1
+            boardLink = cursor.getString(cursor.getColumnIndex("boardlink"));
+        }
+
+        formattedLink = "http://8chan.co" + boardLink;
+        newBoard = Board.newInstance(formattedLink);
+
+        fragmentTransaction.replace(R.id.container, newBoard, boardLink);
 
         fragmentTransaction.commit();
+
+        mTitle = boardLink;
     }
 
     public void restoreActionBar() {

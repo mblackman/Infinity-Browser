@@ -6,8 +6,11 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -24,9 +27,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CursorAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.ViewSwitcher;
 
 import org.jsoup.Jsoup;
@@ -35,6 +42,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -67,8 +75,7 @@ public class NavigationDrawerFragment extends Fragment {
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
     private View mFragmentContainerView;
-    private Button mBoardButton;
-    private ViewSwitcher vsMain;
+    private AdapterView.OnClickListener onClickListener;
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
@@ -104,15 +111,8 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
             Bundle savedInstanceState) {
-        Context context;
-        String[] boardList;
-
-        context = getActivity();
-        SharedPreferences sharedPref = context.getSharedPreferences(
-                getString(R.string.shared_preference_file), context.MODE_PRIVATE);
-
-        boardList = sharedPref.getString(getString(R.string.PREF_USER_BOARD_LIST), "").split(" ");
-
+        List<String> boardList;
+        BoardListDatabase boardListDB;
         LinearLayout drawerview =  (LinearLayout) inflater.inflate(
                 R.layout.fragment_navigation_drawer, container, false);
 
@@ -127,22 +127,26 @@ public class NavigationDrawerFragment extends Fragment {
             }
         });
 
-        // Set onclick listener to boards button
-        mBoardButton = (Button) drawerview.findViewById(R.id.navigation_drawer_board_button);
+        boardListDB = new BoardListDatabase(inflater.getContext());
+        boardListDB.openToRead();
 
-        mBoardButton.setOnClickListener(new AdapterView.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                vsMain.showNext();
-                mDrawerLayout.closeDrawers();
-            }
-        });
+        Cursor cursor = boardListDB.getFavoritedBoards();
 
-        mDrawerListView.setAdapter(new ArrayAdapter<String>(
-                getActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_activated_1,
-                android.R.id.text1,
-                boardList));
+        String[] from = new String[]{"boardlink"};
+        int[] to = new int[]{R.id.text};
+
+        SimpleCursorAdapter cursorAdapter = new SimpleCursorAdapter(mDrawerListView.getContext(), R.layout.row, cursor, from, to, 0);
+
+        mDrawerListView.setAdapter(cursorAdapter);
+
+        boardListDB.close();
+
+        /*listViewAdapter = new ArrayAdapter<String>(getActionBar().getThemedContext(),
+                                                   android.R.layout.simple_list_item_activated_1,
+                                                   android.R.id.text1,
+                                                   boardList );
+
+        mDrawerListView.setAdapter(listViewAdapter);*/
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         return drawerview;
     }
@@ -157,10 +161,12 @@ public class NavigationDrawerFragment extends Fragment {
      * @param fragmentId   The android:id of this fragment in its activity's layout.
      * @param drawerLayout The DrawerLayout containing this fragment's UI.
      */
-    public void setUp(int fragmentId, DrawerLayout drawerLayout, ViewSwitcher vsMain) {
+    public void setUp(int fragmentId, DrawerLayout drawerLayout, AdapterView.OnClickListener listener) {
         mFragmentContainerView = getActivity().findViewById(fragmentId);
+        Button BoardButton = (Button) getActivity().findViewById(R.id.navigation_drawer_board_button);
         mDrawerLayout = drawerLayout;
-        this.vsMain = vsMain;
+
+        BoardButton.setOnClickListener(listener);
 
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
@@ -205,6 +211,7 @@ public class NavigationDrawerFragment extends Fragment {
                     sp.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).apply();
                 }
 
+                //listViewAdapter.notifyDataSetChanged();
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };

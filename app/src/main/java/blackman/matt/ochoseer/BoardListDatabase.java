@@ -3,10 +3,14 @@ package blackman.matt.ochoseer;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -15,6 +19,9 @@ import android.util.Log;
 public class BoardListDatabase extends SQLiteOpenHelper  {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "BoardList.db";
+    private Context c;
+    private SQLiteOpenHelper SQLiteHelper;
+    private SQLiteDatabase SQLiteDB;
 
     /* Inner class that defines the table contents */
     public static abstract class FeedEntry implements BaseColumns {
@@ -31,7 +38,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
 
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + FeedEntry.TABLE_NAME + " (" + FeedEntry.KEY_BOARD_LINK +
-                    " TEXT PRIMARY KEY," + FeedEntry.KEY_NATIONALITY + " TEXT," +
+                    " TEXT PRIMARY KEY," + FeedEntry.KEY_NATIONALITY + " TEXT," + FeedEntry._ID + " INTEGER," +
                     FeedEntry.KEY_POSTS_LAST_HOUR + " INTEGER," + FeedEntry.KEY_TOTAL_POSTS + " INTEGER," +
                     FeedEntry.KEY_UNIQUE_IPS + " INTEGER," + FeedEntry.KEY_DATE_CREATED + " TEXT," +
                     FeedEntry.KEY_FAVORITED + " INTEGER," + FeedEntry.KEY_BOARD_NAME + " TEXT" +
@@ -44,6 +51,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
 
     public BoardListDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        c = context;
     }
 
     @Override
@@ -88,7 +96,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
 
     public Boolean boardExists(String boardLink) {
         SQLiteDatabase db = getReadableDatabase();
-
+        Boolean boardExists = false;
         String selection = FeedEntry.KEY_BOARD_LINK + "=?";
         String[] boardLinks = new String[] { boardLink };
 
@@ -103,16 +111,19 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         );
 
         c.moveToFirst();
+        boardExists = c.getCount() != 0;
+        c.close();
 
-        return c.getCount() == 0;
+        return boardExists; // if c.getCount() == 0 then board doesn't exists
     }
 
     public Cursor getFavoritedBoards() {
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
         String[] projection;
         String sortOrder;
 
         projection = new String[] {
+            FeedEntry._ID,
             FeedEntry.KEY_NATIONALITY,
             FeedEntry.KEY_BOARD_LINK,
             FeedEntry.KEY_BOARD_NAME,
@@ -130,24 +141,55 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
                 null,                        // don't filter by row groups
                 sortOrder                    // The sort order
         );
+
         return c;
+    }
+
+    public Boolean isEmpty() {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor mCursor = db.rawQuery("SELECT * FROM " + FeedEntry.TABLE_NAME, null);
+        Boolean rowExists;
+
+        if (mCursor.moveToFirst())
+        {
+            // DO SOMETHING WITH CURSOR
+            rowExists = true;
+
+        } else
+        {
+            // I AM EMPTY
+            rowExists = false;
+        }
+        return rowExists;
+    }
+
+    public BoardListDatabase openToRead() throws android.database.SQLException {
+        SQLiteHelper = new SQLiteOpenHelper(c, DATABASE_NAME, null, DATABASE_VERSION) {
+            @Override
+            public void onCreate(SQLiteDatabase db) {
+                db.execSQL(SQL_CREATE_ENTRIES);
+            }
+
+            @Override
+            public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+            }
+        };
+        SQLiteDB = SQLiteHelper.getReadableDatabase();
+        return this;
     }
 
     /**
      * Gets a cursor pointing to all the entries sorted by the parameters specified by the user.
      * Will use default sortBy of posts_last_hour if set to null.
-     * @param sortBy the column to sort the db. Will be _posts_last_hour if null
-     * @param order the order of the sort. desc or asc
+     * @param sortBy the column to sort the db.
+     * @param order the order of the sort. desc or asc.
      * @return the cursor pointing to the returned db
      */
     public Cursor getBoardsInSortedOrder(String sortBy, String order) {
         SQLiteDatabase db = getReadableDatabase();
         String[] projection;
         String sortOrder;
-
-        if(sortBy == null) {
-            sortBy = FeedEntry.KEY_POSTS_LAST_HOUR;
-        }
 
         projection = new String[] {
                 FeedEntry.KEY_NATIONALITY,
