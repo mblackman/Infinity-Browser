@@ -22,7 +22,7 @@
         android:layout_width="@dimen/navigation_drawer_width"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:name="blackman.matt.ochoseer.NavigationDrawerFragment"
+        android:name="blackman.matt.infinitebrowser.NavigationDrawerFragment"
         tools:layout="@layout/fragment_navigation_drawer" />
 
 </android.support.v4.widget.DrawerLayout>

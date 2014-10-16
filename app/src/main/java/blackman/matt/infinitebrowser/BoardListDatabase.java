@@ -1,19 +1,18 @@
-package blackman.matt.ochoseer;
+package blackman.matt.infinitebrowser;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 /**
+ * A database to store boards on 8chan.
+ * An extension of the SQLite open helper with the design of the database to store the list of
+ * boards. Can read the DB and add items to it.
  * Created by Matt on 10/12/2014.
  */
 public class BoardListDatabase extends SQLiteOpenHelper  {

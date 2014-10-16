@@ -1,4 +1,4 @@
-package blackman.matt.ochoseer;
+package blackman.matt.infinitebrowser;
 
 import android.app.Activity;
 
@@ -16,13 +16,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.ViewSwitcher;
 
 
-public class OchSeer extends Activity
+public class InfinityBrowser extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
                    PostLayout.OnFragmentInteractionListener,
                    Boardlist.OnFragmentInteractionListener,
@@ -55,6 +53,8 @@ public class OchSeer extends Activity
             public void onClick(View v) {
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+                mNavigationDrawerFragment.closeDrawer();
 
                 // Replace whatever is in the fragment_container view with this fragment,
                 // and add the transaction to the back stack so the user can navigate back
@@ -118,6 +118,7 @@ public class OchSeer extends Activity
 
     public void restoreActionBar() {
         ActionBar actionBar = getActionBar();
+        assert actionBar != null;
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle(mTitle);
@@ -143,10 +144,7 @@ public class OchSeer extends Activity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -182,14 +180,13 @@ public class OchSeer extends Activity
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_board, container, false);
-            return rootView;
+            return inflater.inflate(R.layout.fragment_board, container, false);
         }
 
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
-            ((OchSeer) activity).onSectionAttached(
+            ((InfinityBrowser) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
     }

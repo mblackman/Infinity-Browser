@@ -7,7 +7,7 @@
 
     <Button
         android:layout_width="match_parent"
-        android:layout_height="@dimen/board_list_car_height"
+        android:layout_height="@dimen/drawer_item_height"
         android:id="@+id/navigation_drawer_board_button"
         android:background="#ff2838ff"
         android:clickable="true"

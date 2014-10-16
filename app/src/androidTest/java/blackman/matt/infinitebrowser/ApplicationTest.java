@@ -1,4 +1,4 @@
-package blackman.matt.ochoseer;
+package blackman.matt.infinitebrowser;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

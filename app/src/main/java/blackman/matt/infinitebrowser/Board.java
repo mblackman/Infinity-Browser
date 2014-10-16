@@ -1,4 +1,4 @@
-package blackman.matt.ochoseer;
+package blackman.matt.infinitebrowser;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -206,7 +206,7 @@ public class Board extends Fragment {
                         postImageThumbs, postImageFull, postRepliedToPost);
 
                 // Add new fragment to browser activity
-                fragmentTransaction.add(R.id.posts_view, opPost, postNumber.toString());
+                fragmentTransaction.add(R.id.posts_view, opPost, postNumber);
 
                 // Looks through all the replies to an OP post
                 for (Element postReply : postReplies) {

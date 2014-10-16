@@ -1,17 +1,10 @@
-package blackman.matt.ochoseer;
+package blackman.matt.infinitebrowser;
 
 
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.app.ListActivity;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.res.Resources;
 import android.database.Cursor;
-import android.os.AsyncTask;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -26,23 +19,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.ViewSwitcher;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -75,7 +55,6 @@ public class NavigationDrawerFragment extends Fragment {
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
     private View mFragmentContainerView;
-    private AdapterView.OnClickListener onClickListener;
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
@@ -108,11 +87,13 @@ public class NavigationDrawerFragment extends Fragment {
         setHasOptionsMenu(true);
     }
 
+    public void closeDrawer() {
+        mDrawerLayout.closeDrawers();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
             Bundle savedInstanceState) {
-        List<String> boardList;
-        BoardListDatabase boardListDB;
         LinearLayout drawerview =  (LinearLayout) inflater.inflate(
                 R.layout.fragment_navigation_drawer, container, false);
 
@@ -127,7 +108,22 @@ public class NavigationDrawerFragment extends Fragment {
             }
         });
 
-        boardListDB = new BoardListDatabase(inflater.getContext());
+        setUpListAdapter();
+
+        /*listViewAdapter = new ArrayAdapter<String>(getActionBar().getThemedContext(),
+                                                   android.R.layout.simple_list_item_activated_1,
+                                                   android.R.id.text1,
+                                                   boardList );
+
+        mDrawerListView.setAdapter(listViewAdapter);*/
+        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
+        return drawerview;
+    }
+
+    private void setUpListAdapter() {
+        BoardListDatabase boardListDB;
+
+        boardListDB = new BoardListDatabase(getActivity());
         boardListDB.openToRead();
 
         Cursor cursor = boardListDB.getFavoritedBoards();
@@ -140,15 +136,6 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerListView.setAdapter(cursorAdapter);
 
         boardListDB.close();
-
-        /*listViewAdapter = new ArrayAdapter<String>(getActionBar().getThemedContext(),
-                                                   android.R.layout.simple_list_item_activated_1,
-                                                   android.R.id.text1,
-                                                   boardList );
-
-        mDrawerListView.setAdapter(listViewAdapter);*/
-        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-        return drawerview;
     }
 
     public boolean isDrawerOpen() {
@@ -211,7 +198,7 @@ public class NavigationDrawerFragment extends Fragment {
                     sp.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).apply();
                 }
 
-                //listViewAdapter.notifyDataSetChanged();
+                setUpListAdapter();
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };
@@ -288,11 +275,8 @@ public class NavigationDrawerFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
+        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
 
-        return super.onOptionsItemSelected(item);
     }
 
     /**

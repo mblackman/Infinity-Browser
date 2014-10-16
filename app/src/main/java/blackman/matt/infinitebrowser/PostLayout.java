@@ -1,4 +1,4 @@
-package blackman.matt.ochoseer;
+package blackman.matt.infinitebrowser;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -8,16 +8,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.text.Html;
-import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import org.jsoup.examples.HtmlToPlainText;
 
 import java.io.IOException;
 import java.net.URL;

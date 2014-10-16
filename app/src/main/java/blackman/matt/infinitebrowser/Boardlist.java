@@ -1,4 +1,4 @@
-package blackman.matt.ochoseer;
+package blackman.matt.infinitebrowser;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -156,6 +156,7 @@ public class Boardlist extends Fragment implements BoardListCard.OnFragmentInter
         // Gets an updated list of boards
         if(list_db.isEmpty()) {
             new getBoardList().execute();
+            updateDatabaseView();
         }
 
         return rootView;
