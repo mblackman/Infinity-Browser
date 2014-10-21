@@ -1,8 +1,6 @@
-<RelativeLayout
-    android:orientation="horizontal"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/board_list_car_height"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:layout_height="@dimen/board_list_car_height">
 
     <ToggleButton
         android:layout_width="@dimen/board_list_car_height"
@@ -47,5 +45,4 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:gravity="right" />
-
 </RelativeLayout>

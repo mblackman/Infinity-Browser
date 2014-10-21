@@ -7,9 +7,11 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,6 +19,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.jar.Attributes;
 
 
 /**
@@ -153,68 +158,106 @@ public class Board extends Fragment {
          */
         @Override
         protected void onPostExecute(Document html) {
-            // Get the fragment manager
-            FragmentManager fragmentManager = getFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            LinearLayout postView;
+            Elements threads;
+
+            postView = (LinearLayout) getActivity().findViewById(R.id.posts_view);
+            postView.removeAllViews();
 
             // Gets all the parent posts on page
-            Elements threads = html.select("[id*=thread_]");
+            threads = html.select("[id*=thread_]");
 
             // Looks through all the master posts
             for (Element thread : threads) {
                 // Create main elements and post
-                PostLayout opPost;
-                Element postOp = thread.select("[class*=post op]").first();
-                Element imageFiles = thread.getElementsByClass("files").first();
-                Elements postReplies = thread.getElementsByClass("post reply");
+                Elements postReplies;
 
-                // Read through op post and get information
-                Element postLink = postOp.getElementsByClass("post_no").first();
-                String postUrl = postLink.attr("href");
-                String postNumber = postLink.attr("id").replace("post_no_", "");
-                String userName = postOp.getElementsByClass("name").first().text();
-                String postDate = postOp.select("time").first().text();
-                String postTopic = null;
-                String postText = postOp.getElementsByClass("body").first().html();
-                Integer MAXIMAGES = 10;
+                createPostOP(thread, postView);
 
-                // Work with data as needed
-                if (postOp.getElementsByClass("topic").size() > 0) {
-                    postTopic = postOp.getElementsByClass("topic").first().text();
-                }
-
-                // Get images and thumbnails into arrays
-                String[] postImageThumbs = new String[MAXIMAGES];
-                String[] postImageFull = new String[MAXIMAGES];
-                String[] postRepliedToPost = new String[500];
-                Elements singleFile = imageFiles.select("[class=file");
-                Elements multiFiles = imageFiles.select("[class=file multifile");
-
-                if (!singleFile.isEmpty()) {
-                    Element image = singleFile.first();
-                    String imageUrl = image.select("a").first().attr("href");
-                    String imageThumbnail = image.select("img").first().attr("src");
-
-                    postImageThumbs[0] = imageThumbnail;
-                    postImageFull[0] = imageUrl;
-                } else if (!multiFiles.isEmpty()) {
-
-                }
-
-                // Create new instance of post with elements
-                opPost = PostLayout.newInstance(postUrl, userName, postDate, postNumber, postTopic, postText,
-                        postImageThumbs, postImageFull, postRepliedToPost);
-
-                // Add new fragment to browser activity
-                fragmentTransaction.add(R.id.posts_view, opPost, postNumber);
+                postReplies = thread.getElementsByClass("post reply");
 
                 // Looks through all the replies to an OP post
                 for (Element postReply : postReplies) {
 
                 }
             }
-            // Commit posts
-            fragmentTransaction.commit();
+        }
+
+        private void createPostOP(Element postElement, LinearLayout postView) {
+            PostView opPost;
+            Elements singleFile;
+            Elements multiFiles;
+            Elements omitted;
+            Elements subjects;
+            Element postOp;
+            Element imageFiles;
+            Element postLink;
+            String postNumber;
+            String userName;
+            String postDate;
+            String postTopic;
+            String postText ;
+            String numReplies;
+            List<String> postImageThumbs;
+            List<String> postImageFull;
+
+            // Start filtering
+            postOp = postElement.select("[class*=post op]").first();
+            imageFiles = postElement.getElementsByClass("files").first();
+
+            singleFile = imageFiles.select("[class=file");
+            multiFiles = imageFiles.select("[class=file multifile");
+
+            // Read through op post and get information
+            postLink = postOp.getElementsByClass("post_no").first();
+            postNumber = postLink.attr("id").replace("post_no_", "");
+            userName = postOp.getElementsByClass("name").first().text();
+            postDate = postOp.select("time").first().text();
+            postText = postOp.getElementsByClass("body").first().html();
+
+            subjects = postOp.getElementsByClass("subject");
+            if(!subjects.isEmpty()) {
+                postTopic = subjects.first().text();
+            }
+            else {
+                postTopic = "";
+            }
+
+            omitted = postOp.getElementsByClass("omitted");
+            if(!omitted.isEmpty()) {
+                numReplies = omitted.first().text().replaceAll("Click reply to view.", "");
+            }
+            else {
+                numReplies = "";
+            }
+
+            // Get images and thumbnails into arrays
+            postImageThumbs = new ArrayList<String>();
+            postImageFull = new ArrayList<String>();
+
+            if (!singleFile.isEmpty()) {
+                Element image = singleFile.first();
+                String imageUrl = image.select("a").first().attr("href");
+                String imageThumbnail = image.select("img").first().attr("src");
+
+                postImageThumbs.add(imageThumbnail);
+                postImageFull.add(imageUrl);
+            } else if (!multiFiles.isEmpty()) {
+                for(Element image : multiFiles) {
+                    String imageUrl = image.select("a").first().attr("href");
+                    String imageThumbnail = image.select("img").first().attr("src");
+
+                    postImageThumbs.add(imageThumbnail);
+                    postImageFull.add(imageUrl);
+                }
+            }
+
+            // Create new instance of post with elements
+            opPost = new PostView(getActivity());
+            opPost.setUpPost(userName, postDate, postNumber, postTopic, postText, numReplies,
+                    postImageThumbs, postImageFull, true);
+
+            postView.addView(opPost);
         }
     }
 }

@@ -1,0 +1,95 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/post_bar_vertical_margin"
+    android:id="@+id/post_view_layout">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_postno"
+        android:textSize="@dimen/post_header_font_size"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentLeft="false"
+        android:text="Post No"
+        android:layout_below="@+id/tv_username" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_topic"
+        android:textSize="@dimen/post_header_font_size"
+        android:textColor="#0F0C5D"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentLeft="false"
+        android:layout_toRightOf="@+id/tv_postno"
+        android:text="Topic"
+        android:layout_below="@+id/tv_datetime"
+        android:paddingLeft="@dimen/post_bar_medium_padding" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_username"
+        android:textColor="#ff117743"
+        android:textSize="@dimen/post_header_font_size"
+        android:layout_alignParentLeft="true"
+        android:text="User Name"
+        android:layout_alignParentTop="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_datetime"
+        android:textSize="@dimen/post_header_font_size"
+        android:paddingEnd="@dimen/post_header_word_spacing"
+        android:paddingStart="@dimen/post_header_word_spacing"
+        android:layout_toRightOf="@+id/tv_username"
+        android:text="Date Time" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentBottom="false"
+        android:layout_alignParentRight="false"
+        android:layout_below="@+id/tv_postno"
+        android:id="@+id/ll_post_layout">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/post_thumbnail"
+            android:contentDescription="@string/post_thumb_desciption"
+            android:cropToPadding="false"
+            android:adjustViewBounds="true"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:maxWidth="@dimen/post_bar_image_size_small"
+            android:minHeight="@dimen/post_bar_image_size_small"
+            android:minWidth="@dimen/post_bar_image_size_small"
+            android:scaleType="centerCrop"
+            android:baselineAlignBottom="false"
+            android:longClickable="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_postText"
+            android:textSize="@dimen/post_body_font_size" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_number_replies"
+        android:textSize="@dimen/omitted_replies_text_size"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="false"
+        android:layout_alignParentRight="false"
+        android:layout_below="@+id/ll_post_layout" />
+
+</RelativeLayout>

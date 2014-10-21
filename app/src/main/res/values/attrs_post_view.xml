@@ -1,0 +1,5 @@
+<resources>
+    <declare-styleable name="PostView">
+        <attr name="condenseReply" format="boolean" />
+    </declare-styleable>
+</resources>

@@ -18,7 +18,7 @@ import android.util.Log;
 public class BoardListDatabase extends SQLiteOpenHelper  {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "BoardList.db";
-    private Context c;
+    private Context mContext;
     private SQLiteOpenHelper SQLiteHelper;
     private SQLiteDatabase SQLiteDB;
 
@@ -50,7 +50,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
 
     public BoardListDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        c = context;
+        mContext = context;
     }
 
     @Override
@@ -113,7 +113,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         boardExists = c.getCount() != 0;
         c.close();
 
-        return boardExists; // if c.getCount() == 0 then board doesn't exists
+        return boardExists; // if mContext.getCount() == 0 then board doesn't exists
     }
 
     public Cursor getFavoritedBoards() {
@@ -159,7 +159,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
     }
 
     public BoardListDatabase openToRead() throws android.database.SQLException {
-        SQLiteHelper = new SQLiteOpenHelper(c, DATABASE_NAME, null, DATABASE_VERSION) {
+        SQLiteHelper = new SQLiteOpenHelper(mContext, DATABASE_NAME, null, DATABASE_VERSION) {
             @Override
             public void onCreate(SQLiteDatabase db) {
                 db.execSQL(SQL_CREATE_ENTRIES);
