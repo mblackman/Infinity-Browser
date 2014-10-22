@@ -24,6 +24,11 @@
     <string name="sql_column_unique_ips">uniqueips</string>
     <string name="sql_column_date_created">datecreated</string>
     <string name="sql_column_faved">favorited</string>
+    <string name="post_no_sample_text">Post No</string>
+    <string name="post_topic_sample_text">Topic</string>
+    <string name="post_name_sample_text">User Name</string>
+    <string name="post_date_sample_text">Date Time</string>
+    <string name="post_text_sample_text">This is a sample of what a post looks like</string>
     <string-array name="sql_columns_array">
         <item>Unique ips</item>
         <item>Posts/hour</item>

@@ -17,4 +17,5 @@
     <dimen name="navigation_drawer_width">240dp</dimen>
     <dimen name="board_list_car_height">96dp</dimen>
     <dimen name="omitted_replies_text_size">8sp</dimen>
+    <dimen name="post_after_padding">2dp</dimen>
 </resources>
