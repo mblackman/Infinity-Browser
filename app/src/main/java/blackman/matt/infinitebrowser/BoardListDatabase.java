@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package blackman.matt.infinitebrowser;
 
 import android.content.ContentValues;
@@ -20,9 +36,10 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
     private static final String DATABASE_NAME = "BoardList.db";
     private Context mContext;
     private SQLiteOpenHelper SQLiteHelper;
-    private SQLiteDatabase SQLiteDB;
 
-    /* Inner class that defines the table contents */
+    /**
+     *  Inner class that defines the table contents for the database.
+     */
     public static abstract class FeedEntry implements BaseColumns {
         private static final String TABLE_NAME = "boards";
         private static final String KEY_BOARD_NAME = "boardname";
@@ -35,6 +52,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         private static final String KEY_FAVORITED = "favorited"; // 1 means favorited 0 means no
     }
 
+    // Query to create the table.
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + FeedEntry.TABLE_NAME + " (" + FeedEntry.KEY_BOARD_LINK +
                     " TEXT PRIMARY KEY," + FeedEntry.KEY_NATIONALITY + " TEXT," + FeedEntry._ID + " INTEGER," +
@@ -43,21 +61,41 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
                     FeedEntry.KEY_FAVORITED + " INTEGER," + FeedEntry.KEY_BOARD_NAME + " TEXT" +
             " )";
 
+    // Query to delete all the entries.
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + FeedEntry.TABLE_NAME;
 
+    // Query to get all the boards that have been favorited.
     private static final String SQL_SELECT_FAVORITED_BOARDS = FeedEntry.KEY_FAVORITED + "=1";
 
+    /**
+     * Constructor to set up the database for the caller.
+     *
+     * @param context Context of the caller
+     */
     public BoardListDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         mContext = context;
     }
 
+    /**
+     * Creates the table when the class is initialized as an object.
+     *
+     * @param database The database being created.
+     */
     @Override
     public void onCreate(SQLiteDatabase database) {
         database.execSQL(SQL_CREATE_ENTRIES);
     }
 
+    /**
+     * Whenever the database is being updated to a new version, the tables is cleared out and
+     * remade with the new database version.
+     *
+     * @param db The database being upgraded.
+     * @param oldVersion The version the current database is.
+     * @param newVersion The version the database is being updated to.
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.w(BoardListDatabase.class.getName(),
@@ -67,6 +105,18 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         onCreate(db);
     }
 
+    /**
+     * Inserts a board into the database as defined by the information being sent in.
+     *
+     * @param boardName Name of the board.
+     * @param nation Nationality of the board.
+     * @param boardlink Link to the board. EG /v/
+     * @param postsLastHour Posts per hour as last updated.
+     * @param totalPosts Total posts to board as last updated.
+     * @param uniqueIps Unique IPs visiting the board as last updated.
+     * @param dateCreated Date the board was created.
+     * @return The id of the table row.
+     */
     public long insertBoard(String boardName, String nation, String boardlink, String postsLastHour,
                             String totalPosts, String uniqueIps, String dateCreated) {
         // Gets the data repository in write mode
@@ -93,6 +143,12 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         return newRowId;
     }
 
+    /**
+     * Check to see if a board is already in the database.
+     *
+     * @param boardLink Board link EG /v/
+     * @return True if the board is in the database, false otherwise.
+     */
     public Boolean boardExists(String boardLink) {
         SQLiteDatabase db = getReadableDatabase();
         Boolean boardExists = false;
@@ -116,6 +172,11 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         return boardExists; // if mContext.getCount() == 0 then board doesn't exists
     }
 
+    /**
+     * Returns a cursor pointing to all the boards the user has favorited.
+     *
+     * @return A cursor to the boards the user has favorited.
+     */
     public Cursor getFavoritedBoards() {
         SQLiteDatabase db = getReadableDatabase();
         String[] projection;
@@ -144,6 +205,11 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         return c;
     }
 
+    /**
+     * Checks if the table is empty of any rows.
+     *
+     * @return If the table is empty or not.
+     */
     public Boolean isEmpty() {
         SQLiteDatabase db = getReadableDatabase();
         Cursor mCursor = db.rawQuery("SELECT * FROM " + FeedEntry.TABLE_NAME, null);
@@ -158,6 +224,13 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         return isEmpty;
     }
 
+    /**
+     * Opens up the database so a cursor can point to tables in the database to easily
+     * update the UI with database changed.
+     *
+     * @return A BoardListDatabase with an open cursor.
+     * @throws android.database.SQLException
+     */
     public BoardListDatabase openToRead() throws android.database.SQLException {
         SQLiteHelper = new SQLiteOpenHelper(mContext, DATABASE_NAME, null, DATABASE_VERSION) {
             @Override
@@ -170,7 +243,6 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
 
             }
         };
-        SQLiteDB = SQLiteHelper.getReadableDatabase();
         return this;
     }
 
@@ -208,6 +280,15 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         return c;
     }
 
+    /**
+     * Updates an existing board with new data.
+     *
+     * @param boardName The named of the board to change.
+     * @param postsLastHour The new posts in the last hour.
+     * @param totalPosts The new total posts to the board.
+     * @param uniqueIps The total unique IPs that have visited the board.
+     * @return A int that determines if the row was updated. -1 for false.
+     */
     public int updateBoard(String boardName, String postsLastHour, String totalPosts,
                            String uniqueIps) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -230,6 +311,13 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         return count;
     }
 
+    /**
+     * Toggles the favorited status of a board in the database.
+     *
+     * @param boardLink The board to update.
+     * @param follow Whether to favorite the board or now.
+     * @return If the operation was a success. -1 for failure.
+     */
     public int favoriteBoard(String boardLink, Boolean follow) {
         SQLiteDatabase db = this.getReadableDatabase();
 

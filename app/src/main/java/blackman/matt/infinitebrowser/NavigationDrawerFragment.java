@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package blackman.matt.infinitebrowser;
 
 
@@ -59,9 +75,17 @@ public class NavigationDrawerFragment extends Fragment {
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
 
+    /**
+     * Auto-generated constructor full of nothing.
+     */
     public NavigationDrawerFragment() {
     }
 
+    /**
+     * Called when the fragment is first created on the activity. Gets the arguments.
+     *
+     * @param savedInstanceState the instance state of the activity.
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,6 +104,11 @@ public class NavigationDrawerFragment extends Fragment {
         selectItem(mCurrentSelectedPosition);
     }
 
+    /**
+     * Called when the fragments is created in the activity.
+     *
+     * @param savedInstanceState the instance state of the activity.
+     */
     @Override
     public void onActivityCreated (Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -87,10 +116,22 @@ public class NavigationDrawerFragment extends Fragment {
         setHasOptionsMenu(true);
     }
 
+    /**
+     * Closes the navigation drawer.
+     */
     public void closeDrawer() {
         mDrawerLayout.closeDrawers();
     }
 
+    /**
+     * Called when the fragments view is being created. Handled inflating the view and assigning
+     * values.
+     *
+     * @param inflater inflater sent in from parent activity.
+     * @param container The container that the fragment will go in.
+     * @param savedInstanceState the instance state of the activity.
+     * @return returns this fragments newly created view.
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
             Bundle savedInstanceState) {
@@ -110,16 +151,13 @@ public class NavigationDrawerFragment extends Fragment {
 
         setUpListAdapter();
 
-        /*listViewAdapter = new ArrayAdapter<String>(getActionBar().getThemedContext(),
-                                                   android.R.layout.simple_list_item_activated_1,
-                                                   android.R.id.text1,
-                                                   boardList );
-
-        mDrawerListView.setAdapter(listViewAdapter);*/
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         return drawerview;
     }
 
+    /**
+     * Sets up the list adapter for the list of boards the user is following.
+     */
     private void setUpListAdapter() {
         BoardListDatabase boardListDB;
 
@@ -138,6 +176,11 @@ public class NavigationDrawerFragment extends Fragment {
         boardListDB.close();
     }
 
+    /**
+     * Returns true or false value on if the drawer is open.
+     *
+     * @return If the drawer is open.
+     */
     public boolean isDrawerOpen() {
         return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mFragmentContainerView);
     }
@@ -172,6 +215,11 @@ public class NavigationDrawerFragment extends Fragment {
                 R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
                 R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
         ) {
+            /**
+             * Handles the drawer being closed.
+             *
+             * @param drawerView The drawer being closed.
+             */
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
@@ -182,6 +230,11 @@ public class NavigationDrawerFragment extends Fragment {
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
 
+            /**
+             * Handles the drawer being opened.
+             *
+             * @param drawerView The drawer being opened.
+             */
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
@@ -220,6 +273,11 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
+    /**
+     * Handles an item being selected on the drawers list view.
+     *
+     * @param position Position of the item being selected. Starts at 1.
+     */
     private void selectItem(int position) {
         mCurrentSelectedPosition = position;
         if (mDrawerListView != null) {
@@ -233,6 +291,12 @@ public class NavigationDrawerFragment extends Fragment {
         }
     }
 
+    /**
+     * Called when the parent activity attached to this newly created fragment and checks
+     * if the fragment interaction listener has be implemented by the activity.
+     *
+     * @param activity the parent activity of this fragment.
+     */
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -243,18 +307,32 @@ public class NavigationDrawerFragment extends Fragment {
         }
     }
 
+    /**
+     * After the fragment has run it's course and much be removed from the activity this
+     * is called.
+     */
     @Override
     public void onDetach() {
         super.onDetach();
         mCallbacks = null;
     }
 
+    /**
+     * Something to communicate with the parent of this drawer.
+     *
+     * @param outState State of something.
+     */
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(STATE_SELECTED_POSITION, mCurrentSelectedPosition);
     }
 
+    /**
+     * Handles the configuration of the drawer being changed.
+     *
+     * @param newConfig The new configuration to be set to.
+     */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -262,6 +340,12 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
+    /**
+     * Called when the options menu is created in the drawer.
+     *
+     * @param menu The menu being added in.
+     * @param inflater The context of the utility that will inflate the view.
+     */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // If the drawer is open, show the global app actions in the action bar. See also
@@ -273,6 +357,12 @@ public class NavigationDrawerFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    /**
+     * Called when an item in the options menu is selected. Handles the change.
+     *
+     * @param item The item that was selected.
+     * @return If the item was selected or not.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
@@ -290,6 +380,11 @@ public class NavigationDrawerFragment extends Fragment {
         actionBar.setTitle(R.string.app_name);
     }
 
+    /**
+     * Gets the action bar of the main activity.
+     *
+     * @return The action bar of the main activity.
+     */
     private ActionBar getActionBar() {
         return getActivity().getActionBar();
     }
