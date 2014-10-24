@@ -6,22 +6,54 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.CursorAdapter;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
 /**
+ * Reads in all the rows from the SQL query and addresses them to listCardViews and sets up
+ * the adapter.
+ *
  * Created by Matt on 10/24/2014.
  */
-public class boardListCursorAdapter extends SimpleCursorAdapter {
-    private Context appContext;
+public class boardListCursorAdapter extends CursorAdapter {
     private String selectedValue;
 
-    public boardListCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags) {
-        super(context, layout, c, from, to, flags);
-        appContext = context;
-        selectedValue = from[from.length - 1];
+    /**
+     * Basic constructor for the class. Runs the parent constructor and assigns values.
+     *
+     * @param context Context of caller.
+     * @param c Cursor to be adapted.
+     * @param selectedValue The currently selected query column.
+     */
+    public boardListCursorAdapter(Context context, Cursor c, String selectedValue) {
+        super(context, c, 0);
+        this.selectedValue = selectedValue;
     }
+
+    /**
+     * Called when a new view is going to be created, and it creates the new CardListView.
+     *
+     * @param context context of the caller.
+     * @param cursor Cursor for the query.
+     * @param parent Parent view group to the caller.
+     * @return
+     */
+    @Override
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        BoardListCardView cardView = new BoardListCardView(context);
+
+        return cardView;
+    }
+
+    /**
+     * Binds data to the view once the view has been inflated and data read.
+     *
+     * @param view View to be binded.
+     * @param context Context of the caller.
+     * @param cursor Cursor for the query.
+     */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         String boardName;
@@ -39,43 +71,6 @@ public class boardListCursorAdapter extends SimpleCursorAdapter {
 
         isFavorited = favoritedInt == 1;
 
-        TextView viewBoardName = (TextView) view.findViewById(R.id.tv_board_name);
-        viewBoardName.setText(boardName);
-
-        TextView viewBoardLink = (TextView) view.findViewById(R.id.tv_board_link);
-        viewBoardLink.setText(boardLink);
-
-        TextView viewBoardValue = (TextView) view.findViewById(R.id.tv_board_value);
-        viewBoardValue.setText(displayColumn);
-
-        ToggleButton viewToggler = (ToggleButton) view.findViewById(R.id.tb_board_fav);
-        viewToggler.setChecked(isFavorited);
-        viewToggler.setOnCheckedChangeListener(new MyClickClass(boardLink));
-    }
-
-    /**
-     * A listener for how the card reacts to the favorite button being clicked.
-     */
-    class MyClickClass implements CompoundButton.OnCheckedChangeListener {
-        private String mBoardLink;
-        /**
-         * Default, empty constructor.
-         */
-        public MyClickClass(String boardLink) {
-            mBoardLink = boardLink;
-        }
-
-        /**
-         * Find the board from the database and sets if the board is to be favorited or not.
-         *
-         * @param buttonView The button that was clicked.
-         * @param isChecked If the button just got checked or not.
-         */
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            BoardListDatabase list_db = new BoardListDatabase(appContext);
-
-            list_db.favoriteBoard(mBoardLink, isChecked);
-        }
+        ((BoardListCardView) view).setCardInfo(boardLink, boardName, nationality, displayColumn, isFavorited);
     }
 }

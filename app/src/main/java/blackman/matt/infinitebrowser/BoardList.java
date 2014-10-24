@@ -227,8 +227,7 @@ public class BoardList extends Fragment {
         to = new int[] {R.id.tb_board_fav, R.id.tv_board_link, R.id.tv_board_value};
 
         qBoards = list_db.getBoardsInSortedOrder(mDBSortBy, mDBOrderBy);
-        boardListCursorAdapter adapter = new boardListCursorAdapter(getActivity(),
-                R.layout.board_list_card_view, qBoards, from, to, 0);
+        boardListCursorAdapter adapter = new boardListCursorAdapter(getActivity(), qBoards, mDBSortBy);
 
         if(!adapter.isEmpty()) {
             mLLBoards.setAdapter(adapter);
