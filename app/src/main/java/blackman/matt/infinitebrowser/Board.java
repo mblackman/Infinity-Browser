@@ -225,7 +225,9 @@ public class Board extends Fragment {
                     TextView errorView;
                     errorView = new TextView(getActivity());
                     errorView.setText(e.toString());
-                    postView.addView(errorView);
+                    if(errorView != null) {
+                        postView.addView(errorView);
+                    }
                 }
 
                 postReplies = thread.getElementsByClass("post reply");

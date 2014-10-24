@@ -2,13 +2,10 @@ package blackman.matt.infinitebrowser;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.CursorAdapter;
-import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
 import android.widget.ToggleButton;
 
 /**
@@ -19,6 +16,8 @@ import android.widget.ToggleButton;
  */
 public class boardListCursorAdapter extends CursorAdapter {
     private String selectedValue;
+    private Context mContext;
+    private Cursor mCursor;
 
     /**
      * Basic constructor for the class. Runs the parent constructor and assigns values.
@@ -29,6 +28,8 @@ public class boardListCursorAdapter extends CursorAdapter {
      */
     public boardListCursorAdapter(Context context, Cursor c, String selectedValue) {
         super(context, c, 0);
+        this.mContext = context;
+        this.mCursor = c;
         this.selectedValue = selectedValue;
     }
 
@@ -38,13 +39,11 @@ public class boardListCursorAdapter extends CursorAdapter {
      * @param context context of the caller.
      * @param cursor Cursor for the query.
      * @param parent Parent view group to the caller.
-     * @return
+     * @return The newly created view.
      */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        BoardListCardView cardView = new BoardListCardView(context);
-
-        return cardView;
+        return new BoardListCardView(context);
     }
 
     /**
@@ -69,8 +68,29 @@ public class boardListCursorAdapter extends CursorAdapter {
         displayColumn = cursor.getString(cursor.getColumnIndexOrThrow(selectedValue));
         favoritedInt = cursor.getInt(cursor.getColumnIndexOrThrow("favorited"));
 
-        isFavorited = favoritedInt == 1;
+        isFavorited = favoritedInt > 0;
 
         ((BoardListCardView) view).setCardInfo(boardLink, boardName, nationality, displayColumn, isFavorited);
+
+        ToggleButton toggleButton = (ToggleButton) view.findViewById(R.id.tb_board_fav);
+        toggleButton.setChecked(isFavorited);
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View v;
+
+        if (!mCursor.moveToPosition(position)) {
+            throw new IllegalStateException("couldn't move cursor to position " + position);
+        }
+
+        if (convertView == null) {
+            v = new BoardListCardView(mContext);
+        } else {
+            v = convertView;
+        }
+
+        bindView(v, mContext, mCursor);
+        return v;
     }
 }

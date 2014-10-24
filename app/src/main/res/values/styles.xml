@@ -5,4 +5,17 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="Widget.Button.Toggle" parent="android:Widget">
+        <item name="android:background">@drawable/chan_button_toggle</item>
+        <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
+    </style>
+
+    <style name="toggleButton"  parent="@android:Theme.Black">
+        <item name="android:buttonStyleToggle">@style/Widget.Button.Toggle</item>
+        <item name="android:textOn"></item>
+        <item name="android:textOff"></item>
+        <item name="android:layout_width">@dimen/list_card_button_size</item>
+        <item name="android:layout_height">@dimen/list_card_button_size</item>
+    </style>
+
 </resources>

@@ -66,6 +66,8 @@ public class BoardListCardView extends RelativeLayout {
      * @param nation Nationality and language of the board.
      * @param boardValue A stored value used to sort the boards.
      * @param isFavorited If the user follows the board or not.
+     *
+     * TODO: Add flags for nationality
      */
     public void setCardInfo(String boardLink, String boardName, String nation, String boardValue,
                             boolean isFavorited) {
@@ -100,6 +102,8 @@ public class BoardListCardView extends RelativeLayout {
             BoardListDatabase list_db = new BoardListDatabase(getContext());
 
             list_db.favoriteBoard(mBoardLink, isChecked);
+
+            invalidate();
         }
     }
 }

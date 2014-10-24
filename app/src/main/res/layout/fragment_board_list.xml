@@ -7,17 +7,18 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-
-        <Spinner
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/spinner_sort_by" />
+        android:layout_height="wrap_content"
+        android:gravity="right">
 
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/spinner_sort_order" />
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner_sort_by" />
 
     </LinearLayout>
 
