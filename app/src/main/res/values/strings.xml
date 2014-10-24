@@ -33,11 +33,9 @@
         <item>Unique ips</item>
         <item>Posts/hour</item>
         <item>Total Posts</item>
-        <item>Board tag</item>
-        <item>Board name</item>
+        <item>Following</item>
         <item>Nationality</item>
         <item>Date created</item>
-        <item>Following</item>
     </string-array>
     <string-array name="sql_sort_order_array">
         <item>DESC</item>

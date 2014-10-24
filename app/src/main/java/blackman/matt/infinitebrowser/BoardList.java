@@ -28,6 +28,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -197,7 +199,6 @@ public class BoardList extends Fragment {
         // Gets an updated list of boards
         if(list_db.isEmpty()) {
             new getBoardList().execute();
-            updateDatabaseView();
         }
 
         return rootView;
@@ -206,15 +207,14 @@ public class BoardList extends Fragment {
     /**
      * Updates the list of boards based on the SQL selected by the SpinnerViews on the
      * BoardList.
-     *
-     * TODO: Make this load every board sequentially.
      */
     private void updateDatabaseView() {
-        LinearLayout mLLBoards;
+        ListView mLLBoards;
         Cursor qBoards;
-        int i;
+        String[] from;
+        int[] to;
 
-        mLLBoards = (LinearLayout) getActivity().findViewById(R.id.ll_board_list);
+        mLLBoards = (ListView) getActivity().findViewById(R.id.lv_board_list);
 
         if(mDBSortBy == null){
             mDBSortBy = DEFAULT_SELECTED_COLUMN;
@@ -222,38 +222,17 @@ public class BoardList extends Fragment {
         if(mDBOrderBy == null){
             mDBOrderBy = "DESC";
         }
-        if(mLLBoards.getChildCount() != 0) {
-            mLLBoards.removeAllViews();
-        }
+
+        from = new String[] {"favorited", "boardlink", mDBSortBy};
+        to = new int[] {R.id.tb_board_fav, R.id.tv_board_link, R.id.tv_board_value};
 
         qBoards = list_db.getBoardsInSortedOrder(mDBSortBy, mDBOrderBy);
-        qBoards.moveToFirst();
-        i = 0;
-        while(!qBoards.isAfterLast() && i < MAX_CARDS) {
-            String boardName;
-            String nationality;
-            String displayColumn;
-            final String boardLink;
-            int favoritedInt;
-            boolean isFavorited;
-            BoardListCardView boardCard;
+        boardListCursorAdapter adapter = new boardListCursorAdapter(getActivity(),
+                R.layout.board_list_card_view, qBoards, from, to, 0);
 
-            boardName = qBoards.getString(qBoards.getColumnIndexOrThrow("boardname"));
-            boardLink = qBoards.getString(qBoards.getColumnIndexOrThrow("boardlink"));
-            nationality = qBoards.getString(qBoards.getColumnIndexOrThrow("nation"));
-            displayColumn = qBoards.getString(qBoards.getColumnIndexOrThrow(mDBSortBy));
-            favoritedInt = qBoards.getInt(qBoards.getColumnIndexOrThrow("favorited"));
-
-            isFavorited = favoritedInt == 1;
-
-            boardCard = new BoardListCardView(getActivity());
-            boardCard.setCardInfo(boardLink, boardName, nationality, displayColumn, isFavorited);
-            mLLBoards.addView(boardCard);
-
-            i++;
-            qBoards.moveToNext();
+        if(!adapter.isEmpty()) {
+            mLLBoards.setAdapter(adapter);
         }
-        qBoards.close();
     }
 
     /**
@@ -368,6 +347,7 @@ public class BoardList extends Fragment {
                                 totalPosts, uniqueIps, dateCreated);
                     }
                 }
+                updateDatabaseView();
             }
         }
     }

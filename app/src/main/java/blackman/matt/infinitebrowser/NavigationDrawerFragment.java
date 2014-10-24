@@ -160,11 +160,12 @@ public class NavigationDrawerFragment extends Fragment {
      */
     private void setUpListAdapter() {
         BoardListDatabase boardListDB;
+        Cursor cursor;
 
         boardListDB = new BoardListDatabase(getActivity());
         boardListDB.openToRead();
 
-        Cursor cursor = boardListDB.getFavoritedBoards();
+        cursor = boardListDB.getFavoritedBoards();
 
         String[] from = new String[]{"boardlink"};
         int[] to = new int[]{R.id.text};

@@ -206,7 +206,7 @@ public class Board extends Fragment {
             Elements threads;
 
             postView = (LinearLayout) getActivity().findViewById(R.id.posts_view);
-            postView.removeAllViews();
+            //postView.removeAllViews();
 
             // Gets all the parent posts on page
             threads = html.select("[id*=thread_]");

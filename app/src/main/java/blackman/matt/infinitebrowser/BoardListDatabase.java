@@ -66,7 +66,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
             "DROP TABLE IF EXISTS " + FeedEntry.TABLE_NAME;
 
     // Query to get all the boards that have been favorited.
-    private static final String SQL_SELECT_FAVORITED_BOARDS = FeedEntry.KEY_FAVORITED + "=1";
+    private static final String SQL_SELECT_FAVORITED_BOARDS = FeedEntry.KEY_FAVORITED + ">0";
 
     /**
      * Constructor to set up the database for the caller.
@@ -186,11 +186,10 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
             FeedEntry._ID,
             FeedEntry.KEY_NATIONALITY,
             FeedEntry.KEY_BOARD_LINK,
-            FeedEntry.KEY_BOARD_NAME,
-            FeedEntry.KEY_POSTS_LAST_HOUR
+            FeedEntry.KEY_BOARD_NAME
         };
 
-        sortOrder = FeedEntry.KEY_BOARD_NAME + " DESC";
+        sortOrder = FeedEntry.KEY_BOARD_LINK + " DESC";
 
         Cursor c = db.query(
                 FeedEntry.TABLE_NAME,        // The table to query
@@ -259,6 +258,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         String sortOrder;
 
         projection = new String[] {
+                FeedEntry._ID,
                 FeedEntry.KEY_NATIONALITY,
                 FeedEntry.KEY_BOARD_LINK,
                 FeedEntry.KEY_BOARD_NAME,
@@ -326,7 +326,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         values.put(FeedEntry.KEY_FAVORITED, follow ? 1 : 0);
 
         // Which row to update, based on the ID
-        String selection = FeedEntry.KEY_BOARD_LINK + " LIKE ?";
+        String selection = FeedEntry.KEY_BOARD_LINK + "=?";
         String[] selectionArgs = { boardLink };
 
         int count = db.update(
