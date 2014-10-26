@@ -6,16 +6,32 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="@drawable/fade_blue">
 
-    <ScrollView
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/lv_board_posts" />
+
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/posts_scrollview" >
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:visibility="visible">
 
-        <LinearLayout
-            android:id="@+id/posts_view"
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"></LinearLayout>
-    </ScrollView>
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/progress_board_load"
+            android:layout_marginLeft="@dimen/post_bar_medium_padding"
+            android:visibility="invisible" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/board_progress_text"
+            android:id="@+id/tv_loading_page"
+            android:layout_marginLeft="@dimen/post_bar_medium_padding"
+            android:visibility="invisible" />
+    </LinearLayout>
 </LinearLayout>

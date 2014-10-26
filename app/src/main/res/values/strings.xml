@@ -29,6 +29,7 @@
     <string name="post_name_sample_text">User Name</string>
     <string name="post_date_sample_text">Date Time</string>
     <string name="post_text_sample_text">This is a sample of what a post looks like</string>
+    <string name="board_progress_text">Loading page...</string>
     <string-array name="sql_columns_array">
         <item>Unique ips</item>
         <item>Posts/hour</item>
