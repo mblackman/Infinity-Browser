@@ -14,7 +14,7 @@ import android.widget.ToggleButton;
  *
  * Created by Matt on 10/24/2014.
  */
-public class boardListCursorAdapter extends CursorAdapter {
+public class BoardListCursorAdapter extends CursorAdapter {
     private String selectedValue;
     private Context mContext;
     private Cursor mCursor;
@@ -26,7 +26,7 @@ public class boardListCursorAdapter extends CursorAdapter {
      * @param c Cursor to be adapted.
      * @param selectedValue The currently selected query column.
      */
-    public boardListCursorAdapter(Context context, Cursor c, String selectedValue) {
+    public BoardListCursorAdapter(Context context, Cursor c, String selectedValue) {
         super(context, c, 0);
         this.mContext = context;
         this.mCursor = c;
