@@ -123,7 +123,7 @@ public class InfinityBrowser extends Activity
         ListView boardListView;
         String boardLink;
         String formattedLink;
-        final String baseDomain = "http://8chan.co/";
+        final String baseDomain = "http://8chan.co";
         Board newBoard;
         Cursor cursor;
 
@@ -140,6 +140,7 @@ public class InfinityBrowser extends Activity
             cursor = ((SimpleCursorAdapter) boardListView.getAdapter()).getCursor();
             cursor.moveToPosition(number - 1); // Some reason number starts at 1
             boardLink = cursor.getString(cursor.getColumnIndex(ARG_BOARD_LINK));
+            //cursor.close();
         }
 
         formattedLink = baseDomain + boardLink;

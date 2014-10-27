@@ -1,9 +1,25 @@
+/*
+ * Copyright (C) 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package blackman.matt.infinitebrowser;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -13,6 +29,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,19 +38,25 @@ import java.util.List;
  * turns it into post cards to display.
  * This assumes you send it a link and doesn't check for null.
  */
-public class PageLoader extends AsyncTask<String, Void, Document> {
-    private Context mContext;
-    private View mParent;
-    private ProgressBar mProgress;
-    private TextView mProgressText;
+public class PageLoader extends AsyncTask<URL, Void, Document> {
+    private final Context mContext;
+    private final ProgressBar mProgress;
+    private final TextView mProgressText;
+    private final List<PostView> mPosts;
+    private final PostArrayAdapter mAdapter;
 
-    public PageLoader(Context context, View parent) {
+    public PageLoader(Activity context, View parent, List<PostView> posts,
+                      PostArrayAdapter adapter) {
         mContext = context;
-        mParent = parent;
-        mProgress = (ProgressBar) mParent.findViewById(R.id.progress_board_load);
-        mProgressText = (TextView) mParent.findViewById(R.id.tv_loading_page);
+        mProgress = (ProgressBar) parent.findViewById(R.id.progress_board_load);
+        mProgressText = (TextView) parent.findViewById(R.id.tv_loading_page);
+        mPosts = posts;
+        mAdapter = adapter;
     }
 
+    /**
+     * Shows the progress bar and its text to the user.
+     */
     @Override
     protected void onPreExecute() {
         mProgress.setVisibility(View.VISIBLE);
@@ -46,15 +69,15 @@ public class PageLoader extends AsyncTask<String, Void, Document> {
      * @return returns the html document
      */
     @Override
-    protected Document doInBackground(String... urls) {
+    protected Document doInBackground(URL... urls) {
         Document ochPage ;
-        String url;
+        URL url;
 
         ochPage = null;
         url = urls[0];
 
         try {
-            ochPage = Jsoup.connect(url).get();
+            ochPage = Jsoup.connect(url.toString()).get();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -69,10 +92,8 @@ public class PageLoader extends AsyncTask<String, Void, Document> {
      */
     @Override
     protected void onPostExecute(Document html) {
-        ListView postView;
         Elements threads;
 
-        postView = (ListView) mParent.findViewById(R.id.lv_board_posts);
         //postView.removeAllViews();
 
         // Gets all the parent posts on page
@@ -86,14 +107,15 @@ public class PageLoader extends AsyncTask<String, Void, Document> {
 
             try {
                 opPost = createPostOP(thread);
-                postView.addFooterView(opPost);
+                mPosts.add(opPost);
             }
             catch (Exception e) {
                 TextView errorView;
                 errorView = new TextView(mContext);
                 errorView.setText(e.toString());
                 if(errorView != null) {
-                    postView.addFooterView(errorView);
+                    // TODO: Handle errors or something
+                    //mListView.addFooterView(errorView);
                 }
             }
 
@@ -104,7 +126,7 @@ public class PageLoader extends AsyncTask<String, Void, Document> {
 
             }
         }
-        postView.invalidate();
+        mAdapter.notifyDataSetChanged();
         mProgress.setVisibility(View.INVISIBLE);
         mProgressText.setVisibility(View.INVISIBLE);
     }

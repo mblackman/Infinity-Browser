@@ -17,28 +17,20 @@
 package blackman.matt.infinitebrowser;
 
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.AbsListView;
+import android.widget.ListView;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.jar.Attributes;
 
 
 /**
@@ -49,8 +41,11 @@ import java.util.jar.Attributes;
 public class Board extends Fragment {
     // ARG for the board link to be sent in
     private static final String ARG_BOARD_LINK = "boardlink";
-
-    private String mBoardLink;
+    private PageLoader mPageGetter;
+    private boolean mIsRootBoard;
+    private List<PostView> mPosts;
+    private PostArrayAdapter mAdapter;
+    private URL mBoardLink;
 
     private OnFragmentInteractionListener mListener;
 
@@ -85,7 +80,11 @@ public class Board extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mBoardLink = getArguments().getString(ARG_BOARD_LINK);
+            try {
+                mBoardLink = new URL(getArguments().getString(ARG_BOARD_LINK));
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -104,9 +103,18 @@ public class Board extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_board, container, false);
 
+        ListView myListView = (ListView) rootView.findViewById(R.id.lv_board_posts);
+        mPosts = new ArrayList<PostView>();
+        mAdapter = new PostArrayAdapter(mPosts);
+
         if(mBoardLink != null){
-            new PageLoader(getActivity() ,rootView).execute(mBoardLink);
+            mIsRootBoard = !mBoardLink.getPath().endsWith(".html");
+            mPageGetter = new PageLoader(getActivity(), rootView, mPosts, mAdapter);
+            mPageGetter.execute(mBoardLink);
         }
+
+        myListView.setAdapter(mAdapter);
+        myListView.setOnScrollListener(new EndlessScrollListener(rootView));
 
         return rootView;
     }
@@ -161,5 +169,34 @@ public class Board extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         public void onFragmentInteraction(Uri uri);
+    }
+
+    public class EndlessScrollListener implements AbsListView.OnScrollListener {
+        private int currentPage = 1;
+        private View mParent;
+
+        public EndlessScrollListener(View parentView) {
+            mParent = parentView;
+        }
+
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem,
+                             int visibleItemCount, int totalItemCount) {
+            if (mIsRootBoard && mPageGetter.getStatus() == AsyncTask.Status.FINISHED &&
+                    (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleItemCount)) {
+                URL newPage;
+                try {
+                    newPage = new URL(mBoardLink.toString() + (++currentPage) + ".html");
+                    mPageGetter = new PageLoader(getActivity(), mParent, mPosts, mAdapter);
+                    mPageGetter.execute(newPage);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+        }
     }
 }
