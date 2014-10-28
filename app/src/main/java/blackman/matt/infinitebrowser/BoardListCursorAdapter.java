@@ -18,10 +18,12 @@ package blackman.matt.infinitebrowser;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.CursorAdapter;
+import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -104,76 +106,88 @@ public class BoardListCursorAdapter extends CursorAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        final ViewHolder holder;
-        final ToggleButton viewToggle;
-        final String boardLink;
-        final CursorAdapter myAdapter = this;
+        if(mCursor.moveToPosition(position)) {
+            final ViewHolder holder;
+            final ToggleButton viewToggle;
+            final String boardLink;
+            final CursorAdapter myAdapter = this;
 
-        String boardName;
-        String nationality;
-        String displayColumn;
-        int favoritedInt;
-        boolean isFavorited;
+            String boardName;
+            String nationality;
+            String displayColumn;
+            int favoritedInt;
+            boolean isFavorited;
 
-        if (!mCursor.moveToPosition(position)) {
-            throw new IllegalStateException("couldn't move cursor to position " + position);
-        }
-
-        if(convertView == null) {
-            convertView = new BoardListCardView(mContext);
-            holder = new ViewHolder();
-            holder.mView = (BoardListCardView) convertView;
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
-        }
-
-        mCursor.moveToPosition(position);
-
-        boardName = mCursor.getString(mCursor.getColumnIndexOrThrow("boardname"));
-        boardLink = mCursor.getString(mCursor.getColumnIndexOrThrow("boardlink"));
-        nationality = mCursor.getString(mCursor.getColumnIndexOrThrow("nation"));
-        displayColumn = mCursor.getString(mCursor.getColumnIndexOrThrow(mSelectedValue));
-        favoritedInt = mCursor.getInt(mCursor.getColumnIndexOrThrow("favorited"));
-
-        isFavorited = favoritedInt > 0;
-
-        viewToggle = (ToggleButton) holder.mView.findViewById(R.id.tb_board_fav);
-
-        viewToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean isChecked = ((ToggleButton) v).isChecked();
-                BoardListDatabase list_db = new BoardListDatabase(mContext);
-                CharSequence text;
-                int duration = Toast.LENGTH_SHORT;
-
-                if(isChecked) {
-                    text = "Added Board " + boardLink;
-                } else {
-                    text = "Removed Board " + boardLink;
-                }
-
-                Toast toast = Toast.makeText(mContext, text, duration);
-                toast.show();
-
-                list_db.favoriteBoard(boardLink, isChecked);
-
-                mCursor = list_db.getBoardsInSortedOrder(mSelectedValue, mSortOrder);
-                myAdapter.swapCursor(mCursor);
-                myAdapter.notifyDataSetChanged();
-
-                holder.mView.invalidate();
+            if(convertView == null || convertView instanceof Space) {
+                convertView = new BoardListCardView(mContext);
+                holder = new ViewHolder();
+                holder.mView = (BoardListCardView) convertView;
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
             }
-        });
 
-        ((BoardListCardView) convertView).setCardInfo(boardLink,
-                boardName,
-                nationality,
-                displayColumn,
-                isFavorited
-        );
+            nationality = mCursor.getString(1);
+            boardLink = mCursor.getString(2);
+            boardName = mCursor.getString(3);
+            favoritedInt = mCursor.getInt(4);
+            displayColumn = mCursor.getString(5);
+
+            isFavorited = favoritedInt > 0;
+
+            viewToggle = (ToggleButton) holder.mView.findViewById(R.id.tb_board_fav);
+
+            viewToggle.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean isChecked = ((ToggleButton) v).isChecked();
+                    BoardListDatabase list_db = new BoardListDatabase(mContext);
+                    CharSequence text;
+                    int duration = Toast.LENGTH_SHORT;
+
+                    if(isChecked) {
+                        text = "Added Board " + boardLink;
+                    } else {
+                        text = "Removed Board " + boardLink;
+                    }
+
+                    Toast toast = Toast.makeText(mContext, text, duration);
+                    toast.show();
+
+                    list_db.favoriteBoard(boardLink, isChecked);
+
+                    mCursor = list_db.getBoardsInSortedOrder(mSelectedValue, mSortOrder);
+                    myAdapter.swapCursor(mCursor);
+                    myAdapter.notifyDataSetChanged();
+
+                    holder.mView.invalidate();
+                }
+            });
+
+            ((BoardListCardView) convertView).setCardInfo(boardLink,
+                    boardName,
+                    nationality,
+                    displayColumn,
+                    isFavorited
+            );
+        } else {
+            convertView = new Space(mContext);
+            convertView.setVisibility(View.GONE);
+            Log.i("Cursor no show", "couldn't move cursor to position " + position);
+        }
 
         return convertView;
+    }
+
+    @Override
+    public Cursor swapCursor(Cursor cursor) {
+        Cursor oldCursor = mCursor;
+        mCursor = cursor;
+        return oldCursor;
+    }
+
+    public void setDatabaseValues(String newOrder, String newSort) {
+        mSelectedValue = newOrder;
+        mSortOrder = newSort;
     }
 }

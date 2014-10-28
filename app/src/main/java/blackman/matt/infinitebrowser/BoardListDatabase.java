@@ -204,6 +204,38 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         return c;
     }
 
+    public Cursor getSortedSearch(CharSequence search, String sortBy, String order) {
+        SQLiteDatabase db = getReadableDatabase();
+        String selection;
+        String[] projection;
+        String[] selectionArgs;
+        String sortOrder;
+
+        projection = new String[] {
+                FeedEntry._ID,
+                FeedEntry.KEY_NATIONALITY,
+                FeedEntry.KEY_BOARD_LINK,
+                FeedEntry.KEY_BOARD_NAME,
+                FeedEntry.KEY_FAVORITED,
+                sortBy
+        };
+
+        selection = FeedEntry.KEY_BOARD_LINK + " LIKE ? OR " + FeedEntry.KEY_BOARD_NAME + " LIKE ?";
+        selectionArgs = new String[]{"%" + search.toString() + "%", "%" + search.toString() + "%"};
+        sortOrder = sortBy + " " + order;
+
+        Cursor c = db.query(
+                FeedEntry.TABLE_NAME,       // The table to query
+                projection,                 // The columns to return
+                selection,                  // The columns for the WHERE clause
+                selectionArgs,              // The values for the WHERE clause
+                null,                       // don't group the rows
+                null,                       // don't filter by row groups
+                sortOrder                   // The sort order
+        );
+        return c;
+    }
+
     /**
      * Checks if the table is empty of any rows.
      *

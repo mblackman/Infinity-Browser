@@ -138,7 +138,7 @@ public class InfinityBrowser extends Activity
         }
         else {
             cursor = ((SimpleCursorAdapter) boardListView.getAdapter()).getCursor();
-            cursor.moveToPosition(number - 1); // Some reason number starts at 1
+            cursor.moveToPosition(number - 1);
             boardLink = cursor.getString(cursor.getColumnIndex(ARG_BOARD_LINK));
             //cursor.close();
         }
@@ -151,6 +151,7 @@ public class InfinityBrowser extends Activity
         fragmentTransaction.commit();
 
         mTitle = boardLink;
+        getActionBar().setTitle(mTitle);
     }
 
     /**
@@ -204,6 +205,26 @@ public class InfinityBrowser extends Activity
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+    /**
+     * Creates a new board for a post when reply button is hit.
+     *
+     * @param postLink Link to the thread to open up
+     */
+    @Override
+    public void onReplyClicked(String postLink) {
+        String newTitle = postLink.replace("http://8chan.co", "").replace("res/", "").replace(".html", "");
+        Board newThread = new Board().newInstance(postLink);
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+        transaction.replace(R.id.container, newThread);
+        transaction.addToBackStack(null);
+
+        transaction.commit();
+
+        //mTitle = newTitle;
+        //getActionBar().setTitle(mTitle);
     }
 
     /**

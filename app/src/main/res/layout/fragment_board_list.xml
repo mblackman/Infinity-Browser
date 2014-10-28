@@ -4,28 +4,50 @@
     android:layout_height="fill_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
+    <RelativeLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:gravity="right">
+        android:gravity="center_vertical">
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_search"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:background="@drawable/search_button"
+            android:paddingLeft="@dimen/post_bar_medium_padding" />
 
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/spinner_sort_order" />
+            android:id="@+id/spinner_sort_order"
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentTop="false"
+            android:layout_toLeftOf="@+id/spinner_sort_by" />
 
         <Spinner
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/spinner_sort_by" />
+            android:id="@+id/spinner_sort_by"
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true" />
 
-    </LinearLayout>
+    </RelativeLayout>
+
+    <EditText
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txt_search_boards"
+        android:inputType="text"
+        android:linksClickable="false"
+        android:visibility="gone" />
 
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/lv_board_list" />
-
-
 </LinearLayout>

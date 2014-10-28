@@ -22,11 +22,16 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -50,9 +55,13 @@ public class BoardList extends Fragment {
     private String mDBOrderBy;
     private String mDBSortBy;
     private BoardListDatabase list_db;
+    private BoardListCursorAdapter mAdapter;
 
     // Default selection to sort the value column by
     private static final String DEFAULT_SELECTED_COLUMN = "uniqueips";
+
+    // Default selection to sort the value column by
+    private static final String DEFAULT_SORT_ORDER = "DESC";
 
     /**
      * Auto-generated constructor full of nothing.
@@ -84,14 +93,33 @@ public class BoardList extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_board_list, container, false);
+        final ListView boardListView = (ListView) rootView.findViewById(R.id.lv_board_list);
+
         initSpinners(rootView);
+        initSearchButton(rootView);
 
         list_db = new BoardListDatabase(rootView.getContext());
 
+        final Cursor qBoards = list_db.getBoardsInSortedOrder(DEFAULT_SELECTED_COLUMN,
+                DEFAULT_SORT_ORDER);
+
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter = new BoardListCursorAdapter(getActivity(),
+                        qBoards,
+                        DEFAULT_SELECTED_COLUMN,
+                        DEFAULT_SORT_ORDER
+                );
+
+                boardListView.setAdapter(mAdapter);
+            }
+        });
+
+        initSearch(rootView);
+
         // Gets an updated list of boards
-        if(list_db.isEmpty()) {
-            new GetBoardList().execute();
-        }
+        new GetBoardList().execute();
 
         return rootView;
     }
@@ -128,33 +156,65 @@ public class BoardList extends Fragment {
         spinnerSort.setOnItemSelectedListener(new SpinnerActivity());
     }
 
+    private void initSearch(View rootView) {
+        final EditText boardSearch = (EditText) rootView.findViewById(R.id.txt_search_boards);
+
+        boardSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                final CharSequence search = s;
+                new Handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Cursor cSearch = list_db.getSortedSearch(search, mDBSortBy, mDBOrderBy);
+                        mAdapter.swapCursor(cSearch);
+                        mAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+    }
+
+    public void initSearchButton(final View rootView) {
+        Button button = (Button) rootView.findViewById(R.id.btn_search);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText search = (EditText) rootView.findViewById(R.id.txt_search_boards);
+                if(search.getVisibility() == View.VISIBLE) {
+                    search.setVisibility(View.GONE);
+                    search.setText("");
+                } else {
+                    search.setVisibility(View.VISIBLE);
+                    search.setSelection(0, 0);
+                }
+            }
+        });
+    }
+
     /**
      * Updates the list of boards based on the SQL selected by the SpinnerViews on the
      * BoardList.
      */
     private void updateDatabaseView() {
-        ListView mLLBoards;
         Cursor qBoards;
 
-        mLLBoards = (ListView) getActivity().findViewById(R.id.lv_board_list);
-
-        if(mDBSortBy == null){
-            mDBSortBy = DEFAULT_SELECTED_COLUMN;
-        }
-        if(mDBOrderBy == null){
-            mDBOrderBy = "DESC";
-        }
-
         qBoards = list_db.getBoardsInSortedOrder(mDBSortBy, mDBOrderBy);
-        BoardListCursorAdapter adapter = new BoardListCursorAdapter(getActivity(),
-                qBoards,
-                mDBSortBy,
-                mDBOrderBy
-        );
 
-        if(!adapter.isEmpty()) {
-            mLLBoards.setAdapter(adapter);
-        }
+        mAdapter.setDatabaseValues(mDBSortBy, mDBOrderBy);
+        mAdapter.swapCursor(qBoards);
+        mAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -295,10 +355,10 @@ public class BoardList extends Fragment {
          * @param id Id of the selected SpinnerView.
          */
         public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-            if(parent.getId() == R.id.spinner_sort_order) {
+            if(view != null && parent.getId() == R.id.spinner_sort_order) {
                 mDBOrderBy = ((TextView) view).getText().toString();
             }
-            else if(parent.getId() == R.id.spinner_sort_by) {
+            else if(view != null && parent.getId() == R.id.spinner_sort_by) {
                 String sortByName;
                 sortByName = parent.getItemAtPosition(pos).toString();
 

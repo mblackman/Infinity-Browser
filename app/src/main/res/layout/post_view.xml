@@ -87,7 +87,8 @@
             android:textSize="@dimen/post_body_font_size"
             android:text="@string/post_text_sample_text"
             android:paddingLeft="@dimen/post_bar_small_padding"
-            android:paddingRight="@dimen/post_bar_small_padding" />
+            android:paddingRight="@dimen/post_bar_small_padding"
+            android:clickable="true" />
     </LinearLayout>
 
     <TextView
@@ -95,9 +96,12 @@
         android:layout_height="wrap_content"
         android:id="@+id/tv_number_replies"
         android:textSize="@dimen/omitted_replies_text_size"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentBottom="false"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/ll_post_layout" />
+        android:layout_below="@+id/ll_post_layout"
+        android:clickable="true"
+        android:textColor="@android:color/holo_blue_dark"
+        android:text="@string/post_view_reply_text" />
 
 </RelativeLayout>

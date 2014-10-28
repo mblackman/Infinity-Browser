@@ -27,6 +27,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -42,7 +45,9 @@ public class PostView extends RelativeLayout {
     private TextView mPostNumberTextView;
     private TextView mTopicTextView;
     private TextView mPostTextView;
-    private TextView mNumberReplies;
+    private TextView mReplyView;
+
+    private Board.OnFragmentInteractionListener mListener;
 
     private String mPostImageThumb;
     private String mPostImageFull;
@@ -53,8 +58,9 @@ public class PostView extends RelativeLayout {
      *
      * @param context Context of the parent to this view.
      */
-    public PostView(Context context) {
+    public PostView(Context context, Object listener) {
         super(context);
+        mListener = (Board.OnFragmentInteractionListener) listener;
         init();
     }
 
@@ -71,7 +77,7 @@ public class PostView extends RelativeLayout {
         mPostDateTextView = (TextView) findViewById(R.id.tv_datetime);
         mPostNumberTextView = (TextView) findViewById(R.id.tv_postno);
         mPostTextView = (TextView) findViewById(R.id.tv_postText);
-        mNumberReplies = (TextView) findViewById(R.id.tv_number_replies);
+        mReplyView = (TextView) findViewById(R.id.tv_number_replies);
 
         addListenerOnButton();
     }
@@ -87,17 +93,21 @@ public class PostView extends RelativeLayout {
      * @param numReplies Replied string for long threads from site.
      * @param imageThumbs Container of links to image thumbnails.
      * @param imageFull Container of links to full sized images.
-     * @param isCondensed If the post text should be condensed.
+     * @param onRootBoard If the post text should be condensed.
      */
     public void setUpPost(String userName, String postDate, String postNumber, String topic,
                           String postText, String numReplies, List<String> imageThumbs,
-                          List<String> imageFull, boolean isCondensed) {
+                          List<String> imageFull, String boardLink, boolean onRootBoard) {
         mUserNameTextView.setText(userName);
         mTopicTextView.setText(topic);
         mPostDateTextView.setText(postDate);
         mPostNumberTextView.setText("No." + postNumber);
-        mPostTextView.setText(Html.fromHtml(postText));
-        mNumberReplies.setText(numReplies);
+        if(onRootBoard) {
+            setUpReplyButton(boardLink, postNumber);
+        } else {
+            mReplyView.setVisibility(GONE);
+        }
+        mPostTextView.setText(Html.fromHtml(formatPostBody(postText)));
 
         if(!imageFull.isEmpty()) {
             mPostImageFull = "http://8chan.co/" + imageFull.get(0);
@@ -111,15 +121,23 @@ public class PostView extends RelativeLayout {
 
         invalidate();
         requestLayout();
+    }
 
-        int lineCount = mPostTextView.getLineCount();
-        if(isCondensed && lineCount >= 10) {
-            String[] newText = postText.split(System.getProperty("line.separator"));
+    private void setUpReplyButton(String boardLink, String postNo) {
+        final String newUrl = boardLink + "res/" + postNo + ".html";
 
-            for(String line : newText) {
-
+        mReplyView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onReplyClicked(newUrl);
             }
-        }
+        });
+    }
+
+    private String formatPostBody(String post) {
+        Document formattedText = Jsoup.parse(post);
+
+        return formattedText.toString();
     }
 
     /**

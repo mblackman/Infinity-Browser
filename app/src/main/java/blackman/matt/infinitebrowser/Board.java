@@ -88,6 +88,10 @@ public class Board extends Fragment {
         }
     }
 
+    public OnFragmentInteractionListener getListener() {
+        return mListener;
+    }
+
     /**
      * Called when the fragments view is being created. Handled inflating the view and assigning
      * values.
@@ -112,26 +116,14 @@ public class Board extends Fragment {
 
         if(mBoardLink != null){
             mIsRootBoard = !mBoardLink.getPath().endsWith(".html");
-            mPageGetter = new PageLoader(getActivity(), rootView, mPosts, mAdapter);
+            mPageGetter = new PageLoader(getActivity(), rootView, mPosts, mAdapter, mListener);
             mPageGetter.execute(mBoardLink);
         }
 
         myListView.setAdapter(mAdapter);
         myListView.setOnScrollListener(new EndlessScrollListener(rootView));
 
-
         return rootView;
-    }
-
-    /**
-     * Hook method used to help the fragment interact with the parent activity.
-     *
-     * @param uri the uri of the activity being called from.
-     */
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     /**
@@ -172,7 +164,7 @@ public class Board extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        public void onFragmentInteraction(Uri uri);
+        public void onReplyClicked(String postLink);
     }
 
     /**
@@ -208,7 +200,7 @@ public class Board extends Fragment {
                 URL newPage;
                 try {
                     newPage = new URL(mBoardLink.toString() + (++currentPage) + ".html");
-                    mPageGetter = new PageLoader(getActivity(), mParent, mPosts, mAdapter);
+                    mPageGetter = new PageLoader(getActivity(), mParent, mPosts, mAdapter, mListener);
                     mPageGetter.execute(newPage);
                 } catch (MalformedURLException e) {
                     e.printStackTrace();

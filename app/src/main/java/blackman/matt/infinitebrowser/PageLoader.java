@@ -44,14 +44,19 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
     private final TextView mProgressText;
     private final List<PostView> mPosts;
     private final PostArrayAdapter mAdapter;
+    private final Object mlistener;
+
+    private Boolean mIsOnRootPage;
+    private String mPageUrl;
 
     public PageLoader(Activity context, View parent, List<PostView> posts,
-                      PostArrayAdapter adapter) {
+                      PostArrayAdapter adapter, Object listener) {
         mContext = context;
         mProgress = (ProgressBar) parent.findViewById(R.id.progress_page_load);
         mProgressText = (TextView) parent.findViewById(R.id.tv_progress_page_load);
         mPosts = posts;
         mAdapter = adapter;
+        mlistener = listener;
     }
 
     /**
@@ -75,6 +80,8 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
 
         ochPage = null;
         url = urls[0];
+        mPageUrl = url.toString();
+        mIsOnRootPage = !mPageUrl.contains(".html");
 
         try {
             ochPage = Jsoup.connect(url.toString()).get();
@@ -93,8 +100,6 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
     @Override
     protected void onPostExecute(Document html) {
         Elements threads;
-
-        //postView.removeAllViews();
 
         // Gets all the parent posts on page
         threads = html.select("[id*=thread_]");
@@ -119,11 +124,28 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
                 }
             }
 
-            postReplies = thread.getElementsByClass("post reply");
+            // If you are in a thread it will load the replies
+            if(!mIsOnRootPage) {
+                postReplies = thread.select("[class=post reply]");
 
-            // Looks through all the replies to an OP post
-            for (Element postReply : postReplies) {
+                // Looks through all the replies to an OP post
+                for (Element postReply : postReplies) {
+                    PostView replyPost;
 
+                    try {
+                        replyPost = createPostReply(postReply);
+                        mPosts.add(replyPost);
+                    }
+                    catch (Exception e) {
+                        TextView errorView;
+                        errorView = new TextView(mContext);
+                        errorView.setText(e.toString());
+                        if(errorView != null) {
+                            // TODO: Handle errors or something
+                            //mListView.addFooterView(errorView);
+                        }
+                    }
+                }
             }
         }
         mAdapter.notifyDataSetChanged();
@@ -208,10 +230,67 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
         }
 
         // Create new instance of post with elements
-        opPost = new PostView(mContext);
+        opPost = new PostView(mContext, mlistener);
         opPost.setUpPost(userName, postDate, postNumber, postTopic, postText, numReplies,
-                postImageThumbs, postImageFull, true);
+                postImageThumbs, postImageFull, mPageUrl, mIsOnRootPage);
 
         return opPost;
+    }
+
+    private PostView createPostReply(Element postElement) {
+        PostView newPost;
+        Elements singleFile;
+        Elements multiFiles;
+        Element postReply;
+        Element imageFiles;
+        Element postLink;
+        String postNumber;
+        String userName;
+        String postDate;
+        String postText ;
+        List<String> postImageThumbs;
+        List<String> postImageFull;
+
+        // Start filtering
+        postReply = postElement.select("[class*=post reply]").first();
+        imageFiles = postElement.getElementsByClass("files").first();
+
+        singleFile = imageFiles.select("[class=file");
+        multiFiles = imageFiles.select("[class=file multifile");
+
+        // Read through op post and get information
+        postLink = postReply.getElementsByClass("post_no").first();
+        postNumber = postLink.attr("id").replace("post_no_", "");
+        userName = postReply.getElementsByClass("name").first().text();
+        postDate = postReply.select("time").first().text();
+        postText = postReply.getElementsByClass("body").first().html();
+
+        // Get images and thumbnails into arrays
+        postImageThumbs = new ArrayList<String>();
+        postImageFull = new ArrayList<String>();
+
+        if (!singleFile.isEmpty()) {
+            Element image = singleFile.first();
+            String imageUrl = image.select("a").first().attr("href");
+            String imageThumbnail = image.select("img").first().attr("src");
+
+            postImageThumbs.add(imageThumbnail);
+            postImageFull.add(imageUrl);
+        } else if (!multiFiles.isEmpty()) {
+            for(Element image : multiFiles) {
+                String imageUrl = image.select("a").first().attr("href");
+                String imageThumbnail = image.select("img").first().attr("src");
+
+                postImageThumbs.add(imageThumbnail);
+                postImageFull.add(imageUrl);
+            }
+        }
+
+        // Create new instance of post with elements
+        newPost = new PostView(mContext, mlistener);
+        newPost.setUpPost(userName, postDate, postNumber, "", postText, "",
+                postImageThumbs, postImageFull, mPageUrl, mIsOnRootPage);
+
+        return newPost;
     }
 }
