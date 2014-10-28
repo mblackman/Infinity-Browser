@@ -51,10 +51,232 @@ public class BoardList extends Fragment {
     private String mDBSortBy;
     private BoardListDatabase list_db;
 
-    // Max board links to load each pass
-    private static final int MAX_CARDS = 10;
     // Default selection to sort the value column by
     private static final String DEFAULT_SELECTED_COLUMN = "uniqueips";
+
+    /**
+     * Auto-generated constructor full of nothing.
+     */
+    public BoardList() {
+        // Required empty public constructor
+    }
+
+    /**
+     * Called when the fragment is first created on the activity. Gets the arguments.
+     *
+     * @param savedInstanceState the instance state of the activity.
+     */
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    /**
+     * Called when the fragments view is being created. Handled inflating the view and assigning
+     * values.
+     *
+     * @param inflater inflater sent in from parent activity.
+     * @param container The container that the fragment will go in.
+     * @param savedInstanceState the instance state of the activity.
+     * @return returns this fragments newly created view.
+     */
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_board_list, container, false);
+        initSpinners(rootView);
+
+        list_db = new BoardListDatabase(rootView.getContext());
+
+        // Gets an updated list of boards
+        if(list_db.isEmpty()) {
+            new GetBoardList().execute();
+        }
+
+        return rootView;
+    }
+
+    /**
+     * Sets up the spinners on the view.
+     *
+     * @param rootView Thew view containing the spinners.
+     */
+    private void initSpinners(View rootView) {
+        Spinner spinnerSort;
+        Spinner spinnerOrder;
+
+        ArrayAdapter<CharSequence> sortAdapter;
+        ArrayAdapter<CharSequence> orderAdapter;
+
+        // Set up the spinners
+        spinnerSort = (Spinner)rootView.findViewById(R.id.spinner_sort_by);
+        spinnerOrder = (Spinner)rootView.findViewById(R.id.spinner_sort_order);
+
+        sortAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.sql_columns_array,
+                android.R.layout.simple_spinner_item);
+
+        orderAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.sql_sort_order_array,
+                android.R.layout.simple_spinner_item);
+
+        sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spinnerSort.setAdapter(sortAdapter);
+        spinnerOrder.setAdapter(orderAdapter);
+
+        spinnerOrder.setOnItemSelectedListener(new SpinnerActivity());
+        spinnerSort.setOnItemSelectedListener(new SpinnerActivity());
+    }
+
+    /**
+     * Updates the list of boards based on the SQL selected by the SpinnerViews on the
+     * BoardList.
+     */
+    private void updateDatabaseView() {
+        ListView mLLBoards;
+        Cursor qBoards;
+
+        mLLBoards = (ListView) getActivity().findViewById(R.id.lv_board_list);
+
+        if(mDBSortBy == null){
+            mDBSortBy = DEFAULT_SELECTED_COLUMN;
+        }
+        if(mDBOrderBy == null){
+            mDBOrderBy = "DESC";
+        }
+
+        qBoards = list_db.getBoardsInSortedOrder(mDBSortBy, mDBOrderBy);
+        BoardListCursorAdapter adapter = new BoardListCursorAdapter(getActivity(),
+                qBoards,
+                mDBSortBy,
+                mDBOrderBy
+        );
+
+        if(!adapter.isEmpty()) {
+            mLLBoards.setAdapter(adapter);
+        }
+    }
+
+    /**
+     * Called when the parent activity attached to this newly created fragment and checks
+     * if the fragment interaction listener has be implemented by the activity.
+     *
+     * @param activity the parent activity of this fragment.
+     */
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    /**
+     * After the fragment has run it's course and much be removed from the activity this
+     * is called.
+     */
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        public void onFragmentInteraction(Uri uri);
+    }
+
+    /**
+     * Gets an updated list of all the boards on 8Chan and saves that list in the database, while
+     * updating existing board entries.
+     */
+    public class GetBoardList extends AsyncTask<Void, Void, Document> {
+        /**
+         * Loads all the information from the boards index and returns the HTML doc.
+         *
+         * @param params nothing
+         * @return The HTML doc of the boards lists.
+         */
+        @Override
+        protected Document doInBackground(Void... params) {
+            Document boardPage;
+            String url;
+
+            boardPage = null;
+            url = "http://8chan.co/boards.html";
+
+            try {
+                boardPage = Jsoup.connect(url).get();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return boardPage;
+        }
+
+        /**
+         * Takes the HTML doc and parses through all the board information and updates the
+         * SQL database.
+         *
+         * @param html The page with the boards on it.
+         */
+        @Override
+        protected void onPostExecute(Document html) {
+            if(html != null) {
+                Elements boards = html.select("tbody").first().children();
+
+                // Looks through all the boards
+                for(Element board : boards) {
+                    Elements boardItems;
+                    String nationality;
+                    String boardLink;
+                    String boardName;
+                    String postsInLastHour;
+                    String totalPosts;
+                    String uniqueIps;
+                    String dateCreated;
+
+                    boardItems = board.children();
+
+                    nationality = boardItems.get(0).select("img").attr("title");
+                    boardLink = boardItems.get(1).select("a").attr("href");
+                    boardName = boardItems.get(2).text();
+                    postsInLastHour = boardItems.get(3).text();
+                    totalPosts = boardItems.get(4).text();
+                    uniqueIps = boardItems.get(5).text();
+                    dateCreated = boardItems.get(6).text();
+
+                    if(list_db.boardExists(boardLink)){
+                        list_db.updateBoard(boardName, postsInLastHour, totalPosts, uniqueIps);
+                    }
+                    else {
+                        list_db.insertBoard(boardName,
+                                nationality,
+                                boardLink,
+                                postsInLastHour,
+                                totalPosts,
+                                uniqueIps,
+                                dateCreated
+                        );
+                    }
+                }
+                updateDatabaseView();
+            }
+        }
+    }
 
     /**
      * Used to control what happens when the spinners are used on the boardList.
@@ -120,232 +342,6 @@ public class BoardList extends Fragment {
          */
         public void onNothingSelected(AdapterView<?> parent) {
             // Another interface callback
-        }
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @return A new instance of fragment BoardList.
-     */
-    public static BoardList newInstance() {
-        BoardList fragment = new BoardList();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    /**
-     * Auto-generated constructor full of nothing.
-     */
-    public BoardList() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Called when the fragment is first created on the activity. Gets the arguments.
-     *
-     * @param savedInstanceState the instance state of the activity.
-     */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    /**
-     * Called when the fragments view is being created. Handled inflating the view and assigning
-     * values.
-     *
-     * @param inflater inflater sent in from parent activity.
-     * @param container The container that the fragment will go in.
-     * @param savedInstanceState the instance state of the activity.
-     * @return returns this fragments newly created view.
-     */
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView;
-        Spinner spinnerSort;
-        Spinner spinnerOrder;
-        ArrayAdapter<CharSequence> sortAdapter;
-        ArrayAdapter<CharSequence> orderAdapter;
-
-        rootView = inflater.inflate(R.layout.fragment_board_list, container, false);
-        list_db = new BoardListDatabase(rootView.getContext());
-
-
-        // Set up the spinners
-        spinnerSort = (Spinner)rootView.findViewById(R.id.spinner_sort_by);
-        spinnerOrder = (Spinner)rootView.findViewById(R.id.spinner_sort_order);
-
-        sortAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.sql_columns_array,
-                android.R.layout.simple_spinner_item);
-
-        orderAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.sql_sort_order_array,
-                android.R.layout.simple_spinner_item);
-
-        sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        orderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        spinnerSort.setAdapter(sortAdapter);
-        spinnerOrder.setAdapter(orderAdapter);
-
-        spinnerOrder.setOnItemSelectedListener(new SpinnerActivity());
-        spinnerSort.setOnItemSelectedListener(new SpinnerActivity());
-
-        // Gets an updated list of boards
-        if(list_db.isEmpty()) {
-            new getBoardList().execute();
-        }
-
-        return rootView;
-    }
-
-    /**
-     * Updates the list of boards based on the SQL selected by the SpinnerViews on the
-     * BoardList.
-     */
-    private void updateDatabaseView() {
-        ListView mLLBoards;
-        Cursor qBoards;
-        String[] from;
-        int[] to;
-
-        mLLBoards = (ListView) getActivity().findViewById(R.id.lv_board_list);
-
-        if(mDBSortBy == null){
-            mDBSortBy = DEFAULT_SELECTED_COLUMN;
-        }
-        if(mDBOrderBy == null){
-            mDBOrderBy = "DESC";
-        }
-
-        from = new String[] {"favorited", "boardlink", mDBSortBy};
-        to = new int[] {R.id.tb_board_fav, R.id.tv_board_link, R.id.tv_board_value};
-
-        qBoards = list_db.getBoardsInSortedOrder(mDBSortBy, mDBOrderBy);
-        BoardListCursorAdapter adapter = new BoardListCursorAdapter(getActivity(), qBoards, mDBSortBy);
-
-        if(!adapter.isEmpty()) {
-            mLLBoards.setAdapter(adapter);
-        }
-    }
-
-    /**
-     * Called when the parent activity attached to this newly created fragment and checks
-     * if the fragment interaction listener has be implemented by the activity.
-     *
-     * @param activity the parent activity of this fragment.
-     */
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    /**
-     * After the fragment has run it's course and much be removed from the activity this
-     * is called.
-     */
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
-    }
-
-    /**
-     * Gets an updated list of all the boards on 8Chan and saves that list in the database, while
-     * updating existing board entries.
-     */
-    public class getBoardList extends AsyncTask<Void, Void, Document> {
-        /**
-         * Loads all the information from the boards index and returns the HTML doc.
-         *
-         * @param params nothing
-         * @return The HTML doc of the boards lists.
-         */
-        @Override
-        protected Document doInBackground(Void... params) {
-            Document boardPage;
-            String url;
-
-            boardPage = null;
-            url = "http://8chan.co/boards.html";
-
-            try {
-                boardPage = Jsoup.connect(url).get();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return boardPage;
-        }
-
-        /**
-         * Takes the HTML doc and parses through all the board information and updates the
-         * SQL database.
-         *
-         * @param html The page with the boards on it.
-         */
-        @Override
-        protected void onPostExecute(Document html) {
-            if(html != null) {
-                Elements boards;
-
-                boards = html.select("tbody").first().children();
-
-                // Looks through all the boards
-                for(Element board : boards) {
-                    Elements boardItems;
-                    String nationality;
-                    String boardLink;
-                    String boardName;
-                    String postsInLastHour;
-                    String totalPosts;
-                    String uniqueIps;
-                    String dateCreated;
-
-                    boardItems = board.children();
-
-                    nationality = boardItems.get(0).select("img").attr("title");
-                    boardLink = boardItems.get(1).select("a").attr("href");
-                    boardName = boardItems.get(2).text();
-                    postsInLastHour = boardItems.get(3).text();
-                    totalPosts = boardItems.get(4).text();
-                    uniqueIps = boardItems.get(5).text();
-                    dateCreated = boardItems.get(6).text();
-
-                    if(list_db.boardExists(boardLink)){
-                        list_db.updateBoard(boardName, postsInLastHour, totalPosts, uniqueIps);
-                    }
-                    else {
-                        list_db.insertBoard(boardName, nationality, boardLink, postsInLastHour,
-                                totalPosts, uniqueIps, dateCreated);
-                    }
-                }
-                updateDatabaseView();
-            }
         }
     }
 }

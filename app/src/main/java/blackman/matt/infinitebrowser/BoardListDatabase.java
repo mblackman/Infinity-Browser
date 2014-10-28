@@ -189,7 +189,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
             FeedEntry.KEY_BOARD_NAME
         };
 
-        sortOrder = FeedEntry.KEY_BOARD_LINK + " DESC";
+        sortOrder = FeedEntry.KEY_BOARD_LINK + " ASC";
 
         Cursor c = db.query(
                 FeedEntry.TABLE_NAME,        // The table to query

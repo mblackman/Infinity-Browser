@@ -48,8 +48,8 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
     public PageLoader(Activity context, View parent, List<PostView> posts,
                       PostArrayAdapter adapter) {
         mContext = context;
-        mProgress = (ProgressBar) parent.findViewById(R.id.progress_board_load);
-        mProgressText = (TextView) parent.findViewById(R.id.tv_loading_page);
+        mProgress = (ProgressBar) parent.findViewById(R.id.progress_page_load);
+        mProgressText = (TextView) parent.findViewById(R.id.tv_progress_page_load);
         mPosts = posts;
         mAdapter = adapter;
     }

@@ -17,7 +17,6 @@
 package blackman.matt.infinitebrowser;
 
 import android.content.Context;
-import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -32,7 +31,6 @@ public class BoardListCardView extends RelativeLayout {
     private TextView mBoardLinkTextView;
     private TextView mBoardNameTextView;
     private TextView mBoardValueTextView;
-    private String mBoardLink;
 
     /**
      * Public constructor used to get the context of the view being created.
@@ -54,8 +52,6 @@ public class BoardListCardView extends RelativeLayout {
         this.mBoardLinkTextView = (TextView)findViewById(R.id.tv_board_link);
         this.mBoardNameTextView = (TextView)findViewById(R.id.tv_board_name);
         this.mBoardValueTextView = (TextView)findViewById(R.id.tv_board_value);
-
-        mFavButton.setOnCheckedChangeListener(new MyClickClass());
     }
 
     /**
@@ -71,39 +67,11 @@ public class BoardListCardView extends RelativeLayout {
      */
     public void setCardInfo(String boardLink, String boardName, String nation, String boardValue,
                             boolean isFavorited) {
-        mBoardLink = boardLink;
         mBoardLinkTextView.setText(boardLink);
         mBoardNameTextView.setText(boardName);
         mBoardValueTextView.setText(boardValue);
         mFavButton.setChecked(isFavorited);
         invalidate();
         requestLayout();
-    }
-
-    /**
-     * A listener for how the card reacts to the favorite button being clicked.
-     */
-    class MyClickClass implements CompoundButton.OnCheckedChangeListener {
-        /**
-         * Default, empty constructor.
-         */
-        public MyClickClass() {
-
-        }
-
-        /**
-         * Find the board from the database and sets if the board is to be favorited or not.
-         *
-         * @param buttonView The button that was clicked.
-         * @param isChecked If the button just got checked or not.
-         */
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            BoardListDatabase list_db = new BoardListDatabase(getContext());
-
-            list_db.favoriteBoard(mBoardLink, isChecked);
-
-            invalidate();
-        }
     }
 }

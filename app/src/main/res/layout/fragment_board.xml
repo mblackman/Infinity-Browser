@@ -7,31 +7,12 @@
     android:background="@drawable/fade_blue">
 
     <ListView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/lv_board_posts" />
-
-    <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:visibility="visible">
+        android:layout_height="fill_parent"
+        android:id="@+id/lv_board_posts"
+        android:choiceMode="none"
+        android:drawSelectorOnTop="false"
+        android:fastScrollAlwaysVisible="false"
+        android:fastScrollEnabled="true" />
 
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/progress_board_load"
-            android:layout_marginLeft="@dimen/post_bar_medium_padding"
-            android:visibility="invisible" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/board_progress_text"
-            android:id="@+id/tv_loading_page"
-            android:layout_marginLeft="@dimen/post_bar_medium_padding"
-            android:visibility="invisible" />
-    </LinearLayout>
 </LinearLayout>

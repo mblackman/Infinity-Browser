@@ -104,6 +104,9 @@ public class Board extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_board, container, false);
 
         ListView myListView = (ListView) rootView.findViewById(R.id.lv_board_posts);
+        View progress = inflater.inflate(R.layout.board_progress_message, myListView, false);
+        myListView.addFooterView(progress);
+
         mPosts = new ArrayList<PostView>();
         mAdapter = new PostArrayAdapter(mPosts);
 
@@ -115,6 +118,7 @@ public class Board extends Fragment {
 
         myListView.setAdapter(mAdapter);
         myListView.setOnScrollListener(new EndlessScrollListener(rootView));
+
 
         return rootView;
     }
@@ -171,14 +175,31 @@ public class Board extends Fragment {
         public void onFragmentInteraction(Uri uri);
     }
 
+    /**
+     * This class is used to set the on scroll listener for the list view on the board.
+     * Now the page will load the next page on a board when the bottom is met.
+     */
     public class EndlessScrollListener implements AbsListView.OnScrollListener {
         private int currentPage = 1;
         private View mParent;
 
+        /**
+         * Default constructor to get the parent of who called him.
+         *
+         * @param parentView The view that called this class.
+         */
         public EndlessScrollListener(View parentView) {
             mParent = parentView;
         }
 
+        /**
+         * When the list view hits the bottom, the program gets the next page and displays it.
+         *
+         * @param view The list view being scrolled on.
+         * @param firstVisibleItem First visible on the screen.
+         * @param visibleItemCount Number of view on the screen.
+         * @param totalItemCount How many views the list view can display.
+         */
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem,
                              int visibleItemCount, int totalItemCount) {
@@ -195,6 +216,13 @@ public class Board extends Fragment {
             }
         }
 
+        /**
+         * Called when the scroll state is changed.
+         * Currently empty.
+         *
+         * @param view List view being looked at.
+         * @param scrollState The status of the scrolling.
+         */
         @Override
         public void onScrollStateChanged(AbsListView view, int scrollState) {
         }
