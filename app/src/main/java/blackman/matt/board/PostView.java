@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package blackman.matt.infinitebrowser;
+package blackman.matt.board;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -33,6 +33,8 @@ import org.jsoup.nodes.Document;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+
+import blackman.matt.infinitebrowser.R;
 
 /**
  * A view for displaying a post on a board. Has built in variables to handle how the

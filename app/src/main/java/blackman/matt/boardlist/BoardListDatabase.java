@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package blackman.matt.infinitebrowser;
+package blackman.matt.boardlist;
 
 import android.content.ContentValues;
 import android.content.Context;

@@ -35,6 +35,9 @@ import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
+import blackman.matt.board.Board;
+import blackman.matt.boardlist.BoardList;
+
 /**
  * The main method of Infinity Browser.
  * Starts when the program is launched and is in charge of starting and managing activities

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package blackman.matt.infinitebrowser;
+package blackman.matt.board;
 
 import android.app.Activity;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -31,6 +30,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import blackman.matt.infinitebrowser.R;
 
 
 /**

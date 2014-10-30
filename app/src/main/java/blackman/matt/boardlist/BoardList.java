@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package blackman.matt.infinitebrowser;
+package blackman.matt.boardlist;
 
 import android.app.Activity;
 import android.database.Cursor;
@@ -42,6 +42,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+
+import blackman.matt.infinitebrowser.R;
 
 
 /**

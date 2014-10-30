@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package blackman.matt.infinitebrowser;
+package blackman.matt.boardlist;
 
 import android.content.Context;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import blackman.matt.infinitebrowser.R;
 
 
 /**

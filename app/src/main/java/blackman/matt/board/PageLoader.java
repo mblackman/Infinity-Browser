@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package blackman.matt.infinitebrowser;
+package blackman.matt.board;
 
 import android.app.Activity;
 import android.content.Context;
@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import blackman.matt.infinitebrowser.R;
 
 /**
  * Takes in a list of urls and gets the html from them. Then it takes the html doc and

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package blackman.matt.infinitebrowser;
+package blackman.matt.board;
 
 import android.view.View;
 import android.view.ViewGroup;

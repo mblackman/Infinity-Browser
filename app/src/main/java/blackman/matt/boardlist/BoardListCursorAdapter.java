@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package blackman.matt.infinitebrowser;
+package blackman.matt.boardlist;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.CursorAdapter;
 import android.widget.Space;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import blackman.matt.infinitebrowser.R;
 
 /**
  * Reads in all the rows from the SQL query and addresses them to listCardViews and sets up
