@@ -1,0 +1,31 @@
+<resources>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_age_guard">Accept I am over 18</string>
+    <string name="pref_description_age_guard">Warning: Some boards on this site might contain content of an adult or offensive nature. Please cease use of this site if it is illegal for you to view such content. The boards on this site are made entirely by the users and do not represent the opinions of the administration of 8chan.co. In the interest of free speech, only content that directly violates the DMCA or other US laws is deleted.</string>
+
+    <string name="pref_title_default_board">Default Board</string>
+    <string name="pref_default_board">Tech</string>
+
+    <!-- Example settings for Data & Sync -->
+    <string name="pref_header_data_sync">Data &amp; sync</string>
+
+    <string name="pref_title_sync_frequency">Auto Update Boards List</string>
+    <string-array name="pref_sync_frequency_titles">
+        <item>1 hour</item>
+        <item>12 hours</item>
+        <item>Daily</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_sync_frequency_values">
+        <item>1</item>
+        <item>12</item>
+        <item>24</item>
+        <item>-1</item>
+    </string-array>
+</resources>

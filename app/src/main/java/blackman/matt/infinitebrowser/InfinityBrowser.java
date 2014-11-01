@@ -22,6 +22,7 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -67,42 +69,31 @@ public class InfinityBrowser extends Activity
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        final BoardList mBoardList;
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent intent = getIntent();
+
+        if(intent != null && intent.getData() != null) {
+            FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+            Board newBoard = Board.newInstance(intent.getDataString());
+
+            fragmentTransaction.replace(R.id.container, newBoard, intent.getDataString());
+
+            fragmentTransaction.commit();
+        }
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
 
         mTitle = getTitle();
-        mBoardList = new BoardList();
-
-        /**
-         * This class is used to create an onClickListener to send to the navigation drawer
-         * in order to access controls within InfinityBrowser class.
-         */
-        class MyClickClass implements CompoundButton.OnClickListener {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-
-                mNavigationDrawerFragment.closeDrawer();
-
-                if(fragmentManager.findFragmentById(R.id.container) != mBoardList) {
-                    transaction.replace(R.id.container, mBoardList, "");
-                    transaction.addToBackStack(null);
-                }
-                transaction.commit();
-            }
-        }
 
         // Set up the drawer with new onClickListener
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout),
-                new MyClickClass());
+                (DrawerLayout) findViewById(R.id.drawer_layout));
     }
 
     /**
@@ -120,41 +111,12 @@ public class InfinityBrowser extends Activity
 
     /**
      * Called when the navigation drawer is opened and the position is changed.
+     *
      * @param number the position of the navigation drawer.
      */
     public void onSectionAttached(int number) {
-        ListView boardListView;
-        String boardLink;
-        String formattedLink;
-        final String baseDomain = "http://8chan.co";
-        Board newBoard;
-        Cursor cursor;
-
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        boardListView = (ListView) findViewById(R.id.navigation_drawer_listview);
-
-        // If the user hasn't selected any boards to follow, we automatically load /tech/
-        if(boardListView.getCount() == 0) {
-            boardLink = "/tech/";
-        }
-        else {
-            cursor = ((SimpleCursorAdapter) boardListView.getAdapter()).getCursor();
-            cursor.moveToPosition(number - 1);
-            boardLink = cursor.getString(cursor.getColumnIndex(ARG_BOARD_LINK));
-            //cursor.close();
-        }
-
-        formattedLink = baseDomain + boardLink;
-        newBoard = Board.newInstance(formattedLink);
-
-        fragmentTransaction.replace(R.id.container, newBoard, boardLink);
-
-        fragmentTransaction.commit();
-
-        mTitle = boardLink;
-        getActionBar().setTitle(mTitle);
+        //mTitle = boardLink;
+        //getActionBar().setTitle(mTitle);
     }
 
     /**
@@ -165,7 +127,7 @@ public class InfinityBrowser extends Activity
         assert actionBar != null;
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+        //actionBar.setTitle(mTitle);
     }
 
 
@@ -217,7 +179,6 @@ public class InfinityBrowser extends Activity
      */
     @Override
     public void onReplyClicked(String postLink) {
-        String newTitle = postLink.replace("http://8chan.co", "").replace("res/", "").replace(".html", "");
         Board newThread = new Board().newInstance(postLink);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
@@ -226,8 +187,19 @@ public class InfinityBrowser extends Activity
 
         transaction.commit();
 
-        //mTitle = newTitle;
-        //getActionBar().setTitle(mTitle);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean result = super.onPrepareOptionsMenu(menu);
+        menu.findItem(R.id.action_settings).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                InfinityBrowser.this.startActivity(new Intent(InfinityBrowser.this, SettingsActivity.class));
+                return true;
+            }
+        });
+        return result;
     }
 
     /**

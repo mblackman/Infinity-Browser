@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.EditText;
 import android.widget.Space;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -39,6 +40,7 @@ public class BoardListCursorAdapter extends CursorAdapter {
     private String mSortOrder;
     private Context mContext;
     private Cursor mCursor;
+    private final EditText mSearchBar;
 
     static class ViewHolder {
         BoardListCardView mView;
@@ -51,12 +53,14 @@ public class BoardListCursorAdapter extends CursorAdapter {
      * @param c Cursor to be adapted.
      * @param selectedValue The currently selected query column.
      */
-    public BoardListCursorAdapter(Context context, Cursor c, String selectedValue, String sort) {
+    public BoardListCursorAdapter(Context context, Cursor c, String selectedValue, String sort,
+                                  EditText searchBar) {
         super(context, c, 0);
         this.mContext = context;
         this.mCursor = c;
         this.mSelectedValue = selectedValue;
         this.mSortOrder = sort;
+        this.mSearchBar = searchBar;
     }
 
     /**
@@ -156,7 +160,12 @@ public class BoardListCursorAdapter extends CursorAdapter {
 
                     list_db.favoriteBoard(boardLink, isChecked);
 
-                    mCursor = list_db.getBoardsInSortedOrder(mSelectedValue, mSortOrder);
+                    if(mSearchBar.getVisibility() == View.VISIBLE) {
+                        String search = mSearchBar.getText().toString();
+                        mCursor = list_db.getSortedSearch(search,mSelectedValue, mSortOrder);
+                    } else {
+                        mCursor = list_db.getBoardsInSortedOrder(mSelectedValue, mSortOrder);
+                    }
                     myAdapter.swapCursor(mCursor);
                     myAdapter.notifyDataSetChanged();
 

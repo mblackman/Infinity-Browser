@@ -20,6 +20,8 @@ package blackman.matt.infinitebrowser;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.database.Cursor;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -39,7 +41,10 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
+import blackman.matt.board.Board;
+import blackman.matt.boardlist.BoardList;
 import blackman.matt.boardlist.BoardListDatabase;
 
 /**
@@ -142,8 +147,6 @@ public class NavigationDrawerFragment extends Fragment {
 
         mDrawerListView = (ListView) drawerview.findViewById(R.id.navigation_drawer_listview);
 
-        //mDrawerListView = (ListView) inflater.inflate(
-        //        R.layout.fragment_navigation_drawer, container, false);
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -194,12 +197,12 @@ public class NavigationDrawerFragment extends Fragment {
      * @param fragmentId   The android:id of this fragment in its activity's layout.
      * @param drawerLayout The DrawerLayout containing this fragment's UI.
      */
-    public void setUp(int fragmentId, DrawerLayout drawerLayout, AdapterView.OnClickListener listener) {
+    public void setUp(int fragmentId, DrawerLayout drawerLayout) {
         mFragmentContainerView = getActivity().findViewById(fragmentId);
         Button BoardButton = (Button) getActivity().findViewById(R.id.navigation_drawer_board_button);
         mDrawerLayout = drawerLayout;
 
-        BoardButton.setOnClickListener(listener);
+
 
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
@@ -208,6 +211,23 @@ public class NavigationDrawerFragment extends Fragment {
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
+
+        // On click listener for the board button to show the board list.
+        BoardButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                BoardList boardList = new BoardList();
+                closeDrawer();
+
+                if(fragmentManager.findFragmentById(R.id.container) != boardList) {
+                    transaction.replace(R.id.container, boardList, "");
+                    transaction.addToBackStack(null);
+                }
+                transaction.commit();
+            }
+        });
 
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the navigation drawer and the action bar app icon.
@@ -258,6 +278,30 @@ public class NavigationDrawerFragment extends Fragment {
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };
+
+        mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String boardLink = "http://8chan.co";
+                String boardRoot = "/tech/";
+                if(view instanceof TextView) {
+                    boardRoot = ((TextView) view).getText().toString();
+                }
+
+                boardLink = boardLink + boardRoot;
+
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                Board newBoard = Board.newInstance(boardLink);
+
+                fragmentTransaction.replace(R.id.container, newBoard, boardLink);
+
+                fragmentTransaction.commit();
+
+                closeDrawer();
+            }
+        });
 
         // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer,
         // per the navigation drawer design guidelines.

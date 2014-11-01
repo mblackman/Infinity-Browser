@@ -46,11 +46,20 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
     private final TextView mProgressText;
     private final List<PostView> mPosts;
     private final PostArrayAdapter mAdapter;
-    private final Object mlistener;
+    private final Object mListener;
 
     private Boolean mIsOnRootPage;
     private String mPageUrl;
 
+    /**
+     * Basic constructor to initialize the class.
+     *
+     * @param context Context of caller.
+     * @param parent Parent view who needs a loading.
+     * @param posts The posts container.
+     * @param adapter Adapter for the list view that holds the posts.
+     * @param listener A listener for the activity to interact with the fragment.
+     */
     public PageLoader(Activity context, View parent, List<PostView> posts,
                       PostArrayAdapter adapter, Object listener) {
         mContext = context;
@@ -58,7 +67,7 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
         mProgressText = (TextView) parent.findViewById(R.id.tv_progress_page_load);
         mPosts = posts;
         mAdapter = adapter;
-        mlistener = listener;
+        mListener = listener;
     }
 
     /**
@@ -77,11 +86,8 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
      */
     @Override
     protected Document doInBackground(URL... urls) {
-        Document ochPage ;
-        URL url;
-
-        ochPage = null;
-        url = urls[0];
+        Document ochPage = null;
+        URL url = urls[0];
         mPageUrl = url.toString();
         mIsOnRootPage = !mPageUrl.contains(".html");
 
@@ -232,13 +238,20 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
         }
 
         // Create new instance of post with elements
-        opPost = new PostView(mContext, mlistener);
+        opPost = new PostView(mContext, mListener);
         opPost.setUpPost(userName, postDate, postNumber, postTopic, postText, numReplies,
                 postImageThumbs, postImageFull, mPageUrl, mIsOnRootPage);
 
         return opPost;
     }
 
+    /**
+     * Takes information from HTML elements and creates a none OP post of a board
+     * or a thread and returns the newly created post.
+     *
+     * @param postElement the post's HTML elements.
+     * @return the newly created post.
+     */
     private PostView createPostReply(Element postElement) {
         PostView newPost;
         Elements singleFile;
@@ -289,7 +302,7 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
         }
 
         // Create new instance of post with elements
-        newPost = new PostView(mContext, mlistener);
+        newPost = new PostView(mContext, mListener);
         newPost.setUpPost(userName, postDate, postNumber, "", postText, "",
                 postImageThumbs, postImageFull, mPageUrl, mIsOnRootPage);
 

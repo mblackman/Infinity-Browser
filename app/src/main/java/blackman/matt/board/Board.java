@@ -124,6 +124,16 @@ public class Board extends Fragment {
         myListView.setAdapter(mAdapter);
         myListView.setOnScrollListener(new EndlessScrollListener(rootView));
 
+        String link = mBoardLink.getPath();
+        if(link.contains(".html")) {
+            link = link.replace(".html", "");
+        }
+        if(link.contains("/res/")){
+            link = link.replace("res/", "");
+        }
+
+        getActivity().getActionBar().setTitle(link);
+
         return rootView;
     }
 

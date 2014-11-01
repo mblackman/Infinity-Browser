@@ -17,10 +17,8 @@
 package blackman.matt.board;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -29,10 +27,12 @@ import android.widget.TextView;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import blackman.matt.infinitebrowser.R;
 
@@ -48,12 +48,12 @@ public class PostView extends RelativeLayout {
     private TextView mTopicTextView;
     private TextView mPostTextView;
     private TextView mReplyView;
+    private ImageLoader mImageLoader;
 
     private Board.OnFragmentInteractionListener mListener;
 
     private String mPostImageThumb;
     private String mPostImageFull;
-    private Boolean isThumbnail;
 
     /**
      * Public constructor used to get the context of the view being created.
@@ -110,6 +110,7 @@ public class PostView extends RelativeLayout {
             mReplyView.setVisibility(GONE);
         }
         mPostTextView.setText(Html.fromHtml(formatPostBody(postText)));
+        mPostTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
         if(!imageFull.isEmpty()) {
             mPostImageFull = "http://8chan.co/" + imageFull.get(0);
@@ -118,13 +119,19 @@ public class PostView extends RelativeLayout {
             mPostImageThumb = "http://8chan.co/" + imageThumbs.get(0);
         }
 
-        isThumbnail = true;
-        new postImage().execute(mPostImageThumb);
+        mImageLoader = new ImageLoader(getContext(), mImage, mPostImageThumb, mPostImageFull);
+        mImageLoader.loadThumb();
 
         invalidate();
         requestLayout();
     }
 
+    /**
+     * Adds an on click listener to the reply button to open up a new thread.
+     *
+     * @param boardLink Link of the board the post is on.
+     * @param postNo Number of the thread to open.
+     */
     private void setUpReplyButton(String boardLink, String postNo) {
         final String newUrl = boardLink + "res/" + postNo + ".html";
 
@@ -136,8 +143,31 @@ public class PostView extends RelativeLayout {
         });
     }
 
+    /**
+     * Formats the HTML on the post text to accurately display it on the post.
+     *
+     * @param post The unformatted text of the post.
+     * @return A formatted version of the post.
+     */
     private String formatPostBody(String post) {
         Document formattedText = Jsoup.parse(post);
+
+        // Red Text
+        Elements redTexts = formattedText.select("[class=heading]");
+        for(Element text : redTexts) {
+            text.wrap("<font color=\"#AF0A0F\"><strong></strong></font>");
+        }
+
+        // Board Links
+        Elements boardLinks = formattedText.select("a");
+        for(Element link : boardLinks) {
+            String url = link.attr("href");
+            Pattern p = Pattern.compile("^/.*/index\\.html");
+            Matcher m = p.matcher(url);
+            if(m.matches()) {
+                link.attr("href", "http://8chan.co" + url);
+            }
+        }
 
         return formattedText.toString();
     }
@@ -146,77 +176,24 @@ public class PostView extends RelativeLayout {
      * Adds a listener to the image button for the posts images.
      */
     public void addListenerOnButton() {
-        mImage = (ImageButton) findViewById(R.id.post_thumbnail);
+        final LinearLayout postInfoView = (LinearLayout) findViewById(R.id.ll_post_layout);
 
         mImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View btn) {
                 // Swap big and little pick + swap settings
-                if(isThumbnail) { // Little Mode -> Big mode
+                if(mImageLoader.isThumbnail()) { // Little Mode -> Big mode
                     mImage.setMaxWidth(Integer.MAX_VALUE); // A big number
-                    new postImage().execute(mPostImageFull);
-                    isThumbnail = Boolean.FALSE;
+                    mImageLoader.loadFull();
+                    postInfoView.setOrientation(LinearLayout.VERTICAL);
                 }
                 else { // Big mode -> Little Mode
                     mImage.setMaxWidth(getResources().getDimensionPixelOffset(
                             R.dimen.post_bar_image_size_small));
-                    new postImage().execute(mPostImageThumb);
-                    isThumbnail = Boolean.TRUE;
+                    mImageLoader.loadThumb();
+                    postInfoView.setOrientation(LinearLayout.HORIZONTAL);
                 }
             }
         });
-    }
-
-    /**
-     * Used to open a bit-stream to a image from the site to load on demand.
-     */
-    public class postImage extends AsyncTask<String, Void, Bitmap> {
-        /**
-         * Empty constructor.
-         */
-        public postImage() {
-
-        }
-
-        /**
-         * Opens a bit stream and returns the image as a bitmap.
-         *
-         * @param urls All the urls of the images. Probably only 1 used.
-         * @return A bitmap of the image.
-         */
-        @Override
-        protected Bitmap doInBackground(String... urls) {
-            Bitmap img = null;
-            try {
-                URL url = new URL(urls[0]);
-                img = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return img;
-        }
-
-        /**
-         * Sets the bitmap on the image button and adjusts the view.
-         *
-         * @param img The bitmap to set the image button to.
-         */
-        @Override
-        protected void onPostExecute(Bitmap img) {
-            if(img != null) {
-                mImage.setVisibility(View.VISIBLE);
-                mImage.setImageBitmap(img);
-                LinearLayout postInfoView = (LinearLayout) findViewById(R.id.ll_post_layout);
-                if(isThumbnail) {
-                    postInfoView.setOrientation(LinearLayout.HORIZONTAL);
-                }
-                else {
-                    postInfoView.setOrientation(LinearLayout.VERTICAL);
-                }
-            }
-            else {
-                mImage.setVisibility(View.GONE);
-            }
-        }
     }
 }

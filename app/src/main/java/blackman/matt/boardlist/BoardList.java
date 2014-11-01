@@ -96,6 +96,7 @@ public class BoardList extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_board_list, container, false);
         final ListView boardListView = (ListView) rootView.findViewById(R.id.lv_board_list);
+        final EditText searchBar = (EditText) rootView.findViewById(R.id.txt_search_boards);
 
         initSpinners(rootView);
         initSearchButton(rootView);
@@ -111,7 +112,8 @@ public class BoardList extends Fragment {
                 mAdapter = new BoardListCursorAdapter(getActivity(),
                         qBoards,
                         DEFAULT_SELECTED_COLUMN,
-                        DEFAULT_SORT_ORDER
+                        DEFAULT_SORT_ORDER,
+                        searchBar
                 );
 
                 boardListView.setAdapter(mAdapter);

@@ -19,6 +19,18 @@
     </entry>
     <entry>
       <key      
+        class = "com.android.navigation.ActivityState"      
+        className = "blackman.matt.infinitebrowser.SettingsActivity">
+        <location        
+          idref = "point0"/>
+      </key>
+      <value      
+        x = "2240"      
+        y = "800"      
+        class = "com.android.navigation.Point"/>
+    </entry>
+    <entry>
+      <key      
         class = "com.android.navigation.MenuState"      
         xmlResourceName = "board_browser">
         <location        
