@@ -154,7 +154,13 @@ public class NavigationDrawerFragment extends Fragment {
             }
         });
 
-        setUpListAdapter();
+        SharedPreferences preferences =
+                PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Boolean ageAccept = preferences.getBoolean("age_guard_accept", false);
+
+        if(ageAccept) {
+            setUpListAdapter();
+        }
 
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         return drawerview;
@@ -216,16 +222,21 @@ public class NavigationDrawerFragment extends Fragment {
         BoardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                BoardList boardList = new BoardList();
-                closeDrawer();
+                SharedPreferences preferences =
+                        PreferenceManager.getDefaultSharedPreferences(getActivity());
+                Boolean ageAccept = preferences.getBoolean("age_guard_accept", false);
+                if(ageAccept) {
+                    FragmentManager fragmentManager = getFragmentManager();
+                    FragmentTransaction transaction = fragmentManager.beginTransaction();
+                    BoardList boardList = new BoardList();
+                    closeDrawer();
 
-                if(fragmentManager.findFragmentById(R.id.container) != boardList) {
-                    transaction.replace(R.id.container, boardList, "");
-                    transaction.addToBackStack(null);
+                    if (fragmentManager.findFragmentById(R.id.container) != boardList) {
+                        transaction.replace(R.id.container, boardList, "");
+                        transaction.addToBackStack(null);
+                    }
+                    transaction.commit();
                 }
-                transaction.commit();
             }
         });
 
@@ -296,6 +307,7 @@ public class NavigationDrawerFragment extends Fragment {
                 Board newBoard = Board.newInstance(boardLink);
 
                 fragmentTransaction.replace(R.id.container, newBoard, boardLink);
+                fragmentTransaction.addToBackStack(null);
 
                 fragmentTransaction.commit();
 

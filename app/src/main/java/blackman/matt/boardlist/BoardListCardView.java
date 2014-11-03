@@ -17,6 +17,8 @@
 package blackman.matt.boardlist;
 
 import android.content.Context;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -69,7 +71,13 @@ public class BoardListCardView extends RelativeLayout {
      */
     public void setCardInfo(String boardLink, String boardName, String nation, String boardValue,
                             boolean isFavorited) {
-        mBoardLinkTextView.setText(boardLink);
+        String htmlBoardLink = "<a href=\"http://8chan.co" +
+                boardLink.toLowerCase() +
+                "\">" +
+                boardLink +
+                "</a>";
+        mBoardLinkTextView.setText(Html.fromHtml(htmlBoardLink));
+        mBoardLinkTextView.setMovementMethod(LinkMovementMethod.getInstance());
         mBoardNameTextView.setText(boardName);
         mBoardValueTextView.setText(boardValue);
         mFavButton.setChecked(isFavorited);
