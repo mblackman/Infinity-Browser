@@ -16,11 +16,16 @@
 
 package blackman.matt.board;
 
+import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import java.util.Collections;
 import java.util.List;
+
+import blackman.matt.infinitebrowser.R;
 
 /**
  * A custom adapter to handle loading posts on a board page. Sets up the views and recycles them.
@@ -28,14 +33,22 @@ import java.util.List;
  * Created by Matt on 10/26/2014.
  */
 public class PostArrayAdapter extends BaseAdapter {
-    private final List<PostView> mPosts;
+    private List<Post> mPosts = Collections.emptyList();
+    private final Context mContext;
+    private Board.OnFragmentInteractionListener mListener;
 
     /**
      * Public constructor to handle taking in the list of views.
-     * @param posts The posts to load.
+     * @param context Context of the caller.
      */
-    public PostArrayAdapter(List<PostView> posts) {
+    public PostArrayAdapter(Context context) {
+        mContext = context;
+    }
+
+    public void updatePosts(List<Post> posts, Board.OnFragmentInteractionListener listener) {
         mPosts = posts;
+        mListener = listener;
+        notifyDataSetChanged();
     }
 
     /**
@@ -55,7 +68,7 @@ public class PostArrayAdapter extends BaseAdapter {
      * @return The post view.
      */
     @Override
-    public Object getItem(int position) {
+    public Post getItem(int position) {
         return mPosts.get(position);
     }
 
@@ -80,6 +93,18 @@ public class PostArrayAdapter extends BaseAdapter {
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        return mPosts.get(position);
+        PostView postView;
+
+        if(convertView == null) {
+            postView = new PostView(mContext, mListener);
+        } else {
+            postView = (PostView) convertView;
+        }
+
+        Post post = getItem(position);
+
+        postView.setUpPost(post);
+
+        return postView;
     }
 }

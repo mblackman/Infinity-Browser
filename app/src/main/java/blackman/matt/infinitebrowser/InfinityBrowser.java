@@ -162,25 +162,12 @@ public class InfinityBrowser extends Activity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         switch(item.getItemId()) {
-            case R.id.action_refresh:
-                Fragment curFrag = getActiveFragment();
-
-                return true;
             case R.id.action_settings:
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-
-    private Fragment getActiveFragment() {
-        if (getFragmentManager().getBackStackEntryCount() == 0) {
-            return null;
-        }
-        String tag = getFragmentManager().getBackStackEntryAt(getFragmentManager().getBackStackEntryCount() - 1).getName();
-        return getFragmentManager().findFragmentByTag(tag);
-    }
-
 
     /**
      * Generated automatically

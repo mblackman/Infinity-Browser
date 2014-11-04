@@ -44,9 +44,8 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
     private final Context mContext;
     private final ProgressBar mProgress;
     private final TextView mProgressText;
-    private final List<PostView> mPosts;
+    private final List<Post> mPosts;
     private final PostArrayAdapter mAdapter;
-    private final Object mListener;
 
     private Boolean mIsOnRootPage;
     private String mPageUrl;
@@ -58,16 +57,14 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
      * @param parent Parent view who needs a loading.
      * @param posts The posts container.
      * @param adapter Adapter for the list view that holds the posts.
-     * @param listener A listener for the activity to interact with the fragment.
      */
-    public PageLoader(Activity context, View parent, List<PostView> posts,
-                      PostArrayAdapter adapter, Object listener) {
+    public PageLoader(Activity context, View parent, List<Post> posts,
+                      PostArrayAdapter adapter) {
         mContext = context;
         mProgress = (ProgressBar) parent.findViewById(R.id.progress_page_load);
         mProgressText = (TextView) parent.findViewById(R.id.tv_progress_page_load);
         mPosts = posts;
         mAdapter = adapter;
-        mListener = listener;
     }
 
     /**
@@ -116,7 +113,7 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
         for (Element thread : threads) {
             // Create main elements and post
             Elements postReplies;
-            PostView opPost;
+            Post opPost;
 
             try {
                 opPost = createPostOP(thread);
@@ -138,7 +135,7 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
 
                 // Looks through all the replies to an OP post
                 for (Element postReply : postReplies) {
-                    PostView replyPost;
+                    Post replyPost;
 
                     try {
                         replyPost = createPostReply(postReply);
@@ -168,8 +165,8 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
      * @param postElement the post's HTML elements.
      * @return the newly created post.
      */
-    private PostView createPostOP(Element postElement) {
-        PostView opPost;
+    private Post createPostOP(Element postElement) {
+        Post opPost;
         Elements singleFile;
         Elements multiFiles;
         Elements omitted;
@@ -238,8 +235,7 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
         }
 
         // Create new instance of post with elements
-        opPost = new PostView(mContext, mListener);
-        opPost.setUpPost(userName, postDate, postNumber, postTopic, postText, numReplies,
+        opPost = new Post(userName, postDate, postNumber, postTopic, postText, numReplies,
                 postImageThumbs, postImageFull, mPageUrl, mIsOnRootPage);
 
         return opPost;
@@ -252,8 +248,8 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
      * @param postElement the post's HTML elements.
      * @return the newly created post.
      */
-    private PostView createPostReply(Element postElement) {
-        PostView newPost;
+    private Post createPostReply(Element postElement) {
+        Post newPost;
         Elements singleFile;
         Elements multiFiles;
         Element postReply;
@@ -302,8 +298,7 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
         }
 
         // Create new instance of post with elements
-        newPost = new PostView(mContext, mListener);
-        newPost.setUpPost(userName, postDate, postNumber, "", postText, "",
+        newPost = new Post(userName, postDate, postNumber, "", postText, "",
                 postImageThumbs, postImageFull, mPageUrl, mIsOnRootPage);
 
         return newPost;

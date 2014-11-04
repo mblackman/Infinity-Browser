@@ -1,107 +1,108 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/post_view_layout"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/post_after_padding"
-    android:minHeight="@dimen/post_bar_vertical_margin"
-    android:id="@+id/post_view_layout"
     android:background="@drawable/post_background_stroke"
+    android:minHeight="@dimen/post_bar_vertical_margin"
+    android:orientation="horizontal"
     android:padding="@dimen/post_bar_small_padding">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/tv_postno"
-        android:textSize="@dimen/post_header_font_size"
-        android:layout_alignParentTop="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentLeft="false"
+        android:layout_alignParentTop="false"
+        android:layout_below="@+id/tv_username"
         android:text="@string/post_no_sample_text"
-        android:layout_below="@+id/tv_username" />
+        android:textSize="@dimen/post_header_font_size" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/tv_topic"
-        android:textSize="@dimen/post_header_font_size"
-        android:textColor="#0F0C5D"
-        android:layout_alignParentTop="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentLeft="false"
-        android:layout_toRightOf="@+id/tv_postno"
-        android:text="@string/post_topic_sample_text"
+        android:layout_alignParentTop="false"
         android:layout_below="@+id/tv_datetime"
-        android:paddingLeft="@dimen/post_bar_small_padding" />
+        android:layout_toRightOf="@+id/tv_postno"
+        android:paddingLeft="@dimen/post_bar_small_padding"
+        android:text="@string/post_topic_sample_text"
+        android:textColor="#0F0C5D"
+        android:textSize="@dimen/post_header_font_size" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/tv_username"
-        android:textColor="#ff117743"
-        android:textSize="@dimen/post_header_font_size"
-        android:layout_alignParentLeft="true"
-        android:text="@string/post_name_sample_text"
-        android:layout_alignParentTop="true" />
-
-    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/post_name_sample_text"
+        android:textColor="#ff117743"
+        android:textSize="@dimen/post_header_font_size" />
+
+    <TextView
         android:id="@+id/tv_datetime"
-        android:textSize="@dimen/post_header_font_size"
-        android:paddingEnd="@dimen/post_header_word_spacing"
-        android:paddingStart="@dimen/post_header_word_spacing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/tv_username"
+        android:paddingEnd="@dimen/post_header_word_spacing"
+        android:paddingLeft="@dimen/post_bar_small_padding"
+        android:paddingStart="@dimen/post_header_word_spacing"
         android:text="@string/post_date_sample_text"
-        android:paddingLeft="@dimen/post_bar_small_padding" />
+        android:textSize="@dimen/post_header_font_size" />
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:id="@+id/ll_post_layout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="false"
-        android:layout_alignParentTop="false"
         android:layout_alignParentBottom="false"
+        android:layout_alignParentLeft="false"
         android:layout_alignParentRight="false"
+        android:layout_alignParentTop="false"
         android:layout_below="@+id/tv_postno"
-        android:id="@+id/ll_post_layout">
+        android:orientation="horizontal">
 
         <ImageButton
+            android:id="@+id/post_thumbnail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/post_thumbnail"
-            android:contentDescription="@string/post_thumb_desciption"
-            android:cropToPadding="false"
             android:adjustViewBounds="true"
             android:background="@android:color/transparent"
+            android:baselineAlignBottom="false"
             android:clickable="true"
+            android:contentDescription="@string/post_thumb_desciption"
+            android:cropToPadding="false"
+            android:longClickable="false"
             android:maxWidth="@dimen/post_bar_image_size_small"
             android:minHeight="@dimen/post_bar_image_size_small"
             android:minWidth="@dimen/post_bar_image_size_small"
             android:scaleType="centerCrop"
-            android:baselineAlignBottom="false"
-            android:longClickable="false"
             android:src="@drawable/ic_launcher" />
 
         <TextView
+            android:id="@+id/tv_postText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/tv_postText"
-            android:textSize="@dimen/post_body_font_size"
-            android:text="@string/post_text_sample_text"
+            android:clickable="true"
             android:paddingLeft="@dimen/post_bar_small_padding"
             android:paddingRight="@dimen/post_bar_small_padding"
-            android:clickable="true" />
+            android:text="@string/post_text_sample_text"
+            android:textSize="@dimen/post_body_font_size" />
     </LinearLayout>
 
     <TextView
+        android:id="@+id/tv_number_replies"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/tv_number_replies"
-        android:textSize="@dimen/omitted_replies_text_size"
-        android:layout_alignParentEnd="false"
         android:layout_alignParentBottom="false"
+        android:layout_alignParentEnd="false"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/ll_post_layout"
         android:clickable="true"
+        android:text="@string/post_view_reply_text"
         android:textColor="@android:color/holo_blue_dark"
-        android:text="@string/post_view_reply_text" />
+        android:textSize="@dimen/omitted_replies_text_size" />
 
 </RelativeLayout>

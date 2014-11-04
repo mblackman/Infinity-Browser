@@ -26,6 +26,9 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -72,6 +75,41 @@ public class BoardList extends Fragment {
         // Required empty public constructor
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true); // Do not forget this!!!
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.board_list_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case R.id.action_search_list:
+                EditText search = (EditText) getView().findViewById(R.id.txt_search_boards);
+                if(search.getVisibility() == View.VISIBLE) {
+                    search.setVisibility(View.GONE);
+                    search.setText("");
+                } else {
+                    search.setVisibility(View.VISIBLE);
+                    search.setSelection(0, 0);
+                }
+                return true;
+            case R.id.action_refresh_list:
+                new GetBoardList().execute();
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     /**
      * Called when the fragment is first created on the activity. Gets the arguments.
      *
@@ -99,7 +137,6 @@ public class BoardList extends Fragment {
         final EditText searchBar = (EditText) rootView.findViewById(R.id.txt_search_boards);
 
         initSpinners(rootView);
-        initSearchButton(rootView);
 
         list_db = new BoardListDatabase(rootView.getContext());
 
@@ -185,24 +222,6 @@ public class BoardList extends Fragment {
             @Override
             public void afterTextChanged(Editable s) {
 
-            }
-        });
-    }
-
-    public void initSearchButton(final View rootView) {
-        Button button = (Button) rootView.findViewById(R.id.btn_search);
-
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditText search = (EditText) rootView.findViewById(R.id.txt_search_boards);
-                if(search.getVisibility() == View.VISIBLE) {
-                    search.setVisibility(View.GONE);
-                    search.setText("");
-                } else {
-                    search.setVisibility(View.VISIBLE);
-                    search.setSelection(0, 0);
-                }
             }
         });
     }

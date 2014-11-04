@@ -4,21 +4,19 @@
     android:layout_height="fill_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <EditText
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txt_search_boards"
+        android:inputType="text"
+        android:linksClickable="false"
+        android:visibility="gone" />
+
     <RelativeLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical">
-
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/btn_search"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:background="@drawable/search_button"
-            android:paddingLeft="@dimen/post_bar_medium_padding" />
 
         <Spinner
             android:layout_width="wrap_content"
@@ -37,14 +35,6 @@
             android:layout_alignParentRight="true" />
 
     </RelativeLayout>
-
-    <EditText
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/txt_search_boards"
-        android:inputType="text"
-        android:linksClickable="false"
-        android:visibility="gone" />
 
     <ListView
         android:layout_width="wrap_content"

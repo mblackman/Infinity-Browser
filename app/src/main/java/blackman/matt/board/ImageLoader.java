@@ -17,6 +17,7 @@
 package blackman.matt.board;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.ImageButton;
 
 import com.koushikdutta.ion.Ion;
@@ -35,7 +36,7 @@ import blackman.matt.infinitebrowser.R;
 public class ImageLoader {
     private final Context mContext;
     private final ImageButton mButton;
-    private final String mThumb, mFull;
+    private final String mThumb, mFull, mExtension;
     private Boolean mIsThumbnail;
 
     /**
@@ -48,11 +49,21 @@ public class ImageLoader {
      * @param fullURL URL of the full sized image.
      */
     public ImageLoader(Context context, ImageButton button, String thumbURL, String fullURL) {
+        String[] filenameArray = fullURL.split("\\.");
+        mExtension =  filenameArray[filenameArray.length-1];
         mContext = context;
         mButton = button;
         mThumb = thumbURL;
         mFull = fullURL;
         mIsThumbnail = true;
+    }
+
+    public void draw() {
+        if(mIsThumbnail) {
+            loadThumb();
+        } else {
+            loadFull();
+        }
     }
 
     /**
@@ -61,10 +72,10 @@ public class ImageLoader {
     public void loadThumb(){
         Ion.with(mContext)
                 .load(mThumb)
+                .setLogging("MyLogs", Log.DEBUG)
                 .withBitmap()
                 .placeholder(R.drawable.ic_launcher)
                 .intoImageView(mButton);
-        mIsThumbnail = true;
     }
 
     /**
@@ -73,10 +84,14 @@ public class ImageLoader {
     public void loadFull() {
         Ion.with(mContext)
                 .load(mFull)
+                .setLogging("MyLogs", Log.DEBUG)
                 .withBitmap()
                 .placeholder(R.drawable.ic_launcher)
                 .intoImageView(mButton);
-        mIsThumbnail = false;
+    }
+
+    public void renderThumbnail(Boolean isThumb) {
+        mIsThumbnail = isThumb;
     }
 
     /**

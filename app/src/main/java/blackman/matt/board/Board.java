@@ -21,6 +21,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -44,9 +47,10 @@ public class Board extends Fragment {
     private static final String ARG_BOARD_LINK = "boardlink";
     private PageLoader mPageGetter;
     private boolean mIsRootBoard;
-    private List<PostView> mPosts;
+    private List<Post> mPosts;
     private PostArrayAdapter mAdapter;
     private URL mBoardLink;
+    private View mRootView;
 
     private OnFragmentInteractionListener mListener;
 
@@ -70,6 +74,30 @@ public class Board extends Fragment {
      */
     public Board() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true); // Do not forget this!!!
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.board_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case R.id.action_refresh:
+                refreshBoard();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     /**
@@ -106,23 +134,24 @@ public class Board extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_board, container, false);
+        mRootView = inflater.inflate(R.layout.fragment_board, container, false);
 
-        ListView myListView = (ListView) rootView.findViewById(R.id.lv_board_posts);
+        ListView myListView = (ListView) mRootView.findViewById(R.id.lv_board_posts);
         View progress = inflater.inflate(R.layout.board_progress_message, myListView, false);
         myListView.addFooterView(progress);
 
-        mPosts = new ArrayList<PostView>();
-        mAdapter = new PostArrayAdapter(mPosts);
+        mPosts = new ArrayList<Post>();
+        mAdapter = new PostArrayAdapter(mRootView.getContext());
+        mAdapter.updatePosts(mPosts, mListener);
 
         if(mBoardLink != null){
             mIsRootBoard = !mBoardLink.getPath().endsWith(".html");
-            mPageGetter = new PageLoader(getActivity(), rootView, mPosts, mAdapter, mListener);
+            mPageGetter = new PageLoader(getActivity(), mRootView, mPosts, mAdapter);
             mPageGetter.execute(mBoardLink);
         }
 
         myListView.setAdapter(mAdapter);
-        myListView.setOnScrollListener(new EndlessScrollListener(rootView));
+        myListView.setOnScrollListener(new EndlessScrollListener(mRootView));
 
         String link = mBoardLink.getPath();
         if(link.contains(".html")) {
@@ -134,7 +163,7 @@ public class Board extends Fragment {
 
         getActivity().getActionBar().setTitle(link);
 
-        return rootView;
+        return mRootView;
     }
 
     /**
@@ -178,6 +207,13 @@ public class Board extends Fragment {
         public void onReplyClicked(String postLink);
     }
 
+    private void refreshBoard(){
+        mPosts.clear();
+        mAdapter.notifyDataSetChanged();
+        mPageGetter = new PageLoader(getActivity(), mRootView, mPosts, mAdapter);
+        mPageGetter.execute(mBoardLink);
+    }
+
     /**
      * This class is used to set the on scroll listener for the list view on the board.
      * Now the page will load the next page on a board when the bottom is met.
@@ -211,7 +247,7 @@ public class Board extends Fragment {
                 URL newPage;
                 try {
                     newPage = new URL(mBoardLink.toString() + (++currentPage) + ".html");
-                    mPageGetter = new PageLoader(getActivity(), mParent, mPosts, mAdapter, mListener);
+                    mPageGetter = new PageLoader(getActivity(), mParent, mPosts, mAdapter);
                     mPageGetter.execute(newPage);
                 } catch (MalformedURLException e) {
                     e.printStackTrace();

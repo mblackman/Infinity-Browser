@@ -17,9 +17,12 @@
 package blackman.matt.board;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -55,14 +58,19 @@ public class PostView extends RelativeLayout {
     private String mPostImageThumb;
     private String mPostImageFull;
 
+    public PostView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init();
+    }
+
     /**
      * Public constructor used to get the context of the view being created.
      *
      * @param context Context of the parent to this view.
      */
-    public PostView(Context context, Object listener) {
+    public PostView(Context context, Board.OnFragmentInteractionListener listener) {
         super(context);
-        mListener = (Board.OnFragmentInteractionListener) listener;
+        mListener = listener;
         init();
     }
 
@@ -72,7 +80,6 @@ public class PostView extends RelativeLayout {
      */
     private void init() {
         inflate(getContext(), R.layout.post_view, this);
-
         mImage = (ImageButton) findViewById(R.id.post_thumbnail);
         mUserNameTextView = (TextView) findViewById(R.id.tv_username);
         mTopicTextView = (TextView) findViewById(R.id.tv_topic);
@@ -80,50 +87,36 @@ public class PostView extends RelativeLayout {
         mPostNumberTextView = (TextView) findViewById(R.id.tv_postno);
         mPostTextView = (TextView) findViewById(R.id.tv_postText);
         mReplyView = (TextView) findViewById(R.id.tv_number_replies);
-
-        addListenerOnButton();
     }
 
     /**
      * Used to set the values of the card from whoever is creating it.
      *
-     * @param userName Posters username.
-     * @param postDate Date the post was made.
-     * @param postNumber Number of the post on the board.
-     * @param topic The topic the user has posted.
-     * @param postText Body of the post the user made.
-     * @param numReplies Replied string for long threads from site.
-     * @param imageThumbs Container of links to image thumbnails.
-     * @param imageFull Container of links to full sized images.
-     * @param onRootBoard If the post text should be condensed.
+     * @param post Post used to populate view.
      */
-    public void setUpPost(String userName, String postDate, String postNumber, String topic,
-                          String postText, String numReplies, List<String> imageThumbs,
-                          List<String> imageFull, String boardLink, boolean onRootBoard) {
-        mUserNameTextView.setText(userName);
-        mTopicTextView.setText(topic);
-        mPostDateTextView.setText(postDate);
-        mPostNumberTextView.setText("No." + postNumber);
-        if(onRootBoard) {
-            setUpReplyButton(boardLink, postNumber);
+    public void setUpPost(Post post) {
+        mUserNameTextView.setText(post.mUserName);
+        mTopicTextView.setText(post.mTopic);
+        mPostDateTextView.setText(post.mPostDate);
+        mPostNumberTextView.setText("No." + post.mPostNo);
+        if(post.mIsRootBoard) {
+            setUpReplyButton(post.mBoardLink, post.mPostNo);
         } else {
             mReplyView.setVisibility(GONE);
         }
-        mPostTextView.setText(Html.fromHtml(formatPostBody(postText)));
+        mPostTextView.setText(Html.fromHtml(post.mPostText));
         mPostTextView.setMovementMethod(LinkMovementMethod.getInstance());
-
-        if(!imageFull.isEmpty()) {
-            mPostImageFull = "http://8chan.co/" + imageFull.get(0);
+        if(!post.mFullURLS.isEmpty()) {
+            mPostImageFull = "http://8chan.co/" + post.mFullURLS.get(0);
         }
-        if(!imageThumbs.isEmpty()) {
-            mPostImageThumb = "http://8chan.co/" + imageThumbs.get(0);
+        if(!post.mThumbURLS.isEmpty()) {
+            mPostImageThumb = "http://8chan.co/" + post.mThumbURLS.get(0);
         }
-
-        mImageLoader = new ImageLoader(getContext(), mImage, mPostImageThumb, mPostImageFull);
-        mImageLoader.loadThumb();
-
-        invalidate();
-        requestLayout();
+        if(mPostImageFull != null && mPostImageThumb != null) {
+            mImageLoader = new ImageLoader(getContext(), mImage, mPostImageThumb, mPostImageFull);
+            mImageLoader.draw();
+        }
+        addListenerOnButton();
     }
 
     /**
@@ -144,35 +137,6 @@ public class PostView extends RelativeLayout {
     }
 
     /**
-     * Formats the HTML on the post text to accurately display it on the post.
-     *
-     * @param post The unformatted text of the post.
-     * @return A formatted version of the post.
-     */
-    private String formatPostBody(String post) {
-        Document formattedText = Jsoup.parse(post);
-
-        // Red Text
-        Elements redTexts = formattedText.select("[class=heading]");
-        for(Element text : redTexts) {
-            text.wrap("<font color=\"#AF0A0F\"><strong></strong></font>");
-        }
-
-        // Board Links
-        Elements boardLinks = formattedText.select("a");
-        for(Element link : boardLinks) {
-            String url = link.attr("href");
-            Pattern p = Pattern.compile("^/.*/index\\.html");
-            Matcher m = p.matcher(url);
-            if(m.matches()) {
-                link.attr("href", "http://8chan.co" + url);
-            }
-        }
-
-        return formattedText.toString();
-    }
-
-    /**
      * Adds a listener to the image button for the posts images.
      */
     public void addListenerOnButton() {
@@ -184,13 +148,15 @@ public class PostView extends RelativeLayout {
                 // Swap big and little pick + swap settings
                 if(mImageLoader.isThumbnail()) { // Little Mode -> Big mode
                     mImage.setMaxWidth(Integer.MAX_VALUE); // A big number
-                    mImageLoader.loadFull();
+                    mImageLoader.renderThumbnail(false);
+                    mImageLoader.draw();
                     postInfoView.setOrientation(LinearLayout.VERTICAL);
                 }
                 else { // Big mode -> Little Mode
                     mImage.setMaxWidth(getResources().getDimensionPixelOffset(
                             R.dimen.post_bar_image_size_small));
-                    mImageLoader.loadThumb();
+                    mImageLoader.renderThumbnail(true);
+                    mImageLoader.draw();
                     postInfoView.setOrientation(LinearLayout.HORIZONTAL);
                 }
             }
