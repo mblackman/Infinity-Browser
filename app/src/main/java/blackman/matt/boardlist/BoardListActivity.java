@@ -43,6 +43,12 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
     private SearchView mSearchView;
     private String mCurFilter;
 
+    /**
+     * Interface to favorite a board when the user hits the favorite button.
+     *
+     * @param boardLink Link of the board to be favorited.
+     * @param isChecked If the user just checked it true or false.
+     */
     @Override
     public void favoriteBoard(String boardLink, Boolean isChecked) {
         BoardListDatabase list_db = new BoardListDatabase(this);
@@ -67,13 +73,22 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
         mAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * Search button on the activity bar.
+     */
     public static class MySearchView extends SearchView {
+        /**
+         * Basic constructor which calls parent constructor.
+         *
+         * @param context context of the caller.
+         */
         public MySearchView(Context context) {
             super(context);
         }
 
-        // The normal SearchView doesn't clear its search text when
-        // collapsed, so we will do this for it.
+        /**
+         * Clears the text when closed.
+         */
         @Override
         public void onActionViewCollapsed() {
             setQuery("", false);
@@ -81,6 +96,11 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
         }
     }
 
+    /**
+     * Called when the search is closed.
+     *
+     * @return true
+     */
     @Override
     public boolean onClose() {
         if (!TextUtils.isEmpty(mSearchView.getQuery())) {
@@ -89,11 +109,23 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
         return true;
     }
 
+    /**
+     * Always true.
+     *
+     * @param query The query
+     * @return true.
+     */
     @Override
     public boolean onQueryTextSubmit(String query) {
         return true;
     }
 
+    /**
+     * When the text in the search query is changed this updates the list.
+     *
+     * @param newText The newly inputted text.
+     * @return If the change was a success.
+     */
     @Override
     public boolean onQueryTextChange(String newText) {
         String newFilter = !TextUtils.isEmpty(newText) ? newText : null;
@@ -109,6 +141,11 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
         return true;
     }
 
+    /**
+     * When the activity is created this sets up the activity.
+     *
+     * @param savedInstanceState The saved state if this was created before.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,6 +161,12 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
     }
 
 
+    /**
+     * When the option menu is created this handles the creation events.
+     *
+     * @param menu The menu being created.
+     * @return If the creation was a success.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -137,13 +180,16 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
         return true;
     }
 
+    /**
+     * Called when an item is clicked on the activity bar. Mostly handles update being clicked.
+     *
+     * @param item Item that was clicked.
+     * @return Returns if the click handle was successful.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
-            case R.id.action_search_list:
-
-                return true;
             case R.id.action_refresh_list:
                 new GetBoardList().execute();
 
@@ -277,10 +323,7 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
     /**
      * Used to control what happens when the spinners are used on the boardList.
      * Will update the search string for the SQL query.
-     * <p/>
-     * TODO: make the assigns use strings.xml
      */
-
     class SpinnerActivity extends Activity implements Spinner.OnItemSelectedListener {
         /**
          * Called when an item is changed on a spinner. Used to changed the search terms of
@@ -291,7 +334,6 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
          * @param pos    Position of the newly selected item.
          * @param id     Id of the selected SpinnerView.
          */
-
         public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
             if (view != null && parent.getId() == R.id.spinner_sort_order) {
                 mDBOrderBy = ((TextView) view).getText().toString();
@@ -329,7 +371,6 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
          *
          * @param parent The SpinnerView with nothing.
          */
-
         public void onNothingSelected(AdapterView<?> parent) {
             // Another interface callback
         }
