@@ -21,7 +21,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.BaseColumns;
 import android.util.Log;
 
 
@@ -34,8 +33,6 @@ import android.util.Log;
 public class BoardListDatabase extends SQLiteOpenHelper  {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "BoardList.db";
-    private Context mContext;
-    private SQLiteOpenHelper SQLiteHelper;
 
     // Query to create the table.
     private static final String SQL_CREATE_ENTRIES = "CREATE TABLE " +
@@ -65,7 +62,6 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
      */
     public BoardListDatabase(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        mContext = context;
     }
 
     /**
@@ -181,7 +177,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
 
         sortOrder = DatabaseDef.Boards.BOARD_LINK + " ASC";
 
-        Cursor c = db.query(
+        return db.query(
                 DatabaseDef.Boards.TABLE_NAME,        // The table to query
                 projection,                  // The columns to return
                 SQL_SELECT_FAVORITED_BOARDS, // The columns for the WHERE clause
@@ -190,10 +186,17 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
                 null,                        // don't filter by row groups
                 sortOrder                    // The sort order
         );
-
-        return c;
     }
 
+    /**
+     * Searches through the database for boards that match a pattern and sorts the boards
+     * depending on variables set by users.
+     *
+     * @param search What you are searching for by board link or name.
+     * @param sortBy The value you are sorting on.
+     * @param order The order to be sort. EG ASC or DESC
+     * @return The cursor to query.
+     */
     public Cursor getSortedSearch(CharSequence search, String sortBy, String order) {
         SQLiteDatabase db = getReadableDatabase();
         String selection;
@@ -219,7 +222,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         }
         sortOrder = sortBy + " " + order;
 
-        Cursor c = db.query(
+        return db.query(
                 DatabaseDef.Boards.TABLE_NAME,       // The table to query
                 projection,                 // The columns to return
                 selection,                  // The columns for the WHERE clause
@@ -228,64 +231,6 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
                 null,                       // don't filter by row groups
                 sortOrder                   // The sort order
         );
-        return c;
-    }
-
-    /**
-     * Opens up the database so a cursor can point to tables in the database to easily
-     * update the UI with database changed.
-     *
-     * @return A BoardListDatabase with an open cursor.
-     * @throws android.database.SQLException
-     */
-    public BoardListDatabase openToRead() throws android.database.SQLException {
-        SQLiteHelper = new SQLiteOpenHelper(mContext, DATABASE_NAME, null, DATABASE_VERSION) {
-            @Override
-            public void onCreate(SQLiteDatabase db) {
-                db.execSQL(SQL_CREATE_ENTRIES);
-            }
-
-            @Override
-            public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-            }
-        };
-        return this;
-    }
-
-    /**
-     * Gets a cursor pointing to all the entries sorted by the parameters specified by the user.
-     * Will use default sortBy of posts_last_hour if set to null.
-     * @param sortBy the column to sort the db.
-     * @param order the order of the sort. desc or asc.
-     * @return the cursor pointing to the returned db
-     */
-    public Cursor getBoardsInSortedOrder(String sortBy, String order) {
-        SQLiteDatabase db = getReadableDatabase();
-        String[] projection;
-        String sortOrder;
-
-        projection = new String[] {
-                DatabaseDef.Boards.BOARD_ID,
-                DatabaseDef.Boards.NATIONALITY,
-                DatabaseDef.Boards.BOARD_LINK,
-                DatabaseDef.Boards.BOARD_NAME,
-                DatabaseDef.Boards.FAVORITED,
-                sortBy
-        };
-
-        sortOrder = sortBy + " " + order;
-
-        Cursor c = db.query(
-                DatabaseDef.Boards.TABLE_NAME,       // The table to query
-                projection,                 // The columns to return
-                null,                       // The columns for the WHERE clause
-                null,                       // The values for the WHERE clause
-                null,                       // don't group the rows
-                null,                       // don't filter by row groups
-                sortOrder                   // The sort order
-        );
-        return c;
     }
 
     /**
@@ -311,12 +256,11 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         String selection = DatabaseDef.Boards.BOARD_NAME + " =?";
         String[] boards = new String[] { boardName };
 
-        int count = db.update(
+        return db.update(
                 DatabaseDef.Boards.TABLE_NAME,
                 values,
                 selection,
                 boards);
-        return count;
     }
 
     /**
@@ -337,11 +281,10 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         String selection = DatabaseDef.Boards.BOARD_LINK + "=?";
         String[] selectionArgs = { boardLink };
 
-        int count = db.update(
+        return db.update(
                 DatabaseDef.Boards.TABLE_NAME,
                 values,
                 selection,
                 selectionArgs);
-        return count;
     }
 }

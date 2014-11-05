@@ -41,10 +41,16 @@ public class BoardListCursorAdapter extends CursorAdapter {
     private BoardFavoritedListener mFavoritedListener;
     private static LayoutInflater mInflater=null;
 
+    /**
+     * Interface used to favorite a board when this is called.
+     */
     public interface BoardFavoritedListener {
         public void favoriteBoard(String boardLink, Boolean isChecked);
     }
 
+    /**
+     * A nice place to hold your views in.
+     */
     public static class ViewHolder {
         public ToggleButton favButton;
         public TextView boardLinkTextView, boardNameTextView, boardValueTextView;
@@ -63,6 +69,11 @@ public class BoardListCursorAdapter extends CursorAdapter {
         mCursor = c;
     }
 
+    /**
+     * Sets the listener for the board favoring.
+     *
+     * @param listener Listener being sent in.
+     */
     public void setListener(BoardFavoritedListener listener) {
         mFavoritedListener = listener;
     }
@@ -127,6 +138,14 @@ public class BoardListCursorAdapter extends CursorAdapter {
         });
     }
 
+    /**
+     * Called when the list needs to display a view, and it gets the view needed.
+     *
+     * @param position Position of the view on the list.
+     * @param convertView The possible view in question.
+     * @param parent Parent view group to the caller.
+     * @return The view that was created or found.
+     */
     @Override
     public View getView(int position, View convertView, final ViewGroup parent) {
         if (!mCursor.moveToPosition(position)) {
@@ -142,12 +161,21 @@ public class BoardListCursorAdapter extends CursorAdapter {
         return v;
     }
 
+    /**
+     * If data was changed in the database, this notifies that adapter.
+     */
     @Override
     protected void onContentChanged() {
         super.onContentChanged();
         notifyDataSetChanged();
     }
 
+    /**
+     * Swaps the cursor out with a new one.
+     *
+     * @param cursor Cursor to be swapped.
+     * @return The old cursor.
+     */
     @Override
     public Cursor swapCursor(Cursor cursor) {
         Cursor oldCursor = mCursor;
