@@ -9,7 +9,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".InfinityBrowser"
+            android:name="blackman.matt.infinitebrowser.InfinityBrowser"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,8 +27,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name="blackman.matt.infinitebrowser.SettingsActivity"
             android:label="@string/title_activity_settings" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="blackman.matt.infinitebrowser.InfinityBrowser" />
+        </activity>
+        <activity
+            android:name="blackman.matt.boardlist.BoardListActivity"
+            android:label="@string/title_activity_board_list"
+            android:parentActivityName="blackman.matt.infinitebrowser.InfinityBrowser" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="blackman.matt.infinitebrowser.InfinityBrowser" />

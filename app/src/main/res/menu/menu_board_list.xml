@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="blackman.matt.boardlist.BoardListActivity">
     <item android:id="@+id/action_search_list"
         android:icon="@drawable/ic_search"
         android:title="@string/action_search_list"

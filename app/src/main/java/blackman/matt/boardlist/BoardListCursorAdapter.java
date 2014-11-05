@@ -18,13 +18,13 @@ package blackman.matt.boardlist;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
-import android.widget.EditText;
-import android.widget.Space;
-import android.widget.Toast;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import blackman.matt.infinitebrowser.R;
@@ -36,24 +36,35 @@ import blackman.matt.infinitebrowser.R;
  * Created by Matt on 10/24/2014.
  */
 public class BoardListCursorAdapter extends CursorAdapter {
-    private String mSelectedValue;
-    private String mSortOrder;
     private Context mContext;
     private Cursor mCursor;
+    private BoardFavoritedListener mFavoritedListener;
+    private static LayoutInflater mInflater=null;
+
+    public interface BoardFavoritedListener {
+        public void favoriteBoard(String boardLink, Boolean isChecked);
+    }
+
+    public static class ViewHolder {
+        public ToggleButton favButton;
+        public TextView boardLinkTextView, boardNameTextView, boardValueTextView;
+    }
 
     /**
      * Basic constructor for the class. Runs the parent constructor and assigns values.
      *
      * @param context Context of caller.
      * @param c Cursor to be adapted.
-     * @param selectedValue The currently selected query column.
      */
-    public BoardListCursorAdapter(Context context, Cursor c, String selectedValue, String sort) {
+    public BoardListCursorAdapter(Context context, Cursor c) {
         super(context, c, 0);
-        this.mContext = context;
-        this.mCursor = c;
-        this.mSelectedValue = selectedValue;
-        this.mSortOrder = sort;
+        mInflater =(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mContext = context;
+        mCursor = c;
+    }
+
+    public void setListener(BoardFavoritedListener listener) {
+        mFavoritedListener = listener;
     }
 
     /**
@@ -66,7 +77,17 @@ public class BoardListCursorAdapter extends CursorAdapter {
      */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        return new BoardListCardView(context);
+        View view = mInflater.inflate(R.layout.board_list_card_view, parent, false);
+        ViewHolder holder = new ViewHolder();
+
+        holder.boardNameTextView = (TextView) view.findViewById(R.id.tv_board_name);
+        holder.boardValueTextView = (TextView) view.findViewById(R.id.tv_board_value);
+        holder.boardLinkTextView = (TextView) view.findViewById(R.id.tv_board_link);
+        holder.favButton = (ToggleButton) view.findViewById(R.id.tb_board_fav);
+
+        view.setTag(holder);
+
+        return view;
     }
 
     /**
@@ -78,91 +99,53 @@ public class BoardListCursorAdapter extends CursorAdapter {
      */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        String boardName;
-        String nationality;
-        String displayColumn;
-        final String boardLink;
-        int favoritedInt;
-        boolean isFavorited;
+        ViewHolder holder = (ViewHolder) view.getTag();
+        final String boardName = cursor.getString(3);
+        final String boardLink = cursor.getString(2);
+        //final String nationality = cursor.getString(1);
+        final String displayColumn = cursor.getString(5);
+        final int favoritedInt = cursor.getInt(4);
+        final boolean isFavorited = favoritedInt > 0;
 
-        boardName = cursor.getString(cursor.getColumnIndexOrThrow("boardname"));
-        boardLink = cursor.getString(cursor.getColumnIndexOrThrow("boardlink"));
-        nationality = cursor.getString(cursor.getColumnIndexOrThrow("nation"));
-        displayColumn = cursor.getString(cursor.getColumnIndexOrThrow(mSelectedValue));
-        favoritedInt = cursor.getInt(cursor.getColumnIndexOrThrow("favorited"));
+        String htmlBoardLink = "<a href=\"http://8chan.co" +
+                boardLink.toLowerCase() +
+                "\">" +
+                boardLink +
+                "</a>";
 
-        isFavorited = favoritedInt > 0;
-
-        ((BoardListCardView) view).setCardInfo(boardLink,
-                boardName,
-                nationality,
-                displayColumn,
-                isFavorited
-        );
+        holder.boardNameTextView.setText(boardName);
+        holder.boardLinkTextView.setText(Html.fromHtml(htmlBoardLink));
+        holder.boardLinkTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        holder.boardValueTextView.setText(displayColumn);
+        holder.favButton.setChecked(isFavorited);
+        holder.favButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isChecked = ((ToggleButton) v).isChecked();
+                mFavoritedListener.favoriteBoard(boardLink, isChecked);
+            }
+        });
     }
 
     @Override
     public View getView(int position, View convertView, final ViewGroup parent) {
-        BoardListCardView cardView = null;
-        if(mCursor.moveToPosition(position)) {
-            final ToggleButton viewToggle;
-            final CursorAdapter myAdapter = this;
-
-            String nationality = mCursor.getString(1);
-            final String boardLink = mCursor.getString(2);
-            String boardName = mCursor.getString(3);
-            int favoritedInt = mCursor.getInt(4);
-            String displayColumn = mCursor.getString(5);
-
-            Boolean isFavorited = favoritedInt > 0;
-
-            if(convertView == null || convertView instanceof Space) {
-                cardView = new BoardListCardView(mContext);
-            } else {
-                cardView = (BoardListCardView) convertView;
-            }
-
-            viewToggle = (ToggleButton) cardView.findViewById(R.id.tb_board_fav);
-
-            viewToggle.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    EditText searchBar = (EditText) parent.findViewById(R.id.txt_search_boards);
-                    boolean isChecked = ((ToggleButton) v).isChecked();
-                    BoardListDatabase list_db = new BoardListDatabase(mContext);
-                    CharSequence text;
-                    int duration = Toast.LENGTH_SHORT;
-
-                    if(isChecked) {
-                        text = "Added Board " + boardLink;
-                    } else {
-                        text = "Removed Board " + boardLink;
-                    }
-
-                    Toast toast = Toast.makeText(mContext, text, duration);
-                    toast.show();
-
-                    list_db.favoriteBoard(boardLink, isChecked);
-
-                    if(searchBar.getVisibility() == View.VISIBLE) {
-                        String search = searchBar.getText().toString();
-                        mCursor = list_db.getSortedSearch(search, mSelectedValue, mSortOrder);
-                    } else {
-                        mCursor = list_db.getBoardsInSortedOrder(mSelectedValue, mSortOrder);
-                    }
-                    myAdapter.swapCursor(mCursor);
-                    myAdapter.notifyDataSetChanged();
-                }
-            });
-
-            cardView.setCardInfo(boardLink, boardName, nationality, displayColumn, isFavorited);
-        } else {
-            //cardView = new Space(mContext);
-            convertView.setVisibility(View.GONE);
-            Log.i("Cursor no show", "couldn't move cursor to position " + position);
+        if (!mCursor.moveToPosition(position)) {
+            throw new IllegalStateException("couldn't move cursor to position " + position);
         }
+        View v;
+        if (convertView == null) {
+            v = newView(mContext, mCursor, parent);
+        } else {
+            v = convertView;
+        }
+        bindView(v, mContext, mCursor);
+        return v;
+    }
 
-        return cardView;
+    @Override
+    protected void onContentChanged() {
+        super.onContentChanged();
+        notifyDataSetChanged();
     }
 
     @Override
@@ -170,10 +153,5 @@ public class BoardListCursorAdapter extends CursorAdapter {
         Cursor oldCursor = mCursor;
         mCursor = cursor;
         return oldCursor;
-    }
-
-    public void setDatabaseValues(String newOrder, String newSort) {
-        mSelectedValue = newOrder;
-        mSortOrder = newSort;
     }
 }

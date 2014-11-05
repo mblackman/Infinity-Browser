@@ -36,7 +36,6 @@ import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 
 import blackman.matt.board.Board;
-import blackman.matt.boardlist.BoardList;
 
 /**
  * The main method of Infinity Browser.
@@ -45,7 +44,6 @@ import blackman.matt.boardlist.BoardList;
  */
 public class InfinityBrowser extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
-                   BoardList.OnFragmentInteractionListener,
                    Board.OnFragmentInteractionListener {
 
     /**
@@ -170,15 +168,6 @@ public class InfinityBrowser extends Activity
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    /**
-     * Generated automatically
-     * @param uri Something passed
-     */
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
     }
 
     /**

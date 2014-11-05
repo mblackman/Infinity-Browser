@@ -22,6 +22,7 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.database.Cursor;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -44,7 +45,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import blackman.matt.board.Board;
-import blackman.matt.boardlist.BoardList;
+import blackman.matt.boardlist.BoardListActivity;
 import blackman.matt.boardlist.BoardListDatabase;
 
 /**
@@ -226,16 +227,8 @@ public class NavigationDrawerFragment extends Fragment {
                         PreferenceManager.getDefaultSharedPreferences(getActivity());
                 Boolean ageAccept = preferences.getBoolean("age_guard_accept", false);
                 if(ageAccept) {
-                    FragmentManager fragmentManager = getFragmentManager();
-                    FragmentTransaction transaction = fragmentManager.beginTransaction();
-                    BoardList boardList = new BoardList();
-                    closeDrawer();
-
-                    if (fragmentManager.findFragmentById(R.id.container) != boardList) {
-                        transaction.replace(R.id.container, boardList, "");
-                        transaction.addToBackStack(null);
-                    }
-                    transaction.commit();
+                    Intent intent = new Intent(getActivity(), BoardListActivity.class);
+                    startActivity(intent);
                 }
             }
         });

@@ -35,6 +35,7 @@
     <string name="action_update">Update Board</string>
     <string name="action_update_list">Update Board List</string>
     <string name="action_search_list">Search for Board</string>
+
     <string-array name="sql_columns_array">
         <item>Unique ips</item>
         <item>Posts/hour</item>
@@ -47,5 +48,7 @@
         <item>DESC</item>
         <item>ASC</item>
     </string-array>
+
+    <string name="title_activity_board_list">Boards</string>
 
 </resources>

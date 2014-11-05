@@ -37,36 +37,26 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
     private Context mContext;
     private SQLiteOpenHelper SQLiteHelper;
 
-    /**
-     *  Inner class that defines the table contents for the database.
-     */
-    public static abstract class FeedEntry implements BaseColumns {
-        private static final String TABLE_NAME = "boards";
-        private static final String KEY_BOARD_NAME = "boardname";
-        private static final String KEY_NATIONALITY = "nation";
-        private static final String KEY_BOARD_LINK = "boardlink";
-        private static final String KEY_POSTS_LAST_HOUR = "postslasthour";
-        private static final String KEY_TOTAL_POSTS = "totalposts";
-        private static final String KEY_UNIQUE_IPS = "uniqueips";
-        private static final String KEY_DATE_CREATED = "datecreated";
-        private static final String KEY_FAVORITED = "favorited"; // 1 means favorited 0 means no
-    }
-
     // Query to create the table.
-    private static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + FeedEntry.TABLE_NAME + " (" + FeedEntry.KEY_BOARD_LINK +
-                    " TEXT PRIMARY KEY," + FeedEntry.KEY_NATIONALITY + " TEXT," + FeedEntry._ID + " INTEGER," +
-                    FeedEntry.KEY_POSTS_LAST_HOUR + " INTEGER," + FeedEntry.KEY_TOTAL_POSTS + " INTEGER," +
-                    FeedEntry.KEY_UNIQUE_IPS + " INTEGER," + FeedEntry.KEY_DATE_CREATED + " TEXT," +
-                    FeedEntry.KEY_FAVORITED + " INTEGER," + FeedEntry.KEY_BOARD_NAME + " TEXT" +
+    private static final String SQL_CREATE_ENTRIES = "CREATE TABLE " +
+            DatabaseDef.Boards.TABLE_NAME + " (" +
+            DatabaseDef.Boards.BOARD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+            DatabaseDef.Boards.BOARD_LINK + " TEXT," +
+            DatabaseDef.Boards.NATIONALITY + " TEXT," +
+            DatabaseDef.Boards.POSTS_LAST_HOUR + " INTEGER," +
+            DatabaseDef.Boards.TOTAL_POSTS + " INTEGER," +
+            DatabaseDef.Boards.UNIQUE_IPS + " INTEGER," +
+            DatabaseDef.Boards.DATE_CREATED + " TEXT," +
+            DatabaseDef.Boards.FAVORITED + " INTEGER," +
+            DatabaseDef.Boards.BOARD_NAME + " TEXT" +
             " )";
 
     // Query to delete all the entries.
     private static final String SQL_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS " + FeedEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + DatabaseDef.Boards.TABLE_NAME;
 
     // Query to get all the boards that have been favorited.
-    private static final String SQL_SELECT_FAVORITED_BOARDS = FeedEntry.KEY_FAVORITED + ">0";
+    private static final String SQL_SELECT_FAVORITED_BOARDS = DatabaseDef.Boards.FAVORITED + ">0";
 
     /**
      * Constructor to set up the database for the caller.
@@ -124,19 +114,19 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
 
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(FeedEntry.KEY_BOARD_NAME, boardName);
-        values.put(FeedEntry.KEY_NATIONALITY, nation);
-        values.put(FeedEntry.KEY_BOARD_LINK, boardlink);
-        values.put(FeedEntry.KEY_POSTS_LAST_HOUR, postsLastHour);
-        values.put(FeedEntry.KEY_TOTAL_POSTS, totalPosts);
-        values.put(FeedEntry.KEY_UNIQUE_IPS, uniqueIps);
-        values.put(FeedEntry.KEY_DATE_CREATED, dateCreated);
-        values.put(FeedEntry.KEY_FAVORITED, 0);
+        values.put(DatabaseDef.Boards.BOARD_NAME, boardName);
+        values.put(DatabaseDef.Boards.NATIONALITY, nation);
+        values.put(DatabaseDef.Boards.BOARD_LINK, boardlink);
+        values.put(DatabaseDef.Boards.POSTS_LAST_HOUR, postsLastHour);
+        values.put(DatabaseDef.Boards.TOTAL_POSTS, totalPosts);
+        values.put(DatabaseDef.Boards.UNIQUE_IPS, uniqueIps);
+        values.put(DatabaseDef.Boards.DATE_CREATED, dateCreated);
+        values.put(DatabaseDef.Boards.FAVORITED, 0);
 
         // Insert the new row, returning the primary key value of the new row
         long newRowId;
         newRowId = db.insert(
-                FeedEntry.TABLE_NAME,
+                DatabaseDef.Boards.TABLE_NAME,
                 null,
                 values);
 
@@ -151,12 +141,12 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
      */
     public Boolean boardExists(String boardLink) {
         SQLiteDatabase db = getReadableDatabase();
-        Boolean boardExists = false;
-        String selection = FeedEntry.KEY_BOARD_LINK + "=?";
+        Boolean boardExists;
+        String selection = DatabaseDef.Boards.BOARD_LINK + "=?";
         String[] boardLinks = new String[] { boardLink };
 
         Cursor c = db.query(
-                FeedEntry.TABLE_NAME,        // The table to query
+                DatabaseDef.Boards.TABLE_NAME,        // The table to query
                 null,                        // The columns to return
                 selection,                   // The columns for the WHERE clause
                 boardLinks,                  // The values for the WHERE clause
@@ -183,16 +173,16 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         String sortOrder;
 
         projection = new String[] {
-            FeedEntry._ID,
-            FeedEntry.KEY_NATIONALITY,
-            FeedEntry.KEY_BOARD_LINK,
-            FeedEntry.KEY_BOARD_NAME
+                DatabaseDef.Boards.BOARD_ID,
+                DatabaseDef.Boards.NATIONALITY,
+                DatabaseDef.Boards.BOARD_LINK,
+                DatabaseDef.Boards.BOARD_NAME
         };
 
-        sortOrder = FeedEntry.KEY_BOARD_LINK + " ASC";
+        sortOrder = DatabaseDef.Boards.BOARD_LINK + " ASC";
 
         Cursor c = db.query(
-                FeedEntry.TABLE_NAME,        // The table to query
+                DatabaseDef.Boards.TABLE_NAME,        // The table to query
                 projection,                  // The columns to return
                 SQL_SELECT_FAVORITED_BOARDS, // The columns for the WHERE clause
                 null,                        // The values for the WHERE clause
@@ -212,20 +202,25 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         String sortOrder;
 
         projection = new String[] {
-                FeedEntry._ID,
-                FeedEntry.KEY_NATIONALITY,
-                FeedEntry.KEY_BOARD_LINK,
-                FeedEntry.KEY_BOARD_NAME,
-                FeedEntry.KEY_FAVORITED,
+                DatabaseDef.Boards.BOARD_ID,
+                DatabaseDef.Boards.NATIONALITY,
+                DatabaseDef.Boards.BOARD_LINK,
+                DatabaseDef.Boards.BOARD_NAME,
+                DatabaseDef.Boards.FAVORITED,
                 sortBy
         };
 
-        selection = FeedEntry.KEY_BOARD_LINK + " LIKE ? OR " + FeedEntry.KEY_BOARD_NAME + " LIKE ?";
-        selectionArgs = new String[]{"%" + search.toString() + "%", "%" + search.toString() + "%"};
+        selection = DatabaseDef.Boards.BOARD_LINK + " LIKE ? OR " +
+                    DatabaseDef.Boards.BOARD_NAME + " LIKE ?";
+        if(search == null || search.equals("")) {
+            selectionArgs = new String[]{"%", "%"};
+        } else {
+            selectionArgs = new String[]{"%" + search.toString() + "%", "%" + search.toString() + "%"};
+        }
         sortOrder = sortBy + " " + order;
 
         Cursor c = db.query(
-                FeedEntry.TABLE_NAME,       // The table to query
+                DatabaseDef.Boards.TABLE_NAME,       // The table to query
                 projection,                 // The columns to return
                 selection,                  // The columns for the WHERE clause
                 selectionArgs,              // The values for the WHERE clause
@@ -234,25 +229,6 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
                 sortOrder                   // The sort order
         );
         return c;
-    }
-
-    /**
-     * Checks if the table is empty of any rows.
-     *
-     * @return If the table is empty or not.
-     */
-    public Boolean isEmpty() {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor mCursor = db.rawQuery("SELECT * FROM " + FeedEntry.TABLE_NAME, null);
-        Boolean isEmpty;
-
-        if (mCursor.moveToFirst()) {
-            isEmpty = false;
-        }
-        else {
-            isEmpty = true;
-        }
-        return isEmpty;
     }
 
     /**
@@ -290,18 +266,18 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         String sortOrder;
 
         projection = new String[] {
-                FeedEntry._ID,
-                FeedEntry.KEY_NATIONALITY,
-                FeedEntry.KEY_BOARD_LINK,
-                FeedEntry.KEY_BOARD_NAME,
-                FeedEntry.KEY_FAVORITED,
+                DatabaseDef.Boards.BOARD_ID,
+                DatabaseDef.Boards.NATIONALITY,
+                DatabaseDef.Boards.BOARD_LINK,
+                DatabaseDef.Boards.BOARD_NAME,
+                DatabaseDef.Boards.FAVORITED,
                 sortBy
         };
 
         sortOrder = sortBy + " " + order;
 
         Cursor c = db.query(
-                FeedEntry.TABLE_NAME,       // The table to query
+                DatabaseDef.Boards.TABLE_NAME,       // The table to query
                 projection,                 // The columns to return
                 null,                       // The columns for the WHERE clause
                 null,                       // The values for the WHERE clause
@@ -327,16 +303,16 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
 
         // New value for one column
         ContentValues values = new ContentValues();
-        values.put(FeedEntry.KEY_POSTS_LAST_HOUR, postsLastHour);
-        values.put(FeedEntry.KEY_TOTAL_POSTS, totalPosts);
-        values.put(FeedEntry.KEY_UNIQUE_IPS, uniqueIps);
+        values.put(DatabaseDef.Boards.POSTS_LAST_HOUR, postsLastHour);
+        values.put(DatabaseDef.Boards.TOTAL_POSTS, totalPosts);
+        values.put(DatabaseDef.Boards.UNIQUE_IPS, uniqueIps);
 
         // Which row to update, based on the ID
-        String selection = FeedEntry.KEY_BOARD_NAME + " =?";
+        String selection = DatabaseDef.Boards.BOARD_NAME + " =?";
         String[] boards = new String[] { boardName };
 
         int count = db.update(
-                FeedEntry.TABLE_NAME,
+                DatabaseDef.Boards.TABLE_NAME,
                 values,
                 selection,
                 boards);
@@ -355,14 +331,14 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
 
         // New value for one column
         ContentValues values = new ContentValues();
-        values.put(FeedEntry.KEY_FAVORITED, follow ? 1 : 0);
+        values.put(DatabaseDef.Boards.FAVORITED, follow ? 1 : 0);
 
         // Which row to update, based on the ID
-        String selection = FeedEntry.KEY_BOARD_LINK + "=?";
+        String selection = DatabaseDef.Boards.BOARD_LINK + "=?";
         String[] selectionArgs = { boardLink };
 
         int count = db.update(
-                FeedEntry.TABLE_NAME,
+                DatabaseDef.Boards.TABLE_NAME,
                 values,
                 selection,
                 selectionArgs);
