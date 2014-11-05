@@ -40,11 +40,6 @@ public class BoardListCursorAdapter extends CursorAdapter {
     private String mSortOrder;
     private Context mContext;
     private Cursor mCursor;
-    private final EditText mSearchBar;
-
-    static class ViewHolder {
-        BoardListCardView mView;
-    }
 
     /**
      * Basic constructor for the class. Runs the parent constructor and assigns values.
@@ -53,14 +48,12 @@ public class BoardListCursorAdapter extends CursorAdapter {
      * @param c Cursor to be adapted.
      * @param selectedValue The currently selected query column.
      */
-    public BoardListCursorAdapter(Context context, Cursor c, String selectedValue, String sort,
-                                  EditText searchBar) {
+    public BoardListCursorAdapter(Context context, Cursor c, String selectedValue, String sort) {
         super(context, c, 0);
         this.mContext = context;
         this.mCursor = c;
         this.mSelectedValue = selectedValue;
         this.mSortOrder = sort;
-        this.mSearchBar = searchBar;
     }
 
     /**
@@ -109,41 +102,32 @@ public class BoardListCursorAdapter extends CursorAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, final ViewGroup parent) {
+        BoardListCardView cardView = null;
         if(mCursor.moveToPosition(position)) {
-            final ViewHolder holder;
             final ToggleButton viewToggle;
-            final String boardLink;
             final CursorAdapter myAdapter = this;
 
-            String boardName;
-            String nationality;
-            String displayColumn;
-            int favoritedInt;
-            boolean isFavorited;
+            String nationality = mCursor.getString(1);
+            final String boardLink = mCursor.getString(2);
+            String boardName = mCursor.getString(3);
+            int favoritedInt = mCursor.getInt(4);
+            String displayColumn = mCursor.getString(5);
+
+            Boolean isFavorited = favoritedInt > 0;
 
             if(convertView == null || convertView instanceof Space) {
-                convertView = new BoardListCardView(mContext);
-                holder = new ViewHolder();
-                holder.mView = (BoardListCardView) convertView;
-                convertView.setTag(holder);
+                cardView = new BoardListCardView(mContext);
             } else {
-                holder = (ViewHolder) convertView.getTag();
+                cardView = (BoardListCardView) convertView;
             }
 
-            nationality = mCursor.getString(1);
-            boardLink = mCursor.getString(2);
-            boardName = mCursor.getString(3);
-            favoritedInt = mCursor.getInt(4);
-            displayColumn = mCursor.getString(5);
-
-            isFavorited = favoritedInt > 0;
-
-            viewToggle = (ToggleButton) holder.mView.findViewById(R.id.tb_board_fav);
+            viewToggle = (ToggleButton) cardView.findViewById(R.id.tb_board_fav);
 
             viewToggle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    EditText searchBar = (EditText) parent.findViewById(R.id.txt_search_boards);
                     boolean isChecked = ((ToggleButton) v).isChecked();
                     BoardListDatabase list_db = new BoardListDatabase(mContext);
                     CharSequence text;
@@ -160,32 +144,25 @@ public class BoardListCursorAdapter extends CursorAdapter {
 
                     list_db.favoriteBoard(boardLink, isChecked);
 
-                    if(mSearchBar.getVisibility() == View.VISIBLE) {
-                        String search = mSearchBar.getText().toString();
-                        mCursor = list_db.getSortedSearch(search,mSelectedValue, mSortOrder);
+                    if(searchBar.getVisibility() == View.VISIBLE) {
+                        String search = searchBar.getText().toString();
+                        mCursor = list_db.getSortedSearch(search, mSelectedValue, mSortOrder);
                     } else {
                         mCursor = list_db.getBoardsInSortedOrder(mSelectedValue, mSortOrder);
                     }
                     myAdapter.swapCursor(mCursor);
                     myAdapter.notifyDataSetChanged();
-
-                    holder.mView.invalidate();
                 }
             });
 
-            ((BoardListCardView) convertView).setCardInfo(boardLink,
-                    boardName,
-                    nationality,
-                    displayColumn,
-                    isFavorited
-            );
+            cardView.setCardInfo(boardLink, boardName, nationality, displayColumn, isFavorited);
         } else {
-            convertView = new Space(mContext);
+            //cardView = new Space(mContext);
             convertView.setVisibility(View.GONE);
             Log.i("Cursor no show", "couldn't move cursor to position " + position);
         }
 
-        return convertView;
+        return cardView;
     }
 
     @Override

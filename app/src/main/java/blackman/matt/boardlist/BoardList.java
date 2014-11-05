@@ -149,8 +149,7 @@ public class BoardList extends Fragment {
                 mAdapter = new BoardListCursorAdapter(getActivity(),
                         qBoards,
                         DEFAULT_SELECTED_COLUMN,
-                        DEFAULT_SORT_ORDER,
-                        searchBar
+                        DEFAULT_SORT_ORDER
                 );
 
                 boardListView.setAdapter(mAdapter);

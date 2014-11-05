@@ -70,7 +70,10 @@ public class InfinityBrowser extends Activity
         if(!ageAccept){
             DialogFragment ageGuardDialog = new AgeGuardDialogFragment();
             ageGuardDialog.show(getFragmentManager(), "ageGuardDialog");
-        } else {
+        }
+        ageAccept = preferences.getBoolean("age_guard_accept", false);
+
+        if(ageAccept) {
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 

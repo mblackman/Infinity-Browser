@@ -4,8 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Infinity Browser.iml" filepath="$PROJECT_DIR$/Infinity Browser.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/infinitybrowser.iml" filepath="$PROJECT_DIR$/infinitybrowser.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ochseer.iml" filepath="$PROJECT_DIR$/ochseer.iml" />
     </modules>
   </component>
 </project>
