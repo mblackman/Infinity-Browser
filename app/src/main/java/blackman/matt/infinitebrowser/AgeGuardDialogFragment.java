@@ -47,7 +47,7 @@ public class AgeGuardDialogFragment extends DialogFragment {
                                 PreferenceManager.getDefaultSharedPreferences(getActivity());
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putBoolean("age_guard_accept", true);
-                        editor.commit();
+                        editor.apply();
                     }
                 })
                 .setNegativeButton("Decline", new DialogInterface.OnClickListener() {
@@ -56,7 +56,7 @@ public class AgeGuardDialogFragment extends DialogFragment {
                                 PreferenceManager.getDefaultSharedPreferences(getActivity());
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putBoolean("age_guard_accept", false);
-                        editor.commit();
+                        editor.apply();
                     }
                 });
         // Create the AlertDialog object and return it

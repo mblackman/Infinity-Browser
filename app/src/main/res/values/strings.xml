@@ -50,5 +50,6 @@
     </string-array>
 
     <string name="title_activity_board_list">Boards</string>
+    <string name="Board_List_Progress_Text">Loading list of boards...</string>
 
 </resources>

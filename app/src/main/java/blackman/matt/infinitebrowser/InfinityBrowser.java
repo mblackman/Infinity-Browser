@@ -26,7 +26,6 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -181,7 +180,8 @@ public class InfinityBrowser extends Activity
         Boolean ageAccept = preferences.getBoolean("age_guard_accept", false);
 
         if(ageAccept) {
-            Board newThread = new Board().newInstance(postLink);
+            new Board();
+            Board newThread = Board.newInstance(postLink);
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
             transaction.replace(R.id.container, newThread);

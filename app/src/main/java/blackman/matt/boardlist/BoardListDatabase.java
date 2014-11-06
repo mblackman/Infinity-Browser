@@ -37,14 +37,14 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
     // Query to create the table.
     private static final String SQL_CREATE_ENTRIES = "CREATE TABLE " +
             DatabaseDef.Boards.TABLE_NAME + " (" +
-            DatabaseDef.Boards.BOARD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+            DatabaseDef.Boards.BOARD_ID + " INTEGER PRIMARY KEY," +
             DatabaseDef.Boards.BOARD_LINK + " TEXT," +
             DatabaseDef.Boards.NATIONALITY + " TEXT," +
             DatabaseDef.Boards.POSTS_LAST_HOUR + " INTEGER," +
             DatabaseDef.Boards.TOTAL_POSTS + " INTEGER," +
             DatabaseDef.Boards.UNIQUE_IPS + " INTEGER," +
             DatabaseDef.Boards.DATE_CREATED + " TEXT," +
-            DatabaseDef.Boards.FAVORITED + " INTEGER," +
+            DatabaseDef.Boards.FAVORITED + " INTEGER DEFAULT 0," +
             DatabaseDef.Boards.BOARD_NAME + " TEXT" +
             " )";
 
@@ -101,61 +101,30 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
      * @param totalPosts Total posts to board as last updated.
      * @param uniqueIps Unique IPs visiting the board as last updated.
      * @param dateCreated Date the board was created.
-     * @return The id of the table row.
      */
-    public long insertBoard(String boardName, String nation, String boardlink, String postsLastHour,
+    public void insertBoard(String boardName, String nation, String boardlink, String postsLastHour,
                             String totalPosts, String uniqueIps, String dateCreated) {
         // Gets the data repository in write mode
         SQLiteDatabase db = getWritableDatabase();
 
-        // Create a new map of values, where column names are the keys
-        ContentValues values = new ContentValues();
-        values.put(DatabaseDef.Boards.BOARD_NAME, boardName);
-        values.put(DatabaseDef.Boards.NATIONALITY, nation);
-        values.put(DatabaseDef.Boards.BOARD_LINK, boardlink);
-        values.put(DatabaseDef.Boards.POSTS_LAST_HOUR, postsLastHour);
-        values.put(DatabaseDef.Boards.TOTAL_POSTS, totalPosts);
-        values.put(DatabaseDef.Boards.UNIQUE_IPS, uniqueIps);
-        values.put(DatabaseDef.Boards.DATE_CREATED, dateCreated);
-        values.put(DatabaseDef.Boards.FAVORITED, 0);
+        int boardId = boardlink.hashCode();
+        String cleanedName = boardName.replace("'", "''");
 
-        // Insert the new row, returning the primary key value of the new row
-        long newRowId;
-        newRowId = db.insert(
-                DatabaseDef.Boards.TABLE_NAME,
-                null,
-                values);
+        String UPSERT = "INSERT OR REPLACE INTO " + DatabaseDef.Boards.TABLE_NAME + " (" +
+                DatabaseDef.Boards.BOARD_ID + ", " + DatabaseDef.Boards.BOARD_LINK + ", " +
+                DatabaseDef.Boards.BOARD_NAME + ", " + DatabaseDef.Boards.NATIONALITY + ", " +
+                DatabaseDef.Boards.POSTS_LAST_HOUR + ", " + DatabaseDef.Boards.TOTAL_POSTS + ", " +
+                DatabaseDef.Boards.UNIQUE_IPS + ", " + DatabaseDef.Boards.DATE_CREATED + ", " +
+                DatabaseDef.Boards.FAVORITED + ") " +
+                "VALUES ( " + boardId + ", '" + boardlink + "', '" + cleanedName + "', '" +
+                nation +  "', '" + postsLastHour + "', '" + totalPosts + "', '" +
+                uniqueIps + "', '" + dateCreated + "', " +
+                "(SELECT " + DatabaseDef.Boards.FAVORITED + " FROM " +
+                DatabaseDef.Boards.TABLE_NAME + " WHERE " + DatabaseDef.Boards.BOARD_ID + " = " +
+                boardId + "));";
 
-        return newRowId;
-    }
+        db.execSQL(UPSERT);
 
-    /**
-     * Check to see if a board is already in the database.
-     *
-     * @param boardLink Board link EG /v/
-     * @return True if the board is in the database, false otherwise.
-     */
-    public Boolean boardExists(String boardLink) {
-        SQLiteDatabase db = getReadableDatabase();
-        Boolean boardExists;
-        String selection = DatabaseDef.Boards.BOARD_LINK + "=?";
-        String[] boardLinks = new String[] { boardLink };
-
-        Cursor c = db.query(
-                DatabaseDef.Boards.TABLE_NAME,        // The table to query
-                null,                        // The columns to return
-                selection,                   // The columns for the WHERE clause
-                boardLinks,                  // The values for the WHERE clause
-                null,                        // don't group the rows
-                null,                        // don't filter by row groups
-                null                         // The sort order
-        );
-
-        c.moveToFirst();
-        boardExists = c.getCount() != 0;
-        c.close();
-
-        return boardExists; // if mContext.getCount() == 0 then board doesn't exists
     }
 
     /**
@@ -200,8 +169,8 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
     public Cursor getSortedSearch(CharSequence search, String sortBy, String order) {
         SQLiteDatabase db = getReadableDatabase();
         String selection;
+        String select;
         String[] projection;
-        String[] selectionArgs;
         String sortOrder;
 
         projection = new String[] {
@@ -213,54 +182,26 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
                 sortBy
         };
 
-        selection = DatabaseDef.Boards.BOARD_LINK + " LIKE ? OR " +
-                    DatabaseDef.Boards.BOARD_NAME + " LIKE ?";
-        if(search == null || search.equals("")) {
-            selectionArgs = new String[]{"%", "%"};
+        if(search == null || search.toString().trim().equals("")){
+            selection = null;
         } else {
-            selectionArgs = new String[]{"%" + search.toString() + "%", "%" + search.toString() + "%"};
+            select = "'%" + search.toString() + "%'";
+
+            selection = DatabaseDef.Boards.BOARD_LINK + " LIKE " + select + " OR " +
+                    DatabaseDef.Boards.BOARD_NAME + " LIKE " + select;
         }
+
         sortOrder = sortBy + " " + order;
 
         return db.query(
                 DatabaseDef.Boards.TABLE_NAME,       // The table to query
                 projection,                 // The columns to return
                 selection,                  // The columns for the WHERE clause
-                selectionArgs,              // The values for the WHERE clause
+                null,              // The values for the WHERE clause
                 null,                       // don't group the rows
                 null,                       // don't filter by row groups
                 sortOrder                   // The sort order
         );
-    }
-
-    /**
-     * Updates an existing board with new data.
-     *
-     * @param boardName The named of the board to change.
-     * @param postsLastHour The new posts in the last hour.
-     * @param totalPosts The new total posts to the board.
-     * @param uniqueIps The total unique IPs that have visited the board.
-     * @return A int that determines if the row was updated. -1 for false.
-     */
-    public int updateBoard(String boardName, String postsLastHour, String totalPosts,
-                           String uniqueIps) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        // New value for one column
-        ContentValues values = new ContentValues();
-        values.put(DatabaseDef.Boards.POSTS_LAST_HOUR, postsLastHour);
-        values.put(DatabaseDef.Boards.TOTAL_POSTS, totalPosts);
-        values.put(DatabaseDef.Boards.UNIQUE_IPS, uniqueIps);
-
-        // Which row to update, based on the ID
-        String selection = DatabaseDef.Boards.BOARD_NAME + " =?";
-        String[] boards = new String[] { boardName };
-
-        return db.update(
-                DatabaseDef.Boards.TABLE_NAME,
-                values,
-                selection,
-                boards);
     }
 
     /**

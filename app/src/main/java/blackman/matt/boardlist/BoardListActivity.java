@@ -5,12 +5,15 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Spinner;
@@ -32,6 +35,7 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
     private String mDBOrderBy;
     private String mDBSortBy;
 
+    private BoardListDatabase list_db = new BoardListDatabase(this);
     private BoardListCursorAdapter mAdapter;
 
     // Default selection to sort the value column by
@@ -43,6 +47,9 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
     private SearchView mSearchView;
     private String mCurFilter;
 
+    private LinearLayout mProgress;
+    private ListView mBoardList;
+
     /**
      * Interface to favorite a board when the user hits the favorite button.
      *
@@ -51,7 +58,6 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
      */
     @Override
     public void favoriteBoard(String boardLink, Boolean isChecked) {
-        BoardListDatabase list_db = new BoardListDatabase(this);
         CharSequence text;
         int duration = Toast.LENGTH_SHORT;
 
@@ -150,16 +156,33 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_board_list);
-        ListView boardsList = (ListView) findViewById(R.id.lv_board_list);
+        mProgress = (LinearLayout) findViewById(R.id.progress_board_list);
+        mBoardList = (ListView) findViewById(R.id.lv_board_list);
 
-        BoardListDatabase list_db = new BoardListDatabase(this);
-        Cursor cursor = list_db.getSortedSearch("", DEFAULT_SELECTED_COLUMN, DEFAULT_SORT_ORDER);
-        mAdapter = new BoardListCursorAdapter(this, cursor);
-        mAdapter.setListener(this);
-        boardsList.setAdapter(mAdapter);
         initSpinners();
+
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                Cursor cursor = list_db.getSortedSearch(mCurFilter,
+                        DEFAULT_SELECTED_COLUMN,
+                        DEFAULT_SORT_ORDER);
+                mAdapter = new BoardListCursorAdapter(BoardListActivity.this, cursor);
+                mAdapter.setListener(BoardListActivity.this);
+
+                mBoardList.setAdapter(mAdapter);
+            }
+        });
     }
 
+    /**
+     * Closes the connection to the database when the activity is closed.
+     */
+    @Override
+    protected void onStop () {
+        super.onStop();
+        list_db.close();
+    }
 
     /**
      * When the option menu is created this handles the creation events.
@@ -176,6 +199,7 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
         mSearchView.setOnQueryTextListener(this);
         mSearchView.setOnCloseListener(this);
         mSearchView.setIconified(true);
+        //mSearchView.setBackground(R.color.post_background_color);
         searchItem.setActionView(mSearchView);
         return true;
     }
@@ -204,11 +228,15 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
      * BoardList.
      */
     private void updateDatabaseView() {
-        BoardListDatabase list_db = new BoardListDatabase(this);
-        Cursor qBoards = list_db.getSortedSearch(mCurFilter, mDBSortBy, mDBOrderBy);
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                Cursor qBoards = list_db.getSortedSearch(mCurFilter, mDBSortBy, mDBOrderBy);
 
-        mAdapter.swapCursor(qBoards);
-        mAdapter.notifyDataSetChanged();
+                mAdapter.swapCursor(qBoards);
+                mAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     /**
@@ -245,7 +273,13 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
      * Gets an updated list of all the boards on 8Chan and saves that list in the database, while
      * updating existing board entries.
      */
-    public class GetBoardList extends AsyncTask<Void, Void, Document> {
+    public class GetBoardList extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            mBoardList.setVisibility(View.INVISIBLE);
+            mProgress.setVisibility(View.VISIBLE);
+        }
+
         /**
          * Loads all the information from the boards index and returns the HTML doc.
          *
@@ -253,33 +287,26 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
          * @return The HTML doc of the boards lists.
          */
         @Override
-        protected Document doInBackground(Void... params) {
-            Document boardPage;
-            String url;
-
-            boardPage = null;
-            url = "http://8chan.co/boards.html";
+        protected Void doInBackground(Void... params) {
+            Document boardPage = null;
+            String url = "http://8chan.co/boards.html";
 
             try {
+                Log.i("Started Jsoup", "Started getting page");
+                Long startTime = System.nanoTime();
+
                 boardPage = Jsoup.connect(url).get();
+
+                Long endTime = System.nanoTime() - startTime;
+                double seconds = (double)endTime / 1000000000.0;
+                Log.i("Ended Jsoup", "Took " + seconds + " seconds to get board");
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            return boardPage;
-        }
-
-        /**
-         * Takes the HTML doc and parses through all the board information and updates the
-         * SQL database.
-         *
-         * @param html The page with the boards on it.
-         */
-        @Override
-        protected void onPostExecute(Document html) {
-            if (html != null) {
-                BoardListDatabase list_db = new BoardListDatabase(getParent());
-                Elements boards = html.select("tbody").first().children();
+            if (boardPage != null) {
+                Elements boards = boardPage.select("tbody").first().children();
 
                 // Looks through all the boards
                 for (Element board : boards) {
@@ -302,21 +329,30 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
                     uniqueIps = boardItems.get(5).text();
                     dateCreated = boardItems.get(6).text();
 
-                    if (list_db.boardExists(boardLink)) {
-                        list_db.updateBoard(boardName, postsInLastHour, totalPosts, uniqueIps);
-                    } else {
-                        list_db.insertBoard(boardName,
-                                nationality,
-                                boardLink,
-                                postsInLastHour,
-                                totalPosts,
-                                uniqueIps,
-                                dateCreated
-                        );
-                    }
+                    list_db.insertBoard(boardName,
+                            nationality,
+                            boardLink,
+                            postsInLastHour,
+                            totalPosts,
+                            uniqueIps,
+                            dateCreated
+                    );
                 }
-                updateDatabaseView();
             }
+            return null;
+        }
+
+        /**
+         * Takes the HTML doc and parses through all the board information and updates the
+         * SQL database.
+         *
+         * @param result Is nothing
+         */
+        @Override
+        protected void onPostExecute(Void result) {
+            mBoardList.setVisibility(View.VISIBLE);
+            mProgress.setVisibility(View.GONE);
+            updateDatabaseView();
         }
     }
 

@@ -36,8 +36,6 @@ import blackman.matt.infinitebrowser.R;
  * Created by Matt on 10/24/2014.
  */
 public class BoardListCursorAdapter extends CursorAdapter {
-    private Context mContext;
-    private Cursor mCursor;
     private BoardFavoritedListener mFavoritedListener;
     private static LayoutInflater mInflater=null;
 
@@ -65,8 +63,6 @@ public class BoardListCursorAdapter extends CursorAdapter {
     public BoardListCursorAdapter(Context context, Cursor c) {
         super(context, c, 0);
         mInflater =(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mContext = context;
-        mCursor = c;
     }
 
     /**
@@ -139,29 +135,6 @@ public class BoardListCursorAdapter extends CursorAdapter {
     }
 
     /**
-     * Called when the list needs to display a view, and it gets the view needed.
-     *
-     * @param position Position of the view on the list.
-     * @param convertView The possible view in question.
-     * @param parent Parent view group to the caller.
-     * @return The view that was created or found.
-     */
-    @Override
-    public View getView(int position, View convertView, final ViewGroup parent) {
-        if (!mCursor.moveToPosition(position)) {
-            throw new IllegalStateException("couldn't move cursor to position " + position);
-        }
-        View v;
-        if (convertView == null) {
-            v = newView(mContext, mCursor, parent);
-        } else {
-            v = convertView;
-        }
-        bindView(v, mContext, mCursor);
-        return v;
-    }
-
-    /**
      * If data was changed in the database, this notifies that adapter.
      */
     @Override
@@ -178,8 +151,6 @@ public class BoardListCursorAdapter extends CursorAdapter {
      */
     @Override
     public Cursor swapCursor(Cursor cursor) {
-        Cursor oldCursor = mCursor;
-        mCursor = cursor;
-        return oldCursor;
+        return super.swapCursor(cursor);
     }
 }

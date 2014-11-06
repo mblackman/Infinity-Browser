@@ -175,7 +175,6 @@ public class NavigationDrawerFragment extends Fragment {
         Cursor cursor;
 
         boardListDB = new BoardListDatabase(getActivity());
-        boardListDB.openToRead();
 
         cursor = boardListDB.getFavoritedBoards();
 
