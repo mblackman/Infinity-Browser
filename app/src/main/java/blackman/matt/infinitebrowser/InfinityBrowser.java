@@ -43,7 +43,9 @@ import blackman.matt.board.Board;
  */
 public class InfinityBrowser extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
-                   Board.OnFragmentInteractionListener {
+        Board.OnReplyClickedListener {
+
+    private String mTitle;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -60,24 +62,23 @@ public class InfinityBrowser extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent intent = getIntent();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         Boolean ageAccept = preferences.getBoolean("age_guard_accept", false);
 
         if(!ageAccept){
             DialogFragment ageGuardDialog = new AgeGuardDialogFragment();
             ageGuardDialog.show(getFragmentManager(), "ageGuardDialog");
-        }
-        ageAccept = preferences.getBoolean("age_guard_accept", false);
-
-        if(ageAccept) {
+        } else {
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
+            Intent intent = getIntent();
             if(intent != null && intent.getData() != null) {
                 Board newBoard = Board.newInstance(intent.getDataString());
 
                 fragmentTransaction.replace(R.id.container, newBoard, intent.getDataString());
+
+                mTitle = intent.getDataString();
             } else {
                 String defaultBoard = "http://8chan.co/" +
                         preferences.getString("default_board", "").toLowerCase() + "/";
@@ -85,6 +86,8 @@ public class InfinityBrowser extends Activity
                 Board newBoard = Board.newInstance(defaultBoard);
 
                 fragmentTransaction.replace(R.id.container, newBoard, defaultBoard);
+
+                mTitle = "/" + preferences.getString("default_board", "").toLowerCase() + "/";
             }
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
@@ -188,6 +191,8 @@ public class InfinityBrowser extends Activity
             transaction.addToBackStack(null);
 
             transaction.commit();
+
+            mTitle = postLink;
         }
     }
 

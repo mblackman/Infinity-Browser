@@ -31,7 +31,7 @@ import android.widget.ListView;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import blackman.matt.infinitebrowser.R;
@@ -47,12 +47,14 @@ public class Board extends Fragment {
     private static final String ARG_BOARD_LINK = "boardlink";
     private PageLoader mPageGetter;
     private boolean mIsRootBoard;
-    private List<Post> mPosts;
+    private List<Post> mPosts = Collections.emptyList();
     private PostArrayAdapter mAdapter;
     private URL mBoardLink;
     private View mRootView;
+    private ListView mListView;
 
-    private OnFragmentInteractionListener mListener;
+    private EndlessScrollListener mScrollListener;
+    private OnReplyClickedListener mListener;
 
     /**
      * Use this factory method to create a new instance of
@@ -117,10 +119,6 @@ public class Board extends Fragment {
         }
     }
 
-    public OnFragmentInteractionListener getListener() {
-        return mListener;
-    }
-
     /**
      * Called when the fragments view is being created. Handled inflating the view and assigning
      * values.
@@ -135,13 +133,12 @@ public class Board extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mRootView = inflater.inflate(R.layout.fragment_board, container, false);
+        View progress = inflater.inflate(R.layout.board_progress_message, mListView, false);
 
-        ListView myListView = (ListView) mRootView.findViewById(R.id.lv_board_posts);
-        View progress = inflater.inflate(R.layout.board_progress_message, myListView, false);
-        myListView.addFooterView(progress);
+        mListView = (ListView) mRootView.findViewById(R.id.lv_board_posts);
+        mListView.addFooterView(progress);
 
-        mPosts = new ArrayList<Post>();
-        mAdapter = new PostArrayAdapter(mRootView.getContext());
+        mAdapter = new PostArrayAdapter(getActivity());
         mAdapter.updatePosts(mPosts, mListener);
 
         if(mBoardLink != null){
@@ -150,18 +147,9 @@ public class Board extends Fragment {
             mPageGetter.execute(mBoardLink);
         }
 
-        myListView.setAdapter(mAdapter);
-        myListView.setOnScrollListener(new EndlessScrollListener(mRootView));
-
-        String link = mBoardLink.getPath();
-        if(link.contains(".html")) {
-            link = link.replace(".html", "");
-        }
-        if(link.contains("/res/")){
-            link = link.replace("res/", "");
-        }
-
-        getActivity().getActionBar().setTitle(link);
+        mListView.setAdapter(mAdapter);
+        mScrollListener = new EndlessScrollListener(mRootView);
+        mListView.setOnScrollListener(mScrollListener);
 
         return mRootView;
     }
@@ -176,10 +164,10 @@ public class Board extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (OnFragmentInteractionListener) activity;
+            mListener = (OnReplyClickedListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement OnReplyClickedListener");
         }
     }
 
@@ -203,13 +191,15 @@ public class Board extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
+    public interface OnReplyClickedListener {
         public void onReplyClicked(String postLink);
     }
 
     private void refreshBoard(){
         mPosts.clear();
         mAdapter.notifyDataSetChanged();
+
+        mScrollListener.resetBoardPage();
         mPageGetter = new PageLoader(getActivity(), mRootView, mPosts, mAdapter);
         mPageGetter.execute(mBoardLink);
     }
@@ -264,6 +254,10 @@ public class Board extends Fragment {
          */
         @Override
         public void onScrollStateChanged(AbsListView view, int scrollState) {
+        }
+
+        public void resetBoardPage() {
+            currentPage = 1;
         }
     }
 }

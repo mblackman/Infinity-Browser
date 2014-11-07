@@ -7,12 +7,15 @@
 
     <Button
         android:layout_width="match_parent"
-        android:layout_height="@dimen/drawer_item_height"
+        android:layout_height="wrap_content"
         android:id="@+id/navigation_drawer_board_button"
-        android:background="#ff2838ff"
         android:clickable="true"
         android:enabled="true"
-        android:text="Boards" />
+        android:text="@string/add_new_boards_text"
+        android:background="@drawable/madoka_background"
+        android:gravity="center_vertical|left"
+        android:paddingLeft="@dimen/post_bar_large_padding"
+        android:textSize="@dimen/drawer_board_text_size" />
 
     <ListView
         xmlns:android="http://schemas.android.com/apk/res/android"

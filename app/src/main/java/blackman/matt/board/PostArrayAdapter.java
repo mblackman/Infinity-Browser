@@ -17,15 +17,13 @@
 package blackman.matt.board;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 
 import java.util.Collections;
 import java.util.List;
-
-import blackman.matt.infinitebrowser.R;
 
 /**
  * A custom adapter to handle loading posts on a board page. Sets up the views and recycles them.
@@ -35,7 +33,7 @@ import blackman.matt.infinitebrowser.R;
 public class PostArrayAdapter extends BaseAdapter {
     private List<Post> mPosts = Collections.emptyList();
     private final Context mContext;
-    private Board.OnFragmentInteractionListener mListener;
+    private Board.OnReplyClickedListener mListener;
 
     /**
      * Public constructor to handle taking in the list of views.
@@ -45,7 +43,7 @@ public class PostArrayAdapter extends BaseAdapter {
         mContext = context;
     }
 
-    public void updatePosts(List<Post> posts, Board.OnFragmentInteractionListener listener) {
+    public void updatePosts(List<Post> posts, Board.OnReplyClickedListener listener) {
         mPosts = posts;
         mListener = listener;
         notifyDataSetChanged();
@@ -101,9 +99,7 @@ public class PostArrayAdapter extends BaseAdapter {
             postView = (PostView) convertView;
         }
 
-        Post post = getItem(position);
-
-        postView.setUpPost(post);
+        postView.setUpPost(getItem(position));
 
         return postView;
     }

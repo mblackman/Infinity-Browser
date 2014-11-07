@@ -14,11 +14,11 @@
 
     <!-- Per the design guidelines, navigation drawers should be between 240dp and 320dp:
          https://developer.android.com/design/patterns/navigation-drawer.html -->
-    <dimen name="navigation_drawer_width">240dp</dimen>
+    <dimen name="navigation_drawer_width">360dp</dimen>
     <dimen name="board_list_car_height">64dp</dimen>
     <dimen name="omitted_replies_text_size">16sp</dimen>
     <dimen name="post_after_padding">2dp</dimen>
     <dimen name="list_card_button_size">50dp</dimen>
     <dimen name="list_card_board_name_size">12sp</dimen>
-    <dimen name="drawer_board_text_size">18sp</dimen>
+    <dimen name="drawer_board_text_size">32sp</dimen>
 </resources>

@@ -19,9 +19,12 @@ package blackman.matt.board;
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -40,7 +43,7 @@ import blackman.matt.infinitebrowser.R;
  * turns it into post cards to display.
  * This assumes you send it a link and doesn't check for null.
  */
-public class PageLoader extends AsyncTask<URL, Void, Document> {
+public class PageLoader extends AsyncTask<URL, Void, Void> {
     private final Context mContext;
     private final ProgressBar mProgress;
     private final TextView mProgressText;
@@ -82,9 +85,9 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
      * @return returns the html document
      */
     @Override
-    protected Document doInBackground(URL... urls) {
-        Document ochPage = null;
+    protected Void doInBackground(URL... urls) {
         URL url = urls[0];
+        Document ochPage = null;
         mPageUrl = url.toString();
         mIsOnRootPage = !mPageUrl.contains(".html");
 
@@ -94,65 +97,58 @@ public class PageLoader extends AsyncTask<URL, Void, Document> {
             e.printStackTrace();
         }
 
-        return ochPage;
+        if(ochPage != null) {
+            // Gets all the parent posts on page
+            Elements threads = ochPage.select("[class=thread]");
+
+            // Looks through all the master posts
+            for (Element thread : threads) {
+                // Create main elements and post
+                Elements postReplies;
+                Post opPost;
+
+                try {
+                    opPost = createPostOP(thread);
+                    mPosts.add(opPost);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                // If you are in a thread it will load the replies
+                if (!mIsOnRootPage) {
+                    postReplies = thread.select("[class=post reply]");
+
+                    // Looks through all the replies to an OP post
+                    for (Element postReply : postReplies) {
+                        Post replyPost;
+
+                        try {
+                            replyPost = createPostReply(postReply);
+                            mPosts.add(replyPost);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        } else {
+            CharSequence text = "Error loading page...Try reloading the page.";
+            int duration = Toast.LENGTH_LONG;
+
+            Toast toast = Toast.makeText(mContext, text, duration);
+            toast.setGravity(Gravity.TOP, 0, 0);
+            toast.show();
+        }
+
+        return null;
     }
 
     /**
      * After the page is read in, the pages are turned into fragments and are put on the
      * screen.
-     * @param html the document to process.
      */
     @Override
-    protected void onPostExecute(Document html) {
-        Elements threads;
-
-        // Gets all the parent posts on page
-        threads = html.select("[id*=thread_]");
-
-        // Looks through all the master posts
-        for (Element thread : threads) {
-            // Create main elements and post
-            Elements postReplies;
-            Post opPost;
-
-            try {
-                opPost = createPostOP(thread);
-                mPosts.add(opPost);
-            }
-            catch (Exception e) {
-                TextView errorView;
-                errorView = new TextView(mContext);
-                errorView.setText(e.toString());
-                if(errorView != null) {
-                    // TODO: Handle errors or something
-                    //mListView.addFooterView(errorView);
-                }
-            }
-
-            // If you are in a thread it will load the replies
-            if(!mIsOnRootPage) {
-                postReplies = thread.select("[class=post reply]");
-
-                // Looks through all the replies to an OP post
-                for (Element postReply : postReplies) {
-                    Post replyPost;
-
-                    try {
-                        replyPost = createPostReply(postReply);
-                        mPosts.add(replyPost);
-                    }
-                    catch (Exception e) {
-                        TextView errorView;
-                        errorView = new TextView(mContext);
-                        errorView.setText(e.toString());
-                        if(errorView != null) {
-                            // TODO: Handle errors or something
-                            //mListView.addFooterView(errorView);
-                        }
-                    }
-                }
-            }
-        }
+    protected void onPostExecute(Void nothing) {
         mAdapter.notifyDataSetChanged();
         mProgress.setVisibility(View.INVISIBLE);
         mProgressText.setVisibility(View.INVISIBLE);

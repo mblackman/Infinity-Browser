@@ -17,25 +17,14 @@
 package blackman.matt.board;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import blackman.matt.infinitebrowser.R;
 
@@ -53,11 +42,17 @@ public class PostView extends RelativeLayout {
     private TextView mReplyView;
     private ImageLoader mImageLoader;
 
-    private Board.OnFragmentInteractionListener mListener;
+    private Board.OnReplyClickedListener mListener;
 
     private String mPostImageThumb;
     private String mPostImageFull;
 
+    /**
+     * Constructor to take in custom attribute set.
+     *
+     * @param context Context of the caller.
+     * @param attrs Custom attribute set.
+     */
     public PostView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
@@ -67,8 +62,9 @@ public class PostView extends RelativeLayout {
      * Public constructor used to get the context of the view being created.
      *
      * @param context Context of the parent to this view.
+     * @param listener A On reply clicked listener for the board fragment.
      */
-    public PostView(Context context, Board.OnFragmentInteractionListener listener) {
+    public PostView(Context context, Board.OnReplyClickedListener listener) {
         super(context);
         mListener = listener;
         init();
