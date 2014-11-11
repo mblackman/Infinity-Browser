@@ -43,7 +43,7 @@ import blackman.matt.infinitebrowser.R;
  * turns it into post cards to display.
  * This assumes you send it a link and doesn't check for null.
  */
-public class PageLoader extends AsyncTask<URL, Void, Void> {
+public class PageLoader extends AsyncTask<URL, Void, Boolean> {
     private final Context mContext;
     private final ProgressBar mProgress;
     private final TextView mProgressText;
@@ -52,6 +52,13 @@ public class PageLoader extends AsyncTask<URL, Void, Void> {
 
     private Boolean mIsOnRootPage;
     private String mPageUrl;
+
+    public PageLoaderResponse mResponse;
+
+    public interface PageLoaderResponse {
+        public void setPageLoaded(Boolean isLoaded);
+        public void sendErrorMessage(CharSequence error);
+    }
 
     /**
      * Basic constructor to initialize the class.
@@ -62,12 +69,13 @@ public class PageLoader extends AsyncTask<URL, Void, Void> {
      * @param adapter Adapter for the list view that holds the posts.
      */
     public PageLoader(Activity context, View parent, List<Post> posts,
-                      PostArrayAdapter adapter) {
+                      PostArrayAdapter adapter, Boolean isRootBoard) {
         mContext = context;
         mProgress = (ProgressBar) parent.findViewById(R.id.progress_page_load);
         mProgressText = (TextView) parent.findViewById(R.id.tv_progress_page_load);
         mPosts = posts;
         mAdapter = adapter;
+        mIsOnRootPage = isRootBoard;
     }
 
     /**
@@ -77,6 +85,7 @@ public class PageLoader extends AsyncTask<URL, Void, Void> {
     protected void onPreExecute() {
         mProgress.setVisibility(View.VISIBLE);
         mProgressText.setVisibility(View.VISIBLE);
+        mResponse.setPageLoaded(false);
     }
 
     /**
@@ -85,11 +94,11 @@ public class PageLoader extends AsyncTask<URL, Void, Void> {
      * @return returns the html document
      */
     @Override
-    protected Void doInBackground(URL... urls) {
+    protected Boolean doInBackground(URL... urls) {
         URL url = urls[0];
         Document ochPage = null;
+        Boolean pageLoaded;
         mPageUrl = url.toString();
-        mIsOnRootPage = !mPageUrl.contains(".html");
 
         try {
             ochPage = Jsoup.connect(url.toString()).get();
@@ -109,7 +118,10 @@ public class PageLoader extends AsyncTask<URL, Void, Void> {
 
                 try {
                     opPost = createPostOP(thread);
-                    mPosts.add(opPost);
+
+                    if(!boardExists(opPost.Id)) {
+                        mPosts.add(opPost);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -124,23 +136,23 @@ public class PageLoader extends AsyncTask<URL, Void, Void> {
 
                         try {
                             replyPost = createPostReply(postReply);
-                            mPosts.add(replyPost);
+
+                            if(!boardExists(replyPost.Id)) {
+                                mPosts.add(replyPost);
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
                 }
             }
+            pageLoaded = true;
         } else {
             CharSequence text = "Error loading page...Try reloading the page.";
-            int duration = Toast.LENGTH_LONG;
-
-            Toast toast = Toast.makeText(mContext, text, duration);
-            toast.setGravity(Gravity.TOP, 0, 0);
-            toast.show();
+            mResponse.sendErrorMessage(text);
+            pageLoaded =false;
         }
-
-        return null;
+        return pageLoaded;
     }
 
     /**
@@ -148,10 +160,27 @@ public class PageLoader extends AsyncTask<URL, Void, Void> {
      * screen.
      */
     @Override
-    protected void onPostExecute(Void nothing) {
+    protected void onPostExecute(Boolean loadSuccess) {
+        if(loadSuccess) {
+            mResponse.setPageLoaded(true);
+        } else {
+            mResponse.setPageLoaded(false);
+        }
         mAdapter.notifyDataSetChanged();
         mProgress.setVisibility(View.INVISIBLE);
         mProgressText.setVisibility(View.INVISIBLE);
+    }
+
+    private Boolean boardExists(final long newPost) {
+        Boolean exists = false;
+
+        for(Post post : mPosts) {
+            if(post.Id.equals(newPost)) {
+                exists = true;
+            }
+        }
+
+        return exists;
     }
 
     /**
@@ -218,15 +247,15 @@ public class PageLoader extends AsyncTask<URL, Void, Void> {
             String imageUrl = image.select("a").first().attr("href");
             String imageThumbnail = image.select("img").first().attr("src");
 
-            postImageThumbs.add(imageThumbnail);
-            postImageFull.add(imageUrl);
+            postImageThumbs.add("http://8chan.co" + imageThumbnail);
+            postImageFull.add("http://8chan.co" + imageUrl);
         } else if (!multiFiles.isEmpty()) {
             for(Element image : multiFiles) {
                 String imageUrl = image.select("a").first().attr("href");
                 String imageThumbnail = image.select("img").first().attr("src");
 
-                postImageThumbs.add(imageThumbnail);
-                postImageFull.add(imageUrl);
+                postImageThumbs.add("http://8chan.co" + imageThumbnail);
+                postImageFull.add("http://8chan.co" + imageUrl);
             }
         }
 
@@ -281,15 +310,15 @@ public class PageLoader extends AsyncTask<URL, Void, Void> {
             String imageUrl = image.select("a").first().attr("href");
             String imageThumbnail = image.select("img").first().attr("src");
 
-            postImageThumbs.add(imageThumbnail);
-            postImageFull.add(imageUrl);
+            postImageThumbs.add("http://8chan.co" + imageThumbnail);
+            postImageFull.add("http://8chan.co" + imageUrl);
         } else if (!multiFiles.isEmpty()) {
             for(Element image : multiFiles) {
                 String imageUrl = image.select("a").first().attr("href");
                 String imageThumbnail = image.select("img").first().attr("src");
 
-                postImageThumbs.add(imageThumbnail);
-                postImageFull.add(imageUrl);
+                postImageThumbs.add("http://8chan.co" + imageThumbnail);
+                postImageFull.add("http://8chan.co" + imageUrl);
             }
         }
 

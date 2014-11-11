@@ -17,9 +17,11 @@
 package blackman.matt.board;
 
 import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Looper;
+import android.os.MessageQueue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,10 +30,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import blackman.matt.infinitebrowser.R;
@@ -42,16 +45,18 @@ import blackman.matt.infinitebrowser.R;
  * A main board or thread on 8chan. This will load and handle all of the posts on the board.
  *
  */
-public class Board extends Fragment {
+public class Board extends Fragment implements PageLoader.PageLoaderResponse {
     // ARG for the board link to be sent in
     private static final String ARG_BOARD_LINK = "boardlink";
     private PageLoader mPageGetter;
     private boolean mIsRootBoard;
-    private List<Post> mPosts = Collections.emptyList();
+    private List<Post> mPosts;
     private PostArrayAdapter mAdapter;
     private URL mBoardLink;
     private View mRootView;
     private ListView mListView;
+
+    private Boolean mPageLoaded = false;
 
     private EndlessScrollListener mScrollListener;
     private OnReplyClickedListener mListener;
@@ -138,18 +143,23 @@ public class Board extends Fragment {
         mListView = (ListView) mRootView.findViewById(R.id.lv_board_posts);
         mListView.addFooterView(progress);
 
+        mPosts = new ArrayList<Post>();
         mAdapter = new PostArrayAdapter(getActivity());
         mAdapter.updatePosts(mPosts, mListener);
 
         if(mBoardLink != null){
             mIsRootBoard = !mBoardLink.getPath().endsWith(".html");
-            mPageGetter = new PageLoader(getActivity(), mRootView, mPosts, mAdapter);
+            mPageGetter = new PageLoader(getActivity(), mRootView, mPosts, mAdapter, mIsRootBoard);
+            mPageGetter.mResponse = this;
             mPageGetter.execute(mBoardLink);
         }
 
         mListView.setAdapter(mAdapter);
-        mScrollListener = new EndlessScrollListener(mRootView);
-        mListView.setOnScrollListener(mScrollListener);
+
+        if(mIsRootBoard) {
+            mScrollListener = new EndlessScrollListener(mRootView);
+            mListView.setOnScrollListener(mScrollListener);
+        }
 
         return mRootView;
     }
@@ -182,6 +192,54 @@ public class Board extends Fragment {
     }
 
     /**
+     * Called when a page is loaded or fails to load.
+     *
+     * @param isLoaded If the page successfully loaded or not.
+     */
+    @Override
+    public void setPageLoaded(Boolean isLoaded) {
+        mPageLoaded = isLoaded;
+    }
+
+    /**
+     * Makes a toast indicating an error loading the board.
+     *
+     * @param error The error message.
+     */
+    @Override
+    public void sendErrorMessage(final CharSequence error) {
+        Thread thread = new Thread() {
+            public void run() {
+
+                Looper.prepare();
+                MessageQueue queue = Looper.myQueue();
+
+                queue.addIdleHandler(new MessageQueue.IdleHandler() {
+                    int mReqCount = 0;
+
+                    @Override
+                    public boolean queueIdle() {
+                        if (++mReqCount == 2) {
+                            // Quit looper
+                            Looper.myLooper().quit();
+                            return false;
+                        } else
+                            return true;
+                    }
+                });
+
+                int duration = Toast.LENGTH_LONG;
+
+                Toast toast = Toast.makeText(getActivity(), error, duration);
+                toast.setGravity(Gravity.TOP, 0, 0);
+                toast.show();
+                Looper.loop();
+            }
+        };
+        thread.start();
+    }
+
+    /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
@@ -199,8 +257,12 @@ public class Board extends Fragment {
         mPosts.clear();
         mAdapter.notifyDataSetChanged();
 
-        mScrollListener.resetBoardPage();
-        mPageGetter = new PageLoader(getActivity(), mRootView, mPosts, mAdapter);
+        if(mScrollListener != null) {
+            mScrollListener.resetBoardPage();
+        }
+
+        mPageGetter = new PageLoader(getActivity(), mRootView, mPosts, mAdapter, mIsRootBoard);
+        mPageGetter.mResponse = this;
         mPageGetter.execute(mBoardLink);
     }
 
@@ -232,12 +294,13 @@ public class Board extends Fragment {
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem,
                              int visibleItemCount, int totalItemCount) {
-            if (mIsRootBoard && mPageGetter.getStatus() == AsyncTask.Status.FINISHED &&
+            if (mIsRootBoard && mPageLoaded &&
                     (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleItemCount)) {
                 URL newPage;
                 try {
                     newPage = new URL(mBoardLink.toString() + (++currentPage) + ".html");
-                    mPageGetter = new PageLoader(getActivity(), mParent, mPosts, mAdapter);
+                    mPageGetter = new PageLoader(getActivity(), mParent, mPosts, mAdapter, mIsRootBoard);
+                    mPageGetter.mResponse = Board.this;
                     mPageGetter.execute(newPage);
                 } catch (MalformedURLException e) {
                     e.printStackTrace();

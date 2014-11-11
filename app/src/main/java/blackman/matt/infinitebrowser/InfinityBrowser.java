@@ -27,14 +27,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
+
+
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import blackman.matt.board.Board;
+
 
 /**
  * The main method of Infinity Browser.
@@ -62,9 +68,24 @@ public class InfinityBrowser extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Set up configuration for the universal image loader
+        DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .build();
+
+        ImageLoaderConfiguration config =
+                new ImageLoaderConfiguration.Builder(getApplicationContext())
+                .defaultDisplayImageOptions(defaultOptions)
+                .build();
+
+        ImageLoader.getInstance().init(config);
+
+        // Load preferences for activity
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         Boolean ageAccept = preferences.getBoolean("age_guard_accept", false);
 
+        // Checks if age guard has been accepted
         if(!ageAccept){
             DialogFragment ageGuardDialog = new AgeGuardDialogFragment();
             ageGuardDialog.show(getFragmentManager(), "ageGuardDialog");
@@ -93,6 +114,7 @@ public class InfinityBrowser extends Activity
             fragmentTransaction.commit();
         }
 
+        // Set up navigation drawer
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
 

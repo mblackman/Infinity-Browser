@@ -15,9 +15,10 @@ import java.util.regex.Pattern;
  * Created by Matt on 11/3/2014.
  */
 public class Post {
-    public String mUserName, mPostDate, mPostNo, mTopic, mPostText, mNumReplies, mBoardLink;
-    public List<String> mFullURLS, mThumbURLS;
-    public Boolean mIsRootBoard;
+    public String userName, postDate, postNo, topic, postBody, numReplies, boardLink;
+    public List<String> fullURLS, thumbURLS;
+    public Boolean isRootBoard, hasImages;
+    public Long Id;
 
     /**
      * Basic constructor
@@ -35,16 +36,22 @@ public class Post {
     public Post(String userName, String postDate, String postNumber, String topic,
                 String postText, String numReplies, List<String> imageThumbs,
                 List<String> imageFull, String boardLink, boolean onRootBoard) {
-        mUserName = userName;
-        mPostDate = postDate;
-        mPostNo = postNumber;
-        mTopic = topic;
-        mPostText = formatPostBody(postText);
-        mNumReplies = numReplies;
-        mThumbURLS = imageThumbs;
-        mFullURLS = imageFull;
-        mBoardLink = boardLink;
-        mIsRootBoard = onRootBoard;
+        this.userName = userName;
+        this.postDate = postDate;
+        postNo = postNumber;
+        this.topic = topic;
+        postBody = formatPostBody(postText);
+        this.numReplies = numReplies;
+        thumbURLS = imageThumbs;
+        fullURLS = imageFull;
+        this.boardLink = boardLink;
+        isRootBoard = onRootBoard;
+        Id = Long.parseLong(postNo);
+        if(thumbURLS.isEmpty() && fullURLS.isEmpty()) {
+            hasImages = false;
+        } else {
+            hasImages = true;
+        }
     }
 
     /**
