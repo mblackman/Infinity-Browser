@@ -216,7 +216,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
         imageFiles = postElement.getElementsByClass("files").first();
 
         singleFile = imageFiles.getElementsByClass("file");
-        multiFiles = imageFiles.select("[class=file multifile");
+        multiFiles = imageFiles.select("[class=file multifile]");
 
         // Read through op post and get information
         postLink = postOp.getElementsByClass("post_no").first();
@@ -247,18 +247,8 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
         fileNumbers = new ArrayList<String>();
         fileInfos = new ArrayList<String>();
 
-        if (!singleFile.isEmpty()) {
-            Element image = singleFile.first();
-            String imageUrl = image.select("a").first().attr("href");
-            String imageThumbnail = image.select("img").first().attr("src");
-            String fileNumber = image.select("a").first().text();
-            String fileInfo = image.getElementsByClass("unimportant").first().text();
 
-            postImageThumbs.add(imageThumbnail);
-            postImageFull.add(imageUrl);
-            fileNumbers.add(fileNumber);
-            fileInfos.add(fileInfo);
-        } else if (!multiFiles.isEmpty()) {
+        if (!multiFiles.isEmpty()) {
             for(Element image : multiFiles) {
                 String imageUrl = image.select("a").first().attr("href");
                 String imageThumbnail = image.select("img").first().attr("src");
@@ -270,6 +260,17 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
                 fileNumbers.add(fileNumber);
                 fileInfos.add(fileInfo);
             }
+        } else if (!singleFile.isEmpty()) {
+            Element image = singleFile.first();
+            String imageUrl = image.select("a").first().attr("href");
+            String imageThumbnail = image.select("img").first().attr("src");
+            String fileNumber = image.select("a").first().text();
+            String fileInfo = image.getElementsByClass("unimportant").first().text();
+
+            postImageThumbs.add(imageThumbnail);
+            postImageFull.add(imageUrl);
+            fileNumbers.add(fileNumber);
+            fileInfos.add(fileInfo);
         }
 
         // Create new instance of post with elements
