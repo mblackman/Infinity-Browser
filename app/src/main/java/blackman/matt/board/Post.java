@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  */
 public class Post {
     public String userName, postDate, postNo, topic, postBody, numReplies, boardLink;
-    public List<String> fullURLS, thumbURLS;
+    public List<String> fullURLS, thumbURLS, fileNames, fileNumbers;
     public Boolean isRootBoard, hasImages;
     public Long Id;
 
@@ -35,22 +35,25 @@ public class Post {
      */
     public Post(String userName, String postDate, String postNumber, String topic,
                 String postText, String numReplies, List<String> imageThumbs,
-                List<String> imageFull, String boardLink, boolean onRootBoard) {
+                List<String> imageFull, List<String> fileNames, List<String> fileNumbers,
+                String boardLink, boolean onRootBoard) {
         this.userName = userName;
         this.postDate = postDate;
-        postNo = postNumber;
+        this.postNo = postNumber;
         this.topic = topic;
-        postBody = formatPostBody(postText);
+        this.postBody = formatPostBody(postText);
         this.numReplies = numReplies;
-        thumbURLS = imageThumbs;
-        fullURLS = imageFull;
+        this.thumbURLS = imageThumbs;
+        this.fullURLS = imageFull;
+        this.fileNames = fileNames;
+        this.fileNumbers = fileNumbers;
         this.boardLink = boardLink;
-        isRootBoard = onRootBoard;
-        Id = Long.parseLong(postNo);
+        this.isRootBoard = onRootBoard;
+        this.Id = Long.parseLong(postNo);
         if(thumbURLS.isEmpty() && fullURLS.isEmpty()) {
-            hasImages = false;
+            this.hasImages = false;
         } else {
-            hasImages = true;
+            this.hasImages = true;
         }
     }
 

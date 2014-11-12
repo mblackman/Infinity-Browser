@@ -35,6 +35,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
+import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -77,6 +78,9 @@ public class InfinityBrowser extends Activity
         ImageLoaderConfiguration config =
                 new ImageLoaderConfiguration.Builder(getApplicationContext())
                 .defaultDisplayImageOptions(defaultOptions)
+                .memoryCacheSize(20 * 1024 * 1024) // 20MB
+                .diskCacheSize(50 * 1024 * 1024) // 50MB
+                .writeDebugLogs()
                 .build();
 
         ImageLoader.getInstance().init(config);
@@ -205,14 +209,15 @@ public class InfinityBrowser extends Activity
         Boolean ageAccept = preferences.getBoolean("age_guard_accept", false);
 
         if(ageAccept) {
-            new Board();
+            FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
             Board newThread = Board.newInstance(postLink);
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
-            transaction.replace(R.id.container, newThread);
-            transaction.addToBackStack(null);
+            fragmentTransaction.replace(R.id.container, newThread, postLink);
+            fragmentTransaction.addToBackStack(null);
 
-            transaction.commit();
+            fragmentTransaction.commit();
 
             mTitle = postLink;
         }

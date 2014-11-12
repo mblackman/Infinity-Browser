@@ -192,6 +192,19 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
     }
 
     /**
+     * Called when the fragment is being destroyed
+     */
+    @Override
+    public void onDestroy() {
+        mPosts.clear();
+        mAdapter.notifyDataSetChanged();
+        mPosts = null;
+        mAdapter = null;
+        System.gc();
+        super.onDestroy();
+    }
+
+    /**
      * Called when a page is loaded or fails to load.
      *
      * @param isLoaded If the page successfully loaded or not.
@@ -254,12 +267,12 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
     }
 
     private void refreshBoard(){
-        mPosts.clear();
-        mAdapter.notifyDataSetChanged();
-
         if(mScrollListener != null) {
             mScrollListener.resetBoardPage();
         }
+
+        mPosts.clear();
+        mAdapter.notifyDataSetChanged();
 
         mPageGetter = new PageLoader(getActivity(), mRootView, mPosts, mAdapter, mIsRootBoard);
         mPageGetter.mResponse = this;

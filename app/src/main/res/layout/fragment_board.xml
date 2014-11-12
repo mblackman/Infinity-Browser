@@ -13,6 +13,6 @@
         android:choiceMode="none"
         android:drawSelectorOnTop="false"
         android:fastScrollAlwaysVisible="false"
-        android:fastScrollEnabled="true" />
+        android:fastScrollEnabled="false" />
 
 </LinearLayout>

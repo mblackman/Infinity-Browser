@@ -31,6 +31,7 @@ import android.widget.ViewSwitcher;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import java.util.Collections;
 import java.util.List;
@@ -46,7 +47,6 @@ public class PostArrayAdapter extends BaseAdapter {
     private List<Post> mPosts = Collections.emptyList();
     private final Context mContext;
     private Board.OnReplyClickedListener mListener;
-    private ImageLoader imageLoader;
 
     /**
      * Public constructor to handle taking in the list of views.
@@ -54,7 +54,6 @@ public class PostArrayAdapter extends BaseAdapter {
      */
     public PostArrayAdapter(Context context) {
         mContext = context;
-        imageLoader = ImageLoader.getInstance();
     }
 
     public void updatePosts(List<Post> posts, Board.OnReplyClickedListener listener) {
@@ -105,25 +104,27 @@ public class PostArrayAdapter extends BaseAdapter {
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Post post = getItem(position);
-        ViewHolder holder;
+        final Post post = getItem(position);
+        final ViewHolder holder;
 
         if(convertView == null) {
             LayoutInflater inflater = (LayoutInflater) mContext
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
             convertView = inflater.inflate(R.layout.post_view, parent, false);
+
             holder = new ViewHolder();
-            holder.thumbnail = (ImageButton) convertView.findViewById(R.id.post_thumbnail);
-            holder.fullSize = (ImageButton) convertView.findViewById(R.id.post_full_image);
+
+            holder.image = (ImageButton) convertView.findViewById(R.id.post_thumbnail);
+            holder.filename = (TextView) convertView.findViewById(R.id.tv_post_image_filename);
             holder.username = (TextView) convertView.findViewById(R.id.tv_username);
             holder.postDate = (TextView) convertView.findViewById(R.id.tv_datetime);
             holder.postNo = (TextView) convertView.findViewById(R.id.tv_postno);
             holder.topic = (TextView) convertView.findViewById(R.id.tv_topic);
             holder.postBody = (TextView) convertView.findViewById(R.id.tv_postText);
-            holder.fullBody = (TextView) convertView.findViewById(R.id.tv_full_post_text);
             holder.replies = (TextView) convertView.findViewById(R.id.tv_number_replies);
-            holder.imageLayout = (LinearLayout) convertView.findViewById(R.id.ll_post_layout);
-            holder.switcher = (ViewSwitcher) convertView.findViewById(R.id.vs_post_body);
+            holder.bodyLayout = (LinearLayout) convertView.findViewById(R.id.ll_post_body);
+
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -135,8 +136,6 @@ public class PostArrayAdapter extends BaseAdapter {
         holder.topic.setText(post.topic);
         holder.postBody.setText(Html.fromHtml(post.postBody));
         holder.postBody.setMovementMethod(LinkMovementMethod.getInstance());
-        holder.fullBody.setText(Html.fromHtml(post.postBody));
-        holder.fullBody.setMovementMethod(LinkMovementMethod.getInstance());
 
         // Set up reply button
         if(post.isRootBoard) {
@@ -151,24 +150,67 @@ public class PostArrayAdapter extends BaseAdapter {
             holder.replies.setVisibility(View.GONE);
         }
 
-        // Set up thumbnail button
+        // Set up image button
         if(post.hasImages) {
             int maxWidth = mContext.getResources().getInteger(R.integer.post_thumbnail_size);
-            ImageSize targetSize = new ImageSize(maxWidth, maxWidth);
-            String thumbURL = post.thumbURLS.get(0);
-            Bitmap bmp = imageLoader.loadImageSync(thumbURL, targetSize);
-            holder.thumbnail.setImageBitmap(bmp);
+            final ImageSize targetSize = new ImageSize(maxWidth, maxWidth);
+
+            holder.filename.setText(post.fileNames.get(0) + " " + post.fileNumbers.get(0));
+            holder.filename.setVisibility(View.VISIBLE);
+
+            // Load image image
+            if(holder.bodyLayout.getOrientation() == LinearLayout.HORIZONTAL) {
+                ImageLoader.getInstance().loadImage(post.thumbURLS.get(0), targetSize,
+                        new SimpleImageLoadingListener() {
+                            @Override
+                            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                holder.image.setImageBitmap(loadedImage);
+                            }
+                        });
+            } else {
+                ImageLoader.getInstance().loadImage(post.fullURLS.get(0),
+                        new SimpleImageLoadingListener() {
+                            @Override
+                            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                holder.image.setImageBitmap(loadedImage);
+                            }
+                        });
+            }
+
+            holder.image.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(holder.bodyLayout.getOrientation() == LinearLayout.VERTICAL) {
+                        ImageLoader.getInstance().loadImage(post.thumbURLS.get(0), targetSize,
+                                new SimpleImageLoadingListener() {
+                                    @Override
+                                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                        holder.image.setImageBitmap(loadedImage);
+                                        holder.bodyLayout.setOrientation(LinearLayout.HORIZONTAL);
+                                    }
+                                });
+                    } else {
+                        ImageLoader.getInstance().loadImage(post.fullURLS.get(0),
+                                new SimpleImageLoadingListener() {
+                                    @Override
+                                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                        holder.image.setImageBitmap(loadedImage);
+                                        holder.bodyLayout.setOrientation(LinearLayout.VERTICAL);
+                                    }
+                                });
+                    }
+                }
+            });
         } else {
-            holder.thumbnail.setVisibility(View.GONE);
+            holder.image.setVisibility(View.GONE);
         }
 
         return convertView;
     }
 
     static class ViewHolder {
-        ImageButton thumbnail, fullSize;
-        TextView username, postDate, postNo, topic, postBody, fullBody, replies;
-        LinearLayout imageLayout;
-        ViewSwitcher switcher;
+        ImageButton image;
+        TextView username, postDate, postNo, topic, postBody, replies, filename;
+        LinearLayout bodyLayout;
     }
 }

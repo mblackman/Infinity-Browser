@@ -53,5 +53,6 @@
     <string name="Board_List_Progress_Text">Loading list of boards...</string>
     <string name="add_new_boards_text">Boards</string>
     <string name="page_load_error_text">Could not load page...Try reloading page.</string>
+    <string name="post_image_file_name_text">exampletext.jpg</string>
 
 </resources>

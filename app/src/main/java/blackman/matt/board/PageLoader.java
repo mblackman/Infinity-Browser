@@ -19,6 +19,7 @@ package blackman.matt.board;
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -207,12 +208,14 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
         String numReplies;
         List<String> postImageThumbs;
         List<String> postImageFull;
+        List<String> fileNumbers;
+        List<String> fileInfos;
 
         // Start filtering
         postOp = postElement.select("[class*=post op]").first();
         imageFiles = postElement.getElementsByClass("files").first();
 
-        singleFile = imageFiles.select("[class=file");
+        singleFile = imageFiles.getElementsByClass("file");
         multiFiles = imageFiles.select("[class=file multifile");
 
         // Read through op post and get information
@@ -241,27 +244,37 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
         // Get images and thumbnails into arrays
         postImageThumbs = new ArrayList<String>();
         postImageFull = new ArrayList<String>();
+        fileNumbers = new ArrayList<String>();
+        fileInfos = new ArrayList<String>();
 
         if (!singleFile.isEmpty()) {
             Element image = singleFile.first();
             String imageUrl = image.select("a").first().attr("href");
             String imageThumbnail = image.select("img").first().attr("src");
+            String fileNumber = image.select("a").first().text();
+            String fileInfo = image.getElementsByClass("unimportant").first().text();
 
-            postImageThumbs.add("http://8chan.co" + imageThumbnail);
-            postImageFull.add("http://8chan.co" + imageUrl);
+            postImageThumbs.add(imageThumbnail);
+            postImageFull.add(imageUrl);
+            fileNumbers.add(fileNumber);
+            fileInfos.add(fileInfo);
         } else if (!multiFiles.isEmpty()) {
             for(Element image : multiFiles) {
                 String imageUrl = image.select("a").first().attr("href");
                 String imageThumbnail = image.select("img").first().attr("src");
+                String fileNumber = image.select("a").first().text();
+                String fileInfo = image.getElementsByClass("unimportant").first().text();
 
-                postImageThumbs.add("http://8chan.co" + imageThumbnail);
-                postImageFull.add("http://8chan.co" + imageUrl);
+                postImageThumbs.add(imageThumbnail);
+                postImageFull.add(imageUrl);
+                fileNumbers.add(fileNumber);
+                fileInfos.add(fileInfo);
             }
         }
 
         // Create new instance of post with elements
         opPost = new Post(userName, postDate, postNumber, postTopic, postText, numReplies,
-                postImageThumbs, postImageFull, mPageUrl, mIsOnRootPage);
+                postImageThumbs, postImageFull, fileInfos, fileNumbers, mPageUrl, mIsOnRootPage);
 
         return opPost;
     }
@@ -286,13 +299,15 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
         String postText ;
         List<String> postImageThumbs;
         List<String> postImageFull;
+        List<String> fileNumbers;
+        List<String> fileInfos;
 
         // Start filtering
         postReply = postElement.select("[class*=post reply]").first();
         imageFiles = postElement.getElementsByClass("files").first();
 
-        singleFile = imageFiles.select("[class=file");
-        multiFiles = imageFiles.select("[class=file multifile");
+        singleFile = imageFiles.select("[class=file]");
+        multiFiles = imageFiles.select("[class=file multifile]");
 
         // Read through op post and get information
         postLink = postReply.getElementsByClass("post_no").first();
@@ -304,27 +319,38 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
         // Get images and thumbnails into arrays
         postImageThumbs = new ArrayList<String>();
         postImageFull = new ArrayList<String>();
+        fileNumbers = new ArrayList<String>();
+        fileInfos = new ArrayList<String>();
 
-        if (!singleFile.isEmpty()) {
-            Element image = singleFile.first();
-            String imageUrl = image.select("a").first().attr("href");
-            String imageThumbnail = image.select("img").first().attr("src");
-
-            postImageThumbs.add("http://8chan.co" + imageThumbnail);
-            postImageFull.add("http://8chan.co" + imageUrl);
-        } else if (!multiFiles.isEmpty()) {
+        if (!multiFiles.isEmpty()) {
             for(Element image : multiFiles) {
                 String imageUrl = image.select("a").first().attr("href");
                 String imageThumbnail = image.select("img").first().attr("src");
+                String fileNumber = image.select("a").first().text();
+                String fileInfo = image.getElementsByClass("unimportant").first().text();
 
-                postImageThumbs.add("http://8chan.co" + imageThumbnail);
-                postImageFull.add("http://8chan.co" + imageUrl);
+                postImageThumbs.add(imageThumbnail);
+                postImageFull.add(imageUrl);
+                fileNumbers.add(fileNumber);
+                fileInfos.add(fileInfo);
             }
+        } else if (!singleFile.isEmpty()) {
+            Element image = singleFile.first();
+            String imageUrl = image.select("a").first().attr("href");
+            String imageThumbnail = image.select("img").first().attr("src");
+            String fileNumber = image.select("a").first().text();
+            Log.i("Image info", image.toString());
+            String fileInfo = image.select("[class=unimportant]").first().text();
+
+            postImageThumbs.add(imageThumbnail);
+            postImageFull.add(imageUrl);
+            fileNumbers.add(fileNumber);
+            fileInfos.add(fileInfo);
         }
 
         // Create new instance of post with elements
         newPost = new Post(userName, postDate, postNumber, "", postText, "",
-                postImageThumbs, postImageFull, mPageUrl, mIsOnRootPage);
+                postImageThumbs, postImageFull, fileInfos, fileNumbers, mPageUrl, mIsOnRootPage);
 
         return newPost;
     }
