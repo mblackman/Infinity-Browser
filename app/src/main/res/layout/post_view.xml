@@ -62,73 +62,37 @@
         android:textSize="@dimen/post_header_font_size"
         android:visibility="gone" />
 
-    <ViewSwitcher
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/vs_post_body"
-        android:layout_below="@+id/tv_post_image_filename">
+        android:orientation="horizontal"
+        android:layout_below="@+id/tv_post_image_filename"
+        android:id="@+id/ll_post_body">
 
-        <LinearLayout
-            android:layout_width="fill_parent"
+        <ImageButton
+            android:id="@+id/post_thumbnail"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:adjustViewBounds="true"
+            android:background="@android:color/transparent"
+            android:baselineAlignBottom="false"
+            android:clickable="true"
+            android:contentDescription="@string/post_thumb_desciption"
+            android:cropToPadding="false"
+            android:longClickable="false"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_launcher" />
 
-            <ImageButton
-                android:id="@+id/post_thumbnail"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:adjustViewBounds="true"
-                android:background="@android:color/transparent"
-                android:baselineAlignBottom="false"
-                android:clickable="true"
-                android:contentDescription="@string/post_thumb_desciption"
-                android:cropToPadding="false"
-                android:longClickable="false"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_launcher" />
-
-            <TextView
-                android:id="@+id/tv_postText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:paddingLeft="@dimen/post_bar_small_padding"
-                android:paddingRight="@dimen/post_bar_small_padding"
-                android:text="@string/post_text_sample_text"
-                android:textSize="@dimen/post_body_font_size" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="fill_parent"
+        <TextView
+            android:id="@+id/tv_postText"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:id="@+id/linearLayout" >
-
-            <ImageButton
-                android:id="@+id/post_full_image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:adjustViewBounds="true"
-                android:background="@android:color/transparent"
-                android:baselineAlignBottom="false"
-                android:clickable="true"
-                android:contentDescription="@string/post_thumb_desciption"
-                android:cropToPadding="false"
-                android:longClickable="false"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_launcher" />
-
-            <TextView
-                android:id="@+id/tv_postText_full"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:paddingLeft="@dimen/post_bar_small_padding"
-                android:paddingRight="@dimen/post_bar_small_padding"
-                android:text="@string/post_text_sample_text"
-                android:textSize="@dimen/post_body_font_size" />
-        </LinearLayout>
-    </ViewSwitcher>
+            android:clickable="true"
+            android:paddingLeft="@dimen/post_bar_small_padding"
+            android:paddingRight="@dimen/post_bar_small_padding"
+            android:text="@string/post_text_sample_text"
+            android:textSize="@dimen/post_body_font_size" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tv_number_replies"
@@ -141,6 +105,6 @@
         android:text="@string/post_view_reply_text"
         android:textColor="@android:color/holo_blue_dark"
         android:textSize="@dimen/omitted_replies_text_size"
-        android:layout_below="@+id/vs_post_body" />
+        android:layout_below="@+id/ll_post_body" />
 
 </RelativeLayout>

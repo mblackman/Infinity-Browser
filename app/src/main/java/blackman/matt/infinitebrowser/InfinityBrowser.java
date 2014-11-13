@@ -87,7 +87,6 @@ public class InfinityBrowser extends Activity
                 .defaultDisplayImageOptions(defaultOptions)
                 .memoryCacheSize(20 * 1024 * 1024) // 20MB
                 .diskCacheSize(50 * 1024 * 1024) // 50MB
-                .writeDebugLogs()
                 .build();
 
         ImageLoader.getInstance().init(config);
@@ -121,7 +120,6 @@ public class InfinityBrowser extends Activity
 
                 mTitle = "/" + preferences.getString("default_board", "").toLowerCase() + "/";
             }
-            fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
         }
 

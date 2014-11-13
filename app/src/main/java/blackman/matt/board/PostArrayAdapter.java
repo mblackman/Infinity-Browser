@@ -20,7 +20,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.SparseArray;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,11 +31,8 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.core.imageaware.ImageAware;
 import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import java.util.Collections;
@@ -74,7 +71,7 @@ public class PostArrayAdapter extends BaseAdapter {
      */
     @Override
     public int getCount() {
-        return mPosts.size();
+        return mPosts != null ? mPosts.size() : 0;
     }
 
     /**
@@ -110,117 +107,109 @@ public class PostArrayAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         Post post = getItem(position);
-        int maxWidth = mContext.getResources().getInteger(R.integer.post_thumbnail_size);
-        final ImageSize targetSize = new ImageSize(maxWidth, maxWidth);
-
-        ImageButton thumbnail, fullSize;
-        TextView username, postDate, postNo, topic, postBodySmall, postBodyFull, replies, filename;
-        ViewSwitcher switcher;
+        ViewHolder holder;
+        //int maxWidth = mContext.getResources().getInteger(R.integer.post_thumbnail_size);
+        //final ImageSize targetSize = new ImageSize(maxWidth, maxWidth);
 
         if(convertView == null) {
             convertView = LayoutInflater.from(mContext).inflate(R.layout.post_view, parent, false);
+
+            holder = new ViewHolder();
+
+            holder.image = (ImageButton) convertView.findViewById(R.id.post_thumbnail);
+            holder.filename = (TextView) convertView.findViewById(R.id.tv_post_image_filename);
+            holder.username = (TextView) convertView.findViewById(R.id.tv_username);
+            holder.postDate = (TextView) convertView.findViewById(R.id.tv_datetime);
+            holder.postNo = (TextView) convertView.findViewById(R.id.tv_postno);
+            holder.topic = (TextView) convertView.findViewById(R.id.tv_topic);
+            holder.postBody = (TextView) convertView.findViewById(R.id.tv_postText);
+            holder.replies = (TextView) convertView.findViewById(R.id.tv_number_replies);
+            holder.layout = (LinearLayout) convertView.findViewById(R.id.ll_post_body);
+
+            holder.image.setTag(holder);
+
+            convertView.setTag(holder);
+        } else {
+            holder = (ViewHolder) convertView.getTag();
         }
 
-        thumbnail = ViewHolder.get(convertView, R.id.post_thumbnail);
-        fullSize = ViewHolder.get(convertView, R.id.post_full_image);
-        username = ViewHolder.get(convertView, R.id.tv_username);
-        postNo = ViewHolder.get(convertView, R.id.tv_postno);
-        postDate = ViewHolder.get(convertView, R.id.tv_datetime);
-        topic = ViewHolder.get(convertView, R.id.tv_topic);
-        postBodySmall = ViewHolder.get(convertView, R.id.tv_postText);
-        postBodyFull = ViewHolder.get(convertView, R.id.tv_postText_full);
-        replies = ViewHolder.get(convertView, R.id.tv_number_replies);
-        filename = ViewHolder.get(convertView, R.id.tv_post_image_filename);
-        switcher = ViewHolder.get(convertView, R.id.vs_post_body);
-
-        username.setText(post.userName);
-        postDate.setText(post.postDate);
-        postNo.setText("Post No. " + post.postNo);
-        topic.setText(post.topic);
-        postBodySmall.setText(Html.fromHtml(post.postBody));
-        postBodySmall.setMovementMethod(LinkMovementMethod.getInstance());
-        postBodyFull.setText(Html.fromHtml(post.postBody));
-        postBodyFull.setMovementMethod(LinkMovementMethod.getInstance());
+        holder.username.setText(post.userName);
+        holder.postDate.setText(post.postDate);
+        holder.postNo.setText("Post No. " + post.postNo);
+        holder.topic.setText(post.topic);
+        holder.postBody.setText(Html.fromHtml(post.postBody));
+        holder.postBody.setMovementMethod(LinkMovementMethod.getInstance());
 
         // Set up reply button
         if(post.isRootBoard) {
             final String newUrl = post.boardLink + "res/" + post.postNo + ".html";
-            replies.setOnClickListener(new View.OnClickListener() {
+            holder.replies.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     mListener.onReplyClicked(newUrl);
                 }
             });
         } else {
-            replies.setVisibility(View.GONE);
+            holder.replies.setVisibility(View.GONE);
         }
 
         // Set up image button
         if(post.hasImages) {
-            filename.setText(post.fileNames.get(0) + " " + post.fileNumbers.get(0));
-            filename.setVisibility(View.VISIBLE);
+            holder.filename.setText(post.fileNames.get(0) + " " + post.fileNumbers.get(0));
+            holder.filename.setVisibility(View.VISIBLE);
 
-            ImageAware imageAware = new ImageViewAware(thumbnail, false);
-
-            ImageLoader.getInstance().displayImage(post.thumbURLS.get(0), imageAware);
-
-            thumbnail.setOnClickListener(new View.OnClickListener() {
+            if(post.isThumbnail) {
+                ImageAware imageAware = new ImageViewAware(holder.image, false);
+                ImageLoader.getInstance().displayImage(post.thumbURLS.get(0), imageAware);
+                holder.layout.setOrientation(LinearLayout.HORIZONTAL);
+            } else {
+                ImageAware imageAware = new ImageViewAware(holder.image, false);
+                ImageLoader.getInstance().displayImage(post.fullURLS.get(0), imageAware);
+                holder.layout.setOrientation(LinearLayout.VERTICAL);
+            }
+            holder.image.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ImageButton fullImage = ViewHolder.get(v, R.id.post_full_image);
-
-                    ImageLoader.getInstance().displayImage(getItem(position).fullURLS.get(0), fullImage,
-                            new SimpleImageLoadingListener() {
-                                @Override
-                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                                    ViewSwitcher mswitch = ViewHolder.get(view, R.id.vs_post_body);
-                                    ((ImageButton) view).setImageBitmap(null);
-                                    ((ImageButton) view).setImageBitmap(loadedImage);
-                                    view.setVisibility(View.VISIBLE);
-                                    mswitch.showNext();
-                                }
-                            });
+                    final ViewHolder myHolder = (ViewHolder) v.getTag();
+                    final Post myPost = getItem(position);
+                    // If it is on big picture
+                    if(myHolder.layout.getOrientation() == LinearLayout.VERTICAL) {
+                        String url = myPost.thumbURLS.get(0);
+                        myPost.isThumbnail = true;
+                        ImageLoader.getInstance().displayImage(url, myHolder.image,
+                                new SimpleImageLoadingListener() {
+                                    @Override
+                                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                        ((ImageButton) view).setImageBitmap(loadedImage);
+                                        myHolder.layout.setOrientation(LinearLayout.HORIZONTAL);
+                                    }
+                                });
+                    } else {
+                        String url = myPost.fullURLS.get(0);
+                        myPost.isThumbnail = false;
+                        ImageLoader.getInstance().displayImage(url, myHolder.image,
+                                new SimpleImageLoadingListener() {
+                                    @Override
+                                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                        ((ImageButton) view).setImageBitmap(loadedImage);
+                                        myHolder.layout.setOrientation(LinearLayout.VERTICAL);
+                                    }
+                                });
+                    }
                 }
             });
-            fullSize.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ImageButton thumb = ViewHolder.get(v, R.id.post_full_image);
-                    ImageLoader.getInstance().displayImage(getItem(position).fullURLS.get(0), thumb,
-                            new SimpleImageLoadingListener() {
-                                @Override
-                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                                    ViewSwitcher mswitch = ViewHolder.get(view, R.id.vs_post_body);
-                                    ImageButton fullImage = ViewHolder.get(view, R.id.post_full_image);
-                                    ((ImageButton) view).setImageBitmap(null);
-                                    ((ImageButton) view).setImageBitmap(loadedImage);
-                                    fullImage.setVisibility(View.GONE);
-                                    mswitch.showNext();
-                                }
-                            });
-                }
-            });
+            holder.image.setVisibility(View.VISIBLE);
         } else {
-            //holder.thumbnail.setVisibility(View.GONE);
+            holder.image.setVisibility(View.GONE);
+            holder.filename.setVisibility(View.GONE);
         }
 
         return convertView;
     }
 
     static class ViewHolder {
-        @SuppressWarnings("unchecked")
-        public static <T extends View> T get(View view, int id) {
-            SparseArray<View> viewHolder = (SparseArray<View>) view.getTag();
-            if (viewHolder == null) {
-                viewHolder = new SparseArray<View>();
-                view.setTag(viewHolder);
-            }
-            View childView = viewHolder.get(id);
-            if (childView == null) {
-                childView = view.findViewById(id);
-                viewHolder.put(id, childView);
-            }
-            return (T) childView;
-        }
+        ImageButton image;
+        TextView username, postDate, postNo, topic, postBody, replies, filename;
+        LinearLayout layout;
     }
 }

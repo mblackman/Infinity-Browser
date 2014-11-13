@@ -20,12 +20,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -118,7 +115,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
                 Post opPost;
 
                 try {
-                    opPost = createPostOP(thread);
+                    opPost = createPost(thread);
 
                     if(!boardExists(opPost.Id)) {
                         mPosts.add(opPost);
@@ -136,7 +133,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
                         Post replyPost;
 
                         try {
-                            replyPost = createPostReply(postReply);
+                            replyPost = createPost(postReply);
 
                             if(!boardExists(replyPost.Id)) {
                                 mPosts.add(replyPost);
@@ -168,8 +165,8 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
             mResponse.setPageLoaded(false);
         }
         mAdapter.notifyDataSetChanged();
-        mProgress.setVisibility(View.INVISIBLE);
-        mProgressText.setVisibility(View.INVISIBLE);
+        mProgress.setVisibility(View.GONE);
+        mProgressText.setVisibility(View.GONE);
     }
 
     private Boolean boardExists(final long newPost) {
@@ -191,65 +188,70 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
      * @param postElement the post's HTML elements.
      * @return the newly created post.
      */
-    private Post createPostOP(Element postElement) {
+    private Post createPost(Element postElement) {
         Post opPost;
         Elements singleFile;
         Elements multiFiles;
         Elements omitted;
         Elements subjects;
-        Element postOp;
+        Element post;
         Element imageFiles;
         Element postLink;
         String postNumber;
         String userName;
         String postDate;
         String postTopic;
-        String postText ;
+        String postText;
         String numReplies;
-        List<String> postImageThumbs;
-        List<String> postImageFull;
-        List<String> fileNumbers;
-        List<String> fileInfos;
+        List<String> postImageThumbs = new ArrayList<String>();
+        List<String> postImageFull = new ArrayList<String>();
+        List<String> fileNumbers = new ArrayList<String>();
+        List<String> fileInfos = new ArrayList<String>();
 
         // Start filtering
-        postOp = postElement.select("[class*=post op]").first();
-        imageFiles = postElement.getElementsByClass("files").first();
-
-        singleFile = imageFiles.getElementsByClass("file");
-        multiFiles = imageFiles.select("[class=file multifile]");
+        post = postElement.select("div[class^=post]").first();
 
         // Read through op post and get information
-        postLink = postOp.getElementsByClass("post_no").first();
+        postLink = post.getElementsByClass("post_no").first();
         postNumber = postLink.attr("id").replace("post_no_", "");
-        userName = postOp.getElementsByClass("name").first().text();
-        postDate = postOp.select("time").first().text();
-        postText = postOp.getElementsByClass("body").first().html();
+        userName = post.getElementsByClass("name").first().text();
+        postDate = post.select("time").first().text();
+        postText = post.getElementsByClass("body").first().html();
 
-        subjects = postOp.getElementsByClass("subject");
-        if(!subjects.isEmpty()) {
+        subjects = post.getElementsByClass("subject");
+        if (!subjects.isEmpty()) {
             postTopic = subjects.first().text();
-        }
-        else {
+        } else {
             postTopic = "";
         }
 
-        omitted = postOp.getElementsByClass("omitted");
-        if(!omitted.isEmpty()) {
+        omitted = post.getElementsByClass("omitted");
+        if (!omitted.isEmpty()) {
             numReplies = omitted.first().text().replaceAll("Click reply to view.", "");
-        }
-        else {
+        } else {
             numReplies = "";
         }
 
-        // Get images and thumbnails into arrays
-        postImageThumbs = new ArrayList<String>();
-        postImageFull = new ArrayList<String>();
-        fileNumbers = new ArrayList<String>();
-        fileInfos = new ArrayList<String>();
+        imageFiles = postElement.getElementsByClass("files").first();
 
+        if(imageFiles.hasText()) {
+            singleFile = imageFiles.getElementsByClass("file");
+            multiFiles = imageFiles.select("[class=file multifile]");
 
-        if (!multiFiles.isEmpty()) {
-            for(Element image : multiFiles) {
+            if (!multiFiles.isEmpty()) {
+                for (Element image : multiFiles) {
+                    String imageUrl = image.select("a").first().attr("href");
+                    String imageThumbnail = image.select("img").first().attr("src");
+                    String fileNumber = image.select("a").first().text();
+                    String fileInfo = image.getElementsByClass("unimportant").first().text();
+
+                    postImageThumbs.add(imageThumbnail);
+                    postImageFull.add(imageUrl);
+                    fileNumbers.add(fileNumber);
+                    fileInfos.add(fileInfo);
+                }
+            } else if (!singleFile.isEmpty()) {
+                Element image = singleFile.first();
                 String imageUrl = image.select("a").first().attr("href");
                 String imageThumbnail = image.select("img").first().attr("src");
                 String fileNumber = image.select("a").first().text();
@@ -260,17 +262,6 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
                 fileNumbers.add(fileNumber);
                 fileInfos.add(fileInfo);
             }
-        } else if (!singleFile.isEmpty()) {
-            Element image = singleFile.first();
-            String imageUrl = image.select("a").first().attr("href");
-            String imageThumbnail = image.select("img").first().attr("src");
-            String fileNumber = image.select("a").first().text();
-            String fileInfo = image.getElementsByClass("unimportant").first().text();
-
-            postImageThumbs.add(imageThumbnail);
-            postImageFull.add(imageUrl);
-            fileNumbers.add(fileNumber);
-            fileInfos.add(fileInfo);
         }
 
         // Create new instance of post with elements
@@ -278,81 +269,5 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
                 postImageThumbs, postImageFull, fileInfos, fileNumbers, mPageUrl, mIsOnRootPage);
 
         return opPost;
-    }
-
-    /**
-     * Takes information from HTML elements and creates a none OP post of a board
-     * or a thread and returns the newly created post.
-     *
-     * @param postElement the post's HTML elements.
-     * @return the newly created post.
-     */
-    private Post createPostReply(Element postElement) {
-        Post newPost;
-        Elements singleFile;
-        Elements multiFiles;
-        Element postReply;
-        Element imageFiles;
-        Element postLink;
-        String postNumber;
-        String userName;
-        String postDate;
-        String postText ;
-        List<String> postImageThumbs;
-        List<String> postImageFull;
-        List<String> fileNumbers;
-        List<String> fileInfos;
-
-        // Start filtering
-        postReply = postElement.select("[class*=post reply]").first();
-        imageFiles = postElement.getElementsByClass("files").first();
-
-        singleFile = imageFiles.select("[class=file]");
-        multiFiles = imageFiles.select("[class=file multifile]");
-
-        // Read through op post and get information
-        postLink = postReply.getElementsByClass("post_no").first();
-        postNumber = postLink.attr("id").replace("post_no_", "");
-        userName = postReply.getElementsByClass("name").first().text();
-        postDate = postReply.select("time").first().text();
-        postText = postReply.getElementsByClass("body").first().html();
-
-        // Get images and thumbnails into arrays
-        postImageThumbs = new ArrayList<String>();
-        postImageFull = new ArrayList<String>();
-        fileNumbers = new ArrayList<String>();
-        fileInfos = new ArrayList<String>();
-
-        if (!multiFiles.isEmpty()) {
-            for(Element image : multiFiles) {
-                String imageUrl = image.select("a").first().attr("href");
-                String imageThumbnail = image.select("img").first().attr("src");
-                String fileNumber = image.select("a").first().text();
-                String fileInfo = image.getElementsByClass("unimportant").first().text();
-
-                postImageThumbs.add(imageThumbnail);
-                postImageFull.add(imageUrl);
-                fileNumbers.add(fileNumber);
-                fileInfos.add(fileInfo);
-            }
-        } else if (!singleFile.isEmpty()) {
-            Element image = singleFile.first();
-            String imageUrl = image.select("a").first().attr("href");
-            String imageThumbnail = image.select("img").first().attr("src");
-            String fileNumber = image.select("a").first().text();
-            Log.i("Image info", image.toString());
-            String fileInfo = image.select("[class=unimportant]").first().text();
-
-            postImageThumbs.add(imageThumbnail);
-            postImageFull.add(imageUrl);
-            fileNumbers.add(fileNumber);
-            fileInfos.add(fileInfo);
-        }
-
-        // Create new instance of post with elements
-        newPost = new Post(userName, postDate, postNumber, "", postText, "",
-                postImageThumbs, postImageFull, fileInfos, fileNumbers, mPageUrl, mIsOnRootPage);
-
-        return newPost;
     }
 }

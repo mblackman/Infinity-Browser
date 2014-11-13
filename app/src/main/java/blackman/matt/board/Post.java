@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 public class Post {
     public String userName, postDate, postNo, topic, postBody, numReplies, boardLink;
     public List<String> fullURLS, thumbURLS, fileNames, fileNumbers;
-    public Boolean isRootBoard, hasImages;
+    public Boolean isRootBoard, hasImages, isThumbnail;
     public Long Id;
 
     /**
@@ -50,6 +50,7 @@ public class Post {
         this.boardLink = boardLink;
         this.isRootBoard = onRootBoard;
         this.Id = Long.parseLong(postNo);
+        this.isThumbnail = true;
         if(thumbURLS.isEmpty() && fullURLS.isEmpty()) {
             this.hasImages = false;
         } else {
