@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,7 +36,7 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
     private String mDBOrderBy;
     private String mDBSortBy;
 
-    private BoardListDatabase list_db = new BoardListDatabase(this);
+    private final BoardListDatabase list_db = new BoardListDatabase(this);
     private BoardListCursorAdapter mAdapter;
 
     // Default selection to sort the value column by
@@ -283,7 +282,7 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
      * Gets an updated list of all the boards on 8Chan and saves that list in the database, while
      * updating existing board entries.
      */
-    public class GetBoardList extends AsyncTask<Void, Void, Void> {
+    private class GetBoardList extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
             mBoardList.setVisibility(View.INVISIBLE);
@@ -362,7 +361,7 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
      * Used to control what happens when the spinners are used on the boardList.
      * Will update the search string for the SQL query.
      */
-    class SpinnerActivity extends Activity implements Spinner.OnItemSelectedListener {
+    private class SpinnerActivity implements Spinner.OnItemSelectedListener {
         /**
          * Called when an item is changed on a spinner. Used to changed the search terms of
          * the SQL query.

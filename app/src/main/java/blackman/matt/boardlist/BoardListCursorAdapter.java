@@ -35,7 +35,7 @@ import blackman.matt.infinitebrowser.R;
  *
  * Created by Matt on 10/24/2014.
  */
-public class BoardListCursorAdapter extends CursorAdapter {
+class BoardListCursorAdapter extends CursorAdapter {
     private BoardFavoritedListener mFavoritedListener;
     private static LayoutInflater mInflater=null;
 
@@ -143,14 +143,4 @@ public class BoardListCursorAdapter extends CursorAdapter {
         notifyDataSetChanged();
     }
 
-    /**
-     * Swaps the cursor out with a new one.
-     *
-     * @param cursor Cursor to be swapped.
-     * @return The old cursor.
-     */
-    @Override
-    public Cursor swapCursor(Cursor cursor) {
-        return super.swapCursor(cursor);
-    }
 }

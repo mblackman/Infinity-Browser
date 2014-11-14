@@ -168,7 +168,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
 
         if(mBoardLink != null){
             mIsRootBoard = !mBoardLink.getPath().contains(".html");
-            mPageGetter = new PageLoader(getActivity(), mRootView, mPosts, mAdapter, mIsRootBoard);
+            mPageGetter = new PageLoader(mRootView, mPosts, mAdapter, mIsRootBoard);
             mPageGetter.mResponse = this;
             mPageGetter.execute(mBoardLink);
         }
@@ -306,7 +306,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
         mPosts.clear();
         mAdapter.notifyDataSetChanged();
 
-        mPageGetter = new PageLoader(getActivity(), mRootView, mPosts, mAdapter, mIsRootBoard);
+        mPageGetter = new PageLoader(mRootView, mPosts, mAdapter, mIsRootBoard);
         mPageGetter.mResponse = this;
         mPageGetter.execute(mBoardLink);
     }
@@ -344,8 +344,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
                 URL newPage;
                 try {
                     newPage = new URL(mBoardLink.toString() + (++currentPage) + ".html");
-                    mPageGetter = new PageLoader(getActivity(), mParent, mPosts, mAdapter,
-                            mIsRootBoard);
+                    mPageGetter = new PageLoader(mParent, mPosts, mAdapter, mIsRootBoard);
                     mPageGetter.mResponse = Board.this;
                     mPageGetter.execute(newPage);
                 } catch (MalformedURLException e) {

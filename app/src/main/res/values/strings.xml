@@ -2,34 +2,15 @@
 <resources>
 
     <string name="app_name">Infinity Browser</string>
-    <string name="title_section1">/Tech/</string>
-    <string name="title_section2">Section 2</string>
-    <string name="title_section3">Section 3</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="action_example">Matty Action</string>
     <string name="action_settings">Settings</string>
-    <string name="shared_preference_file">matt.blackman.ochseer.pref</string>
-    <string name="PREF_USER_BOARD_LIST">user_ocho_board_list</string>
-    <string name="wait_text">Loading...</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="post_thumb_desciption">Thumbnail of posts first picture</string>
-    <string name="board_list_sql_button_text">Refresh</string>
-    <string name="sql_table_name">boards</string>
-    <string name="sql_column_name">boardname</string>
-    <string name="sql_column_nation">nation</string>
-    <string name="sql_column_link">boardlink</string>
-    <string name="sql_column_posts_last_hour">postslasthour</string>
-    <string name="sql_column_total_posts">totalposts</string>
-    <string name="sql_column_unique_ips">uniqueips</string>
-    <string name="sql_column_date_created">datecreated</string>
-    <string name="sql_column_faved">favorited</string>
     <string name="post_no_sample_text">Post No</string>
     <string name="post_topic_sample_text">Topic</string>
     <string name="post_name_sample_text">User Name</string>
     <string name="post_date_sample_text">Date Time</string>
     <string name="post_text_sample_text">This is a sample of what a post looks like</string>
-    <string name="board_progress_text">Loading page...</string>
+    <string name="board_progress_text">Loading page…</string>
     <string name="post_view_reply_text"><![CDATA[Reply to thread >>>]]></string>
     <string name="filter_intent_board_link">Infinity Browser</string>
     <string name="action_update">Update Board</string>
@@ -50,11 +31,19 @@
     </string-array>
 
     <string name="title_activity_board_list">Boards</string>
-    <string name="Board_List_Progress_Text">Loading list of boards...</string>
+    <string name="Board_List_Progress_Text">Loading list of boards…</string>
     <string name="add_new_boards_text">Boards</string>
-    <string name="page_load_error_text">Could not load page...Try reloading page.</string>
+    <string name="page_load_error_text">Could not load page…Try reloading page.</string>
     <string name="post_image_file_name_text">exampletext.jpg</string>
     <string name="arrow_description">Arrow Pointing to the boards thing</string>
     <string name="add_boards_text">Add new boards to read</string>
+    <string name="board_card_value_sample_text">Board Value</string>
+    <string name="board_list_name_sample_text">Board Link</string>
+    <string name="board_list_board_sample_text">/Board Name/</string>
+    <string name="drawer_item_sample_test">/example/</string>
+    <string name="post_thumb_desciption">Example post thumb description</string>
+    <string name="pref_title_madokafy">Madokafy Infinity Browser</string>
+    <string name="pref_description_madokafy">Add more magic to your experience</string>
+    <string name="action_boards">Boards List</string>
 
 </resources>

@@ -18,11 +18,9 @@ package blackman.matt.board;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +29,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.ViewSwitcher;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
@@ -49,7 +46,7 @@ import blackman.matt.infinitebrowser.R;
  *
  * Created by Matt on 10/26/2014.
  */
-public class PostArrayAdapter extends BaseAdapter {
+class PostArrayAdapter extends BaseAdapter {
     private List<Post> mPosts = Collections.emptyList();
     private final Context mContext;
     private Board.OnReplyClickedListener mListener;
@@ -185,7 +182,7 @@ public class PostArrayAdapter extends BaseAdapter {
                                 holder.progressImage.setVisibility(View.GONE);
                                 Drawable error = mContext.getResources().getDrawable(R.drawable.deadico);
                                 view.setVisibility(View.VISIBLE);
-                                ((ImageButton) view).setImageDrawable(error);;
+                                ((ImageButton) view).setImageDrawable(error);
                             }
 
                             @Override

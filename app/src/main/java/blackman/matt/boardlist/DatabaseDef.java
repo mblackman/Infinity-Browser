@@ -26,12 +26,6 @@ import android.provider.BaseColumns;
 public class DatabaseDef {
 
     /**
-     * Basic empty constructor.
-     */
-    public DatabaseDef(){
-    }
-
-    /**
      * Column definition.
      */
     public static final class Boards implements BaseColumns {

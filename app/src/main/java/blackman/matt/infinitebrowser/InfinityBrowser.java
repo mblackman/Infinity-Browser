@@ -35,20 +35,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-
-import com.nostra13.universalimageloader.cache.disc.DiskCache;
-import com.nostra13.universalimageloader.cache.disc.impl.ext.LruDiscCache;
-import com.nostra13.universalimageloader.cache.memory.impl.FIFOLimitedMemoryCache;
-import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 
 import blackman.matt.board.Board;
+import blackman.matt.boardlist.BoardListActivity;
 import blackman.matt.boardlist.BoardListDatabase;
 import blackman.matt.boardlist.DatabaseDef;
 
@@ -178,7 +172,7 @@ public class InfinityBrowser extends Activity
      *
      * @param number the position of the navigation drawer.
      */
-    public void onSectionAttached(int number) {
+    void onSectionAttached(int number) {
         //mTitle = boardLink;
         setTitle(mTitle);
     }
@@ -193,7 +187,7 @@ public class InfinityBrowser extends Activity
     /**
      * Restores the action bar when called.
      */
-    public void restoreActionBar() {
+    void restoreActionBar() {
         ActionBar actionBar = getActionBar();
         assert actionBar != null;
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
@@ -232,6 +226,9 @@ public class InfinityBrowser extends Activity
         switch(item.getItemId()) {
             case R.id.action_settings:
                 return true;
+            case R.id.action_boards:
+                Intent boardList = new Intent(this, BoardListActivity.class);
+                startActivity(boardList);
             default:
                 return super.onOptionsItemSelected(item);
         }

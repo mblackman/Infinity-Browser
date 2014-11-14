@@ -127,7 +127,7 @@ public class NavigationDrawerFragment extends Fragment {
     /**
      * Closes the navigation drawer.
      */
-    public void closeDrawer() {
+    void closeDrawer() {
         mDrawerLayout.closeDrawers();
     }
 
@@ -215,7 +215,6 @@ public class NavigationDrawerFragment extends Fragment {
      */
     public void setUp(int fragmentId, DrawerLayout drawerLayout) {
         mFragmentContainerView = getActivity().findViewById(fragmentId);
-        Button BoardButton = (Button) getActivity().findViewById(R.id.navigation_drawer_board_button);
         mDrawerLayout = drawerLayout;
 
         // set a custom shadow that overlays the main content when the drawer opens
@@ -226,19 +225,6 @@ public class NavigationDrawerFragment extends Fragment {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
 
-        // On click listener for the board button to show the board list.
-        BoardButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SharedPreferences preferences =
-                        PreferenceManager.getDefaultSharedPreferences(getActivity());
-                Boolean ageAccept = preferences.getBoolean("age_guard_accept", false);
-                if(ageAccept) {
-                    Intent intent = new Intent(getActivity(), BoardListActivity.class);
-                    startActivity(intent);
-                }
-            }
-        });
 
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the navigation drawer and the action bar app icon.

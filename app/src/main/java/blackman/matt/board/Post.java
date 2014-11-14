@@ -15,10 +15,21 @@ import java.util.regex.Pattern;
  * Created by Matt on 11/3/2014.
  */
 public class Post {
-    public String userName, postDate, postNo, topic, postBody, numReplies, boardLink;
-    public List<String> fullURLS, thumbURLS, fileNames, fileNumbers;
-    public Boolean isRootBoard, hasImages, isThumbnail;
-    public Long Id;
+    public final String userName;
+    public final String postDate;
+    public final String postNo;
+    public final String topic;
+    public final String postBody;
+    public final String numReplies;
+    public final String boardLink;
+    public final List<String> fullURLS;
+    public final List<String> thumbURLS;
+    public final List<String> fileNames;
+    public final List<String> fileNumbers;
+    public final Boolean isRootBoard;
+    public final Boolean hasImages;
+    public Boolean isThumbnail;
+    public final Long Id;
 
     /**
      * Basic constructor
@@ -51,11 +62,7 @@ public class Post {
         this.isRootBoard = onRootBoard;
         this.Id = Long.parseLong(postNo);
         this.isThumbnail = true;
-        if(thumbURLS.isEmpty() && fullURLS.isEmpty()) {
-            this.hasImages = false;
-        } else {
-            this.hasImages = true;
-        }
+        this.hasImages = !(thumbURLS.isEmpty() && fullURLS.isEmpty());
     }
 
     /**
@@ -99,7 +106,7 @@ public class Post {
         // Post too long text removal
         Elements tooLongs = formattedText.getElementsByClass("toolong");
         for(Element text : tooLongs) {
-            text.remove();
+            text.text("...");
         }
 
         return formattedText.toString();

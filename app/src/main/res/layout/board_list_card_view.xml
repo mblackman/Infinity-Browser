@@ -27,14 +27,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Board Link"
+            android:text="@string/board_list_name_sample_text"
             android:id="@+id/tv_board_link" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="/Board Name/"
+            android:text="@string/board_list_board_sample_text"
             android:id="@+id/tv_board_name"
             android:textSize="@dimen/list_card_board_name_size" />
     </LinearLayout>
@@ -43,7 +43,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Board Value"
+        android:text="@string/board_card_value_sample_text"
         android:id="@+id/tv_board_value"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"

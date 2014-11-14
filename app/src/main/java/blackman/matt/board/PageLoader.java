@@ -16,10 +16,7 @@
 
 package blackman.matt.board;
 
-import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -42,7 +39,6 @@ import blackman.matt.infinitebrowser.R;
  * This assumes you send it a link and doesn't check for null.
  */
 public class PageLoader extends AsyncTask<URL, Void, Boolean> {
-    private final Context mContext;
     private final ProgressBar mProgress;
     private final TextView mProgressText;
     private final List<Post> mPosts;
@@ -61,14 +57,11 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
     /**
      * Basic constructor to initialize the class.
      *
-     * @param context Context of caller.
      * @param parent Parent view who needs a loading.
      * @param posts The posts container.
      * @param adapter Adapter for the list view that holds the posts.
      */
-    public PageLoader(Activity context, View parent, List<Post> posts,
-                      PostArrayAdapter adapter, Boolean isRootBoard) {
-        mContext = context;
+    public PageLoader(View parent, List<Post> posts, PostArrayAdapter adapter, Boolean isRootBoard){
         mProgress = (ProgressBar) parent.findViewById(R.id.progress_page_load);
         mProgressText = (TextView) parent.findViewById(R.id.tv_progress_page_load);
         mPosts = posts;
@@ -223,7 +216,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
 
         omitted = post.getElementsByClass("omitted");
         if (!omitted.isEmpty()) {
-            numReplies = omitted.first().text().replaceAll(" omitted. Click reply to view.", "...");
+            numReplies = omitted.first().text().replaceAll(" omitted. Click reply to view.", "");
         } else {
             numReplies = "";
         }

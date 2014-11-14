@@ -2,11 +2,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="blackman.matt.boardlist.BoardListActivity">
     <item android:id="@+id/action_search_list"
-        android:icon="@drawable/ic_search"
+        android:icon="@drawable/search_button"
         android:title="@string/action_search_list"
         android:showAsAction="ifRoom" />
     <item android:id="@+id/action_refresh_list"
-        android:icon="@drawable/ic_update"
+        android:icon="@drawable/menu_update"
         android:title="@string/action_update_list"
         android:showAsAction="ifRoom" />
 </menu>

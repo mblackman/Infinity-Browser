@@ -161,11 +161,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM " +
                 DatabaseDef.Boards.TABLE_NAME, null);
         Boolean empty;
-        if(cursor.moveToFirst()){
-            empty = false;
-        } else {
-            empty = true;
-        }
+        empty = !cursor.moveToFirst();
         cursor.close();
         return empty;
     }
@@ -224,7 +220,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
      * @param follow Whether to favorite the board or now.
      * @return If the operation was a success. -1 for failure.
      */
-    public int favoriteBoard(String boardLink, Boolean follow) {
+    public void favoriteBoard(String boardLink, Boolean follow) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         // New value for one column
@@ -235,10 +231,6 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         String selection = DatabaseDef.Boards.BOARD_LINK + "=?";
         String[] selectionArgs = { boardLink };
 
-        return db.update(
-                DatabaseDef.Boards.TABLE_NAME,
-                values,
-                selection,
-                selectionArgs);
+        db.update(DatabaseDef.Boards.TABLE_NAME, values, selection, selectionArgs);
     }
 }

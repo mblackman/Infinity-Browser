@@ -20,12 +20,10 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
-import android.widget.LinearLayout;
 
 /**
  * Dialog that asks the user to verify that they are over the age of 18 for legal reasons.
