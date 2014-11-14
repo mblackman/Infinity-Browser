@@ -11,6 +11,31 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal" android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/post_bar_medium_padding"
+        android:id="@+id/ll_help_add_boards"
+        android:gravity="top"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView"
+            android:src="@drawable/arrow"
+            android:contentDescription="@string/arrow_description" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/add_boards_text"
+            android:id="@+id/textView3"
+            android:paddingLeft="@dimen/post_bar_medium_padding"
+            android:paddingTop="@dimen/post_bar_small_padding" />
+    </LinearLayout>
+
     <!-- android:layout_gravity="start" tells DrawerLayout to treat
          this as a sliding drawer on the left side for left-to-right
          languages and on the right side for right-to-left languages.

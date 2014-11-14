@@ -181,7 +181,17 @@ public class NavigationDrawerFragment extends Fragment {
         String[] from = new String[]{"boardlink"};
         int[] to = new int[]{R.id.text};
 
-        SimpleCursorAdapter cursorAdapter = new SimpleCursorAdapter(mDrawerListView.getContext(), R.layout.row, cursor, from, to, 0);
+        SimpleCursorAdapter cursorAdapter = new SimpleCursorAdapter(mDrawerListView.getContext(),
+                R.layout.drawer_item, cursor, from, to, 0) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                if(position % 2 == 1) {
+                    view.setBackgroundColor(getActivity().getResources().getColor(R.color.row_color_2));
+                }
+                return view;
+            }
+        };
 
         mDrawerListView.setAdapter(cursorAdapter);
 
@@ -207,8 +217,6 @@ public class NavigationDrawerFragment extends Fragment {
         mFragmentContainerView = getActivity().findViewById(fragmentId);
         Button BoardButton = (Button) getActivity().findViewById(R.id.navigation_drawer_board_button);
         mDrawerLayout = drawerLayout;
-
-
 
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
@@ -428,7 +436,7 @@ public class NavigationDrawerFragment extends Fragment {
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setTitle(R.string.app_name);
+        //actionBar.setTitle(R.string.app_name);
     }
 
     /**

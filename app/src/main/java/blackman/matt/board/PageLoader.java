@@ -111,11 +111,8 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
             // Looks through all the master posts
             for (Element thread : threads) {
                 // Create main elements and post
-                Elements postReplies;
-                Post opPost;
-
                 try {
-                    opPost = createPost(thread);
+                    Post opPost = createPost(thread);
 
                     if(!boardExists(opPost.Id)) {
                         mPosts.add(opPost);
@@ -126,14 +123,12 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
 
                 // If you are in a thread it will load the replies
                 if (!mIsOnRootPage) {
-                    postReplies = thread.select("[class=post reply]");
+                    Elements postReplies = thread.select("[class=post reply]");
 
                     // Looks through all the replies to an OP post
                     for (Element postReply : postReplies) {
-                        Post replyPost;
-
                         try {
-                            replyPost = createPost(postReply);
+                            Post replyPost = createPost(postReply);
 
                             if(!boardExists(replyPost.Id)) {
                                 mPosts.add(replyPost);
@@ -148,7 +143,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
         } else {
             CharSequence text = "Error loading page...Try reloading the page.";
             mResponse.sendErrorMessage(text);
-            pageLoaded =false;
+            pageLoaded = false;
         }
         return pageLoaded;
     }
@@ -194,6 +189,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
         Elements multiFiles;
         Elements omitted;
         Elements subjects;
+        Elements images;
         Element post;
         Element imageFiles;
         Element postLink;
@@ -227,14 +223,15 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
 
         omitted = post.getElementsByClass("omitted");
         if (!omitted.isEmpty()) {
-            numReplies = omitted.first().text().replaceAll("Click reply to view.", "");
+            numReplies = omitted.first().text().replaceAll(" omitted. Click reply to view.", "...");
         } else {
             numReplies = "";
         }
 
-        imageFiles = postElement.getElementsByClass("files").first();
+         images = postElement.getElementsByClass("files");
 
-        if(imageFiles.hasText()) {
+        if(!images.isEmpty()) {
+            imageFiles = images.first();
             singleFile = imageFiles.getElementsByClass("file");
             multiFiles = imageFiles.select("[class=file multifile]");
 

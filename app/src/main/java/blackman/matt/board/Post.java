@@ -69,13 +69,13 @@ public class Post {
         Pattern p = Pattern.compile("^/.*/index\\.html");
 
         // Red Text
-        Elements redTexts = formattedText.select("[class=heading]");
+        Elements redTexts = formattedText.getElementsByClass("heading");
         for(Element text : redTexts) {
             text.wrap("<font color=\"#AF0A0F\"><strong></strong></font>");
         }
 
         // Green text
-        Elements greenTexts = formattedText.select("[class=quote]");
+        Elements greenTexts = formattedText.getElementsByClass("quote");
         for(Element text : greenTexts) {
             text.wrap("<font color=\"#789922\"></font>");
         }
@@ -88,6 +88,18 @@ public class Post {
             if(m.matches()) {
                 link.attr("href", "http://8chan.co" + url);
             }
+        }
+
+        // Reply links
+        Elements replyLinks = formattedText.select("a[onclick^=highlightReply");
+        for(Element reply : replyLinks) {
+            boardLinks.attr("href", "http://8chan.co" + reply.attr("href"));
+        }
+
+        // Post too long text removal
+        Elements tooLongs = formattedText.getElementsByClass("toolong");
+        for(Element text : tooLongs) {
+            text.remove();
         }
 
         return formattedText.toString();

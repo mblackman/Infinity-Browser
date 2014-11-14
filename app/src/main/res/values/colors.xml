@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="post_background_color" >#31ffffff</color>
-    <color name="madoka_background">#ffffcfca</color>
+    <color name="madoka_background">#aeffcfca</color>
+    <color name="row_color_1">#96b7e9ff</color>
+    <color name="row_color_2">#68ffffff</color>
 </resources>

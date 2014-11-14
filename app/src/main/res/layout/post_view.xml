@@ -25,10 +25,10 @@
         android:layout_alignParentLeft="false"
         android:layout_alignParentTop="false"
         android:layout_toRightOf="@+id/tv_postno"
-        android:paddingLeft="@dimen/post_bar_small_padding"
         android:text="@string/post_topic_sample_text"
         android:textColor="#0F0C5D"
-        android:textSize="@dimen/post_header_font_size" />
+        android:textSize="@dimen/post_header_font_size"
+        android:layout_marginLeft="@dimen/post_bar_small_padding" />
 
     <TextView
         android:id="@+id/tv_username"
@@ -47,11 +47,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/tv_username"
-        android:paddingEnd="@dimen/post_header_word_spacing"
-        android:paddingLeft="@dimen/post_bar_small_padding"
-        android:paddingStart="@dimen/post_header_word_spacing"
         android:text="@string/post_date_sample_text"
-        android:textSize="@dimen/post_header_font_size" />
+        android:textSize="@dimen/post_header_font_size"
+        android:layout_marginLeft="@dimen/post_bar_small_padding" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -68,6 +66,12 @@
         android:orientation="horizontal"
         android:layout_below="@+id/tv_post_image_filename"
         android:id="@+id/ll_post_body">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/progress_post_image"
+            android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/post_thumbnail"
@@ -92,6 +96,7 @@
             android:paddingRight="@dimen/post_bar_small_padding"
             android:text="@string/post_text_sample_text"
             android:textSize="@dimen/post_body_font_size" />
+
     </LinearLayout>
 
     <TextView

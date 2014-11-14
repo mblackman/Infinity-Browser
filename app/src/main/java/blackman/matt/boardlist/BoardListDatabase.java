@@ -152,9 +152,22 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
                 SQL_SELECT_FAVORITED_BOARDS, // The columns for the WHERE clause
                 null,                        // The values for the WHERE clause
                 null,                        // don't group the rows
-                null,                        // don't filter by row groups
+                null,                        // don't filter by drawer_item groups
                 sortOrder                    // The sort order
         );
+    }
+
+    public Boolean isEmpty() {
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT * FROM " +
+                DatabaseDef.Boards.TABLE_NAME, null);
+        Boolean empty;
+        if(cursor.moveToFirst()){
+            empty = false;
+        } else {
+            empty = true;
+        }
+        cursor.close();
+        return empty;
     }
 
     /**
@@ -199,7 +212,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
                 selection,                  // The columns for the WHERE clause
                 null,              // The values for the WHERE clause
                 null,                       // don't group the rows
-                null,                       // don't filter by row groups
+                null,                       // don't filter by drawer_item groups
                 sortOrder                   // The sort order
         );
     }
@@ -218,7 +231,7 @@ public class BoardListDatabase extends SQLiteOpenHelper  {
         ContentValues values = new ContentValues();
         values.put(DatabaseDef.Boards.FAVORITED, follow ? 1 : 0);
 
-        // Which row to update, based on the ID
+        // Which drawer_item to update, based on the ID
         String selection = DatabaseDef.Boards.BOARD_LINK + "=?";
         String[] selectionArgs = { boardLink };
 

@@ -32,6 +32,9 @@ import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.listener.PauseOnScrollListener;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -69,6 +72,22 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
      * @return A new instance of fragment Board.
      */
     public static Board newInstance(String boardLink) {
+        Board fragment = new Board();
+        Bundle args = new Bundle();
+        args.putString(ARG_BOARD_LINK, boardLink);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    /**
+     * Creates a new instance of a board based on a given board and thread
+     *
+     * @param boardRoot Root of board EG /v/, /tech/, etc..
+     * @param threadNo The thread being initiated
+     * @return A new instance of a fragment board.
+     */
+    public static Board newInstance(String boardRoot, String threadNo) {
+        String boardLink = boardRoot + "res/" + threadNo + ".html";
         Board fragment = new Board();
         Bundle args = new Bundle();
         args.putString(ARG_BOARD_LINK, boardLink);
@@ -148,7 +167,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
         mAdapter.updatePosts(mPosts, mListener);
 
         if(mBoardLink != null){
-            mIsRootBoard = !mBoardLink.getPath().endsWith(".html");
+            mIsRootBoard = !mBoardLink.getPath().contains(".html");
             mPageGetter = new PageLoader(getActivity(), mRootView, mPosts, mAdapter, mIsRootBoard);
             mPageGetter.mResponse = this;
             mPageGetter.execute(mBoardLink);
@@ -156,10 +175,14 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
 
         mListView.setAdapter(mAdapter);
 
-        if(mIsRootBoard) {
-            mScrollListener = new EndlessScrollListener(mRootView);
-            mListView.setOnScrollListener(mScrollListener);
-        }
+        mScrollListener = new EndlessScrollListener(ImageLoader.getInstance(), true, true);
+        mScrollListener.setParentView(mRootView);
+        mListView.setOnScrollListener(mScrollListener);
+
+        getActivity().getActionBar().setTitle(mBoardLink.toString()
+                .replace("http://8chan.co", "")
+                .replace("res/", "")
+                .replace(".html", ""));
 
         return mRootView;
     }
@@ -179,6 +202,15 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
             throw new ClassCastException(activity.toString()
                     + " must implement OnReplyClickedListener");
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().getActionBar().setTitle(mBoardLink.toString()
+                .replace("http://8chan.co", "")
+                .replace("res/", "")
+                .replace(".html", ""));
     }
 
     /**
@@ -263,7 +295,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnReplyClickedListener {
-        public void onReplyClicked(String postLink);
+        public void onReplyClicked(String boardRoot, String threadNo);
     }
 
     private void refreshBoard(){
@@ -283,16 +315,16 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
      * This class is used to set the on scroll listener for the list view on the board.
      * Now the page will load the next page on a board when the bottom is met.
      */
-    public class EndlessScrollListener implements AbsListView.OnScrollListener {
+    public class EndlessScrollListener extends PauseOnScrollListener {
         private int currentPage = 1;
         private View mParent;
 
-        /**
-         * Default constructor to get the parent of who called him.
-         *
-         * @param parentView The view that called this class.
-         */
-        public EndlessScrollListener(View parentView) {
+        public EndlessScrollListener(ImageLoader imageLoader, boolean pauseOnScroll,
+                                     boolean pauseOnFling) {
+            super(imageLoader, pauseOnScroll, pauseOnFling);
+        }
+
+        public void setParentView(View parentView) {
             mParent = parentView;
         }
 
@@ -312,24 +344,14 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
                 URL newPage;
                 try {
                     newPage = new URL(mBoardLink.toString() + (++currentPage) + ".html");
-                    mPageGetter = new PageLoader(getActivity(), mParent, mPosts, mAdapter, mIsRootBoard);
+                    mPageGetter = new PageLoader(getActivity(), mParent, mPosts, mAdapter,
+                            mIsRootBoard);
                     mPageGetter.mResponse = Board.this;
                     mPageGetter.execute(newPage);
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 }
             }
-        }
-
-        /**
-         * Called when the scroll state is changed.
-         * Currently empty.
-         *
-         * @param view List view being looked at.
-         * @param scrollState The status of the scrolling.
-         */
-        @Override
-        public void onScrollStateChanged(AbsListView view, int scrollState) {
         }
 
         public void resetBoardPage() {

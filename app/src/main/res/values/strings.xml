@@ -54,5 +54,7 @@
     <string name="add_new_boards_text">Boards</string>
     <string name="page_load_error_text">Could not load page...Try reloading page.</string>
     <string name="post_image_file_name_text">exampletext.jpg</string>
+    <string name="arrow_description">Arrow Pointing to the boards thing</string>
+    <string name="add_boards_text">Add new boards to read</string>
 
 </resources>

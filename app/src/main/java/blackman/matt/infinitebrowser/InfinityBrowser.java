@@ -25,6 +25,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
@@ -34,6 +35,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 
 import com.nostra13.universalimageloader.cache.disc.DiskCache;
@@ -46,6 +49,8 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 
 import blackman.matt.board.Board;
+import blackman.matt.boardlist.BoardListDatabase;
+import blackman.matt.boardlist.DatabaseDef;
 
 
 /**
@@ -57,7 +62,7 @@ public class InfinityBrowser extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
         Board.OnReplyClickedListener {
 
-    private String mTitle;
+    private CharSequence mTitle;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -74,26 +79,32 @@ public class InfinityBrowser extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Set up configuration for the universal image loader
-        DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
-                .cacheInMemory(true)
-                .bitmapConfig(Bitmap.Config.RGB_565)
-                .imageScaleType(ImageScaleType.EXACTLY)
-                .cacheOnDisk(true)
-                .build();
+        mTitle = getResources().getString(R.string.app_name);
 
-        ImageLoaderConfiguration config =
-                new ImageLoaderConfiguration.Builder(getApplicationContext())
-                .defaultDisplayImageOptions(defaultOptions)
-                .memoryCacheSize(20 * 1024 * 1024) // 20MB
-                .diskCacheSize(50 * 1024 * 1024) // 50MB
-                .build();
+        if(!ImageLoader.getInstance().isInited()) {
+            // Set up configuration for the universal image loader
+            DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
+                    .cacheInMemory(true)
+                    .cacheOnDisk(true)
+                    .bitmapConfig(Bitmap.Config.RGB_565)
+                    //.imageScaleType(ImageScaleType.EXACTLY)
+                    .build();
 
-        ImageLoader.getInstance().init(config);
+            ImageLoaderConfiguration config =
+                    new ImageLoaderConfiguration.Builder(getApplicationContext())
+                            .defaultDisplayImageOptions(defaultOptions)
+                            .memoryCacheSize(20 * 1024 * 1024) // 20MB
+                            .diskCacheSize(50 * 1024 * 1024) // 50MB
+                            .threadPoolSize(10)
+                            .build();
+
+            ImageLoader.getInstance().init(config);
+        }
 
         // Load preferences for activity
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         Boolean ageAccept = preferences.getBoolean("age_guard_accept", false);
+        String defaultBoard = preferences.getString("default_board", "").toLowerCase();
 
         // Checks if age guard has been accepted
         if(!ageAccept){
@@ -104,21 +115,36 @@ public class InfinityBrowser extends Activity
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
             Intent intent = getIntent();
+            Board newBoard = null;
+
             if(intent != null && intent.getData() != null) {
-                Board newBoard = Board.newInstance(intent.getDataString());
+                newBoard = Board.newInstance(intent.getDataString());
 
-                fragmentTransaction.replace(R.id.container, newBoard, intent.getDataString());
+                mTitle = intent.getDataString().replace("http://8chan.co", "")
+                        .replace("index.html", "");
+            } else if(!defaultBoard.equals("")) {
+                String boardLink = "http://8chan.co/" + defaultBoard + "/";
 
-                mTitle = intent.getDataString();
+                newBoard = Board.newInstance(boardLink);
+                mTitle = "/" + defaultBoard.toLowerCase() + "/";
             } else {
-                String defaultBoard = "http://8chan.co/" +
-                        preferences.getString("default_board", "").toLowerCase() + "/";
+                BoardListDatabase db = new BoardListDatabase(this);
+                Cursor cursor =  db.getFavoritedBoards();
 
-                Board newBoard = Board.newInstance(defaultBoard);
-
-                fragmentTransaction.replace(R.id.container, newBoard, defaultBoard);
-
-                mTitle = "/" + preferences.getString("default_board", "").toLowerCase() + "/";
+                if(cursor.moveToNext()) {
+                    String boardLink = cursor.getString(
+                            cursor.getColumnIndex(DatabaseDef.Boards.BOARD_LINK)).toLowerCase();
+                    newBoard = Board.newInstance("http://8chan.co" + boardLink);
+                    mTitle = boardLink;
+                } else {
+                    LinearLayout helpText = (LinearLayout) findViewById(R.id.ll_help_add_boards);
+                    helpText.setVisibility(View.VISIBLE);
+                }
+                cursor.close();
+            }
+            if(newBoard != null) {
+                fragmentTransaction.replace(R.id.container, newBoard, mTitle.toString());
+                setTitle(mTitle);
             }
             fragmentTransaction.commit();
         }
@@ -144,6 +170,7 @@ public class InfinityBrowser extends Activity
         fragmentManager.beginTransaction()
                 .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
                 .commit();
+        setTitle(mTitle);
     }
 
     /**
@@ -153,8 +180,15 @@ public class InfinityBrowser extends Activity
      */
     public void onSectionAttached(int number) {
         //mTitle = boardLink;
-        //getActionBar().setTitle(mTitle);
+        setTitle(mTitle);
     }
+
+    @Override
+    public void setTitle(CharSequence title) {
+        mTitle = title;
+        getActionBar().setTitle(mTitle);
+    }
+
 
     /**
      * Restores the action bar when called.
@@ -206,10 +240,11 @@ public class InfinityBrowser extends Activity
     /**
      * Creates a new board for a post when reply button is hit.
      *
-     * @param postLink Link to the thread to open up
+     * @param boardRoot Link to the thread to open up
+     * @param threadNo Thread no being opened
      */
     @Override
-    public void onReplyClicked(String postLink) {
+    public void onReplyClicked(String boardRoot, String threadNo) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         Boolean ageAccept = preferences.getBoolean("age_guard_accept", false);
 
@@ -217,14 +252,15 @@ public class InfinityBrowser extends Activity
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-            Board newThread = Board.newInstance(postLink);
+            Board newThread = Board.newInstance(boardRoot, threadNo);
 
-            fragmentTransaction.replace(R.id.container, newThread, postLink);
+            fragmentTransaction.replace(R.id.container, newThread, threadNo);
             fragmentTransaction.addToBackStack(null);
 
             fragmentTransaction.commit();
 
-            mTitle = postLink;
+            mTitle = boardRoot.replace("http://8chan.co", "") + threadNo;
+            setTitle(mTitle);
         }
     }
 

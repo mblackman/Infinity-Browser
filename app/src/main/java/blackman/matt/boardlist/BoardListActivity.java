@@ -2,10 +2,12 @@ package blackman.matt.boardlist;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -161,6 +163,14 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
 
         initSpinners();
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean ageAccept = preferences.getBoolean("age_guard_accept", false);
+
+        if(ageAccept && list_db.isEmpty()) {
+            new GetBoardList().execute();
+        }
+
+
         new Handler().post(new Runnable() {
             @Override
             public void run() {
@@ -292,15 +302,7 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
             String url = "http://8chan.co/boards.html";
 
             try {
-                Log.i("Started Jsoup", "Started getting page");
-                Long startTime = System.nanoTime();
-
                 boardPage = Jsoup.connect(url).get();
-
-                Long endTime = System.nanoTime() - startTime;
-                double seconds = (double)endTime / 1000000000.0;
-                Log.i("Ended Jsoup", "Took " + seconds + " seconds to get board");
-
             } catch (IOException e) {
                 e.printStackTrace();
             }

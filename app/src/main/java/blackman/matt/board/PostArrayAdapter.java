@@ -18,6 +18,8 @@ package blackman.matt.board;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -27,10 +29,12 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.imageaware.ImageAware;
 import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
@@ -106,8 +110,8 @@ public class PostArrayAdapter extends BaseAdapter {
      */
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        Post post = getItem(position);
-        ViewHolder holder;
+        final Post post = getItem(position);
+        final ViewHolder holder;
         //int maxWidth = mContext.getResources().getInteger(R.integer.post_thumbnail_size);
         //final ImageSize targetSize = new ImageSize(maxWidth, maxWidth);
 
@@ -125,7 +129,9 @@ public class PostArrayAdapter extends BaseAdapter {
             holder.postBody = (TextView) convertView.findViewById(R.id.tv_postText);
             holder.replies = (TextView) convertView.findViewById(R.id.tv_number_replies);
             holder.layout = (LinearLayout) convertView.findViewById(R.id.ll_post_body);
+            holder.progressImage = (ProgressBar) convertView.findViewById(R.id.progress_post_image);
 
+            holder.replies.setTag(holder);
             holder.image.setTag(holder);
 
             convertView.setTag(holder);
@@ -142,11 +148,15 @@ public class PostArrayAdapter extends BaseAdapter {
 
         // Set up reply button
         if(post.isRootBoard) {
-            final String newUrl = post.boardLink + "res/" + post.postNo + ".html";
+            if(post.numReplies.equals("")) {
+                holder.replies.setText("Click to reply >>>");
+            } else {
+                holder.replies.setText(post.numReplies + " >>>");
+            }
             holder.replies.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mListener.onReplyClicked(newUrl);
+                    mListener.onReplyClicked(post.boardLink, post.postNo);
                 }
             });
         } else {
@@ -158,13 +168,59 @@ public class PostArrayAdapter extends BaseAdapter {
             holder.filename.setText(post.fileNames.get(0) + " " + post.fileNumbers.get(0));
             holder.filename.setVisibility(View.VISIBLE);
 
+            holder.image.setImageBitmap(null);
+
             if(post.isThumbnail) {
                 ImageAware imageAware = new ImageViewAware(holder.image, false);
-                ImageLoader.getInstance().displayImage(post.thumbURLS.get(0), imageAware);
+                ImageLoader.getInstance().displayImage(post.thumbURLS.get(0), imageAware,
+                        new SimpleImageLoadingListener() {
+                            @Override
+                            public void onLoadingStarted(String imageUri, View view) {
+                                holder.progressImage.setVisibility(View.VISIBLE);
+                            }
+
+                            @Override
+                            public void onLoadingFailed(String imageUri, View view,
+                                                        FailReason failReason) {
+                                holder.progressImage.setVisibility(View.GONE);
+                                Drawable error = mContext.getResources().getDrawable(R.drawable.deadico);
+                                view.setVisibility(View.VISIBLE);
+                                ((ImageButton) view).setImageDrawable(error);;
+                            }
+
+                            @Override
+                            public void onLoadingComplete(String imageUri, View view,
+                                                          Bitmap loadedImage) {
+                                holder.progressImage.setVisibility(View.GONE);
+                                holder.image.setVisibility(View.VISIBLE);
+                            }
+                        });
                 holder.layout.setOrientation(LinearLayout.HORIZONTAL);
             } else {
                 ImageAware imageAware = new ImageViewAware(holder.image, false);
-                ImageLoader.getInstance().displayImage(post.fullURLS.get(0), imageAware);
+                ImageLoader.getInstance().displayImage(post.fullURLS.get(0), imageAware,
+                        new SimpleImageLoadingListener() {
+                            @Override
+                            public void onLoadingStarted(String imageUri, View view) {
+                                holder.progressImage.setVisibility(View.VISIBLE);
+                            }
+
+                            @Override
+                            public void onLoadingFailed(String imageUri, View view,
+                                                        FailReason failReason) {
+                                holder.progressImage.setVisibility(View.GONE);
+                                Drawable error = mContext.getResources().getDrawable(R.drawable.deadico);
+                                view.setVisibility(View.VISIBLE);
+                                ((ImageButton) view).setImageDrawable(error);
+                            }
+
+                            @Override
+                            public void onLoadingComplete(String imageUri, View view,
+                                                          Bitmap loadedImage) {
+                                holder.progressImage.setVisibility(View.GONE);
+                                holder.image.setVisibility(View.VISIBLE);
+                            }
+                });
                 holder.layout.setOrientation(LinearLayout.VERTICAL);
             }
             holder.image.setOnClickListener(new View.OnClickListener() {
@@ -179,9 +235,27 @@ public class PostArrayAdapter extends BaseAdapter {
                         ImageLoader.getInstance().displayImage(url, myHolder.image,
                                 new SimpleImageLoadingListener() {
                                     @Override
-                                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                    public void onLoadingStarted(String imageUri, View view) {
+                                        myHolder.image.setVisibility(View.GONE);
+                                        myHolder.progressImage.setVisibility(View.VISIBLE);
+                                    }
+
+                                    @Override
+                                    public void onLoadingFailed(String imageUri, View view,
+                                                                FailReason failReason) {
+                                        myHolder.progressImage.setVisibility(View.GONE);
+                                        Drawable error = mContext.getResources().getDrawable(R.drawable.deadico);
+                                        view.setVisibility(View.VISIBLE);
+                                        ((ImageButton) view).setImageDrawable(error);
+                                    }
+
+                                    @Override
+                                    public void onLoadingComplete(String imageUri, View view,
+                                                                  Bitmap loadedImage) {
+                                        myHolder.progressImage.setVisibility(View.GONE);
                                         ((ImageButton) view).setImageBitmap(loadedImage);
                                         myHolder.layout.setOrientation(LinearLayout.HORIZONTAL);
+                                        myHolder.image.setVisibility(View.VISIBLE);
                                     }
                                 });
                     } else {
@@ -190,9 +264,27 @@ public class PostArrayAdapter extends BaseAdapter {
                         ImageLoader.getInstance().displayImage(url, myHolder.image,
                                 new SimpleImageLoadingListener() {
                                     @Override
-                                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                                    public void onLoadingStarted(String imageUri, View view) {
+                                        myHolder.image.setVisibility(View.GONE);
+                                        myHolder.progressImage.setVisibility(View.VISIBLE);
+                                    }
+
+                                    @Override
+                                    public void onLoadingFailed(String imageUri, View view,
+                                                                FailReason failReason) {
+                                        myHolder.progressImage.setVisibility(View.GONE);
+                                        Drawable error = mContext.getResources().getDrawable(R.drawable.deadico);
+                                        view.setVisibility(View.VISIBLE);
+                                        ((ImageButton) view).setImageDrawable(error);
+                                    }
+
+                                    @Override
+                                    public void onLoadingComplete(String imageUri, View view,
+                                                                  Bitmap loadedImage) {
+                                        myHolder.progressImage.setVisibility(View.GONE);
                                         ((ImageButton) view).setImageBitmap(loadedImage);
                                         myHolder.layout.setOrientation(LinearLayout.VERTICAL);
+                                        myHolder.image.setVisibility(View.VISIBLE);
                                     }
                                 });
                     }
@@ -211,5 +303,6 @@ public class PostArrayAdapter extends BaseAdapter {
         ImageButton image;
         TextView username, postDate, postNo, topic, postBody, replies, filename;
         LinearLayout layout;
+        ProgressBar progressImage;
     }
 }

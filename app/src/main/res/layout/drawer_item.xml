@@ -3,9 +3,9 @@
     android:id="@+id/text"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="10dip"
-    android:paddingTop="@dimen/post_bar_small_padding"
-    android:paddingBottom="@dimen/post_bar_small_padding"
     android:singleLine="false"
     android:text="@string/sql_column_link"
-    android:textSize="@dimen/drawer_board_text_size" />
+    android:textSize="@dimen/drawer_board_text_size"
+    android:paddingLeft="@dimen/post_bar_large_padding"
+    android:paddingTop="@dimen/post_bar_small_padding"
+    android:paddingBottom="@dimen/post_bar_small_padding" />

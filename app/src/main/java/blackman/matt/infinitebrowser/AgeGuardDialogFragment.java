@@ -20,9 +20,12 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.View;
+import android.widget.LinearLayout;
 
 /**
  * Dialog that asks the user to verify that they are over the age of 18 for legal reasons.
@@ -48,6 +51,8 @@ public class AgeGuardDialogFragment extends DialogFragment {
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putBoolean("age_guard_accept", true);
                         editor.apply();
+                        View helpBoard = getActivity().findViewById(R.id.ll_help_add_boards);
+                        helpBoard.setVisibility(View.VISIBLE);
                     }
                 })
                 .setNegativeButton("Decline", new DialogInterface.OnClickListener() {
