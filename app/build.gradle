@@ -1,20 +1,31 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'InfinityBrowserKey'
+            keyPassword 'ajgra980g4j980a()tg43j9gg9456u-09'
+            storeFile file('E:/My Documents/Mega Sync/Inf Bro/app keystore.jks')
+            storePassword 'j98f4aq89t4aj()R932r94t84*#(5u843idnvdiIUheraugio'
+        }
+    }
     compileSdkVersion 20
     buildToolsVersion "20.0.0"
-
     defaultConfig {
         applicationId "blackman.matt.infinitebrowser"
         minSdkVersion 16
         targetSdkVersion 20
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "0.12.0"
     }
     buildTypes {
         release {
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            zipAlign true
+        }
+        debug {
+            zipAlign true
         }
     }
 }

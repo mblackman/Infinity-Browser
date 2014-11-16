@@ -99,6 +99,7 @@ public class InfinityBrowser extends Activity
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         Boolean ageAccept = preferences.getBoolean("age_guard_accept", false);
         String defaultBoard = preferences.getString("default_board", "").toLowerCase();
+        LinearLayout helpText = (LinearLayout) findViewById(R.id.ll_help_add_boards);
 
         // Checks if age guard has been accepted
         if(!ageAccept){
@@ -132,13 +133,13 @@ public class InfinityBrowser extends Activity
                     newBoard = Board.newInstance("https://8chan.co" + boardLink);
                     mTitle = boardLink;
                 } else {
-                    LinearLayout helpText = (LinearLayout) findViewById(R.id.ll_help_add_boards);
                     helpText.setVisibility(View.VISIBLE);
                 }
                 cursor.close();
             }
             if(newBoard != null) {
                 fragmentTransaction.replace(R.id.container, newBoard, mTitle.toString());
+                helpText.setVisibility(View.GONE);
                 setTitle(mTitle);
             }
             fragmentTransaction.commit();
@@ -254,6 +255,7 @@ public class InfinityBrowser extends Activity
         if(ageAccept) {
             FragmentManager fragmentManager = getFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            LinearLayout helpText = (LinearLayout) findViewById(R.id.ll_help_add_boards);
 
             Board newThread = Board.newInstance(boardRoot, threadNo);
 
@@ -262,6 +264,7 @@ public class InfinityBrowser extends Activity
 
             fragmentTransaction.commit();
 
+            helpText.setVisibility(View.GONE);
             mTitle = boardRoot.replace("https://8chan.co", "") + threadNo;
             setTitle(mTitle);
         }
