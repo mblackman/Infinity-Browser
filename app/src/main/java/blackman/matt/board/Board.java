@@ -87,7 +87,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
      * @return A new instance of a fragment board.
      */
     public static Board newInstance(String boardRoot, String threadNo) {
-        String boardLink = boardRoot + "res/" + threadNo + ".html";
+        String boardLink = "https://8chan.co/" + boardRoot + "/res/" + threadNo + ".html";
         Board fragment = new Board();
         Bundle args = new Bundle();
         args.putString(ARG_BOARD_LINK, boardLink);
@@ -102,18 +102,35 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
         // Required empty public constructor
     }
 
+    /**
+     * Creates the activity menu when fragment created.
+     *
+     * @param savedInstanceState If the fragment was already created before.
+     */
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setHasOptionsMenu(true); // Do not forget this!!!
     }
 
+    /**
+     * When the options menu is created this chooses the layout to inflate.
+     *
+     * @param menu Menu to inflate
+     * @param inflater The inflater.
+     */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.board_menu, menu);
     }
 
+    /**
+     * Handles an option menu item being selected.
+     *
+     * @param item The selected item in question.
+     * @return If the operation was carried out successfully.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
@@ -180,7 +197,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
         mListView.setOnScrollListener(mScrollListener);
 
         getActivity().getActionBar().setTitle(mBoardLink.toString()
-                .replace("http://8chan.co", "")
+                .replace("https://8chan.co", "")
                 .replace("res/", "")
                 .replace(".html", ""));
 
@@ -204,11 +221,14 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
         }
     }
 
+    /**
+     * Restores the action bar title when the fragment is brought back into focus.
+     */
     @Override
     public void onResume() {
         super.onResume();
         getActivity().getActionBar().setTitle(mBoardLink.toString()
-                .replace("http://8chan.co", "")
+                .replace("https://8chan.co", "")
                 .replace("res/", "")
                 .replace(".html", ""));
     }
@@ -228,7 +248,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
      */
     @Override
     public void onDestroy() {
-        mPosts.clear();
+        //mPosts.clear();
         mAdapter.notifyDataSetChanged();
         mPosts = null;
         mAdapter = null;
@@ -273,7 +293,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
                     }
                 });
 
-                int duration = Toast.LENGTH_LONG;
+                int duration = Toast.LENGTH_SHORT;
 
                 Toast toast = Toast.makeText(getActivity(), error, duration);
                 toast.setGravity(Gravity.TOP, 0, 0);
@@ -298,6 +318,9 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
         public void onReplyClicked(String boardRoot, String threadNo);
     }
 
+    /**
+     * Refreshes the current board.
+     */
     private void refreshBoard(){
         if(mScrollListener != null) {
             mScrollListener.resetBoardPage();
@@ -319,11 +342,23 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
         private int currentPage = 1;
         private View mParent;
 
+        /**
+         * Override constructor.
+         *
+         * @param imageLoader The current loader of images.
+         * @param pauseOnScroll If loading should be paused when scrolled.
+         * @param pauseOnFling If loading should be paused on fling.
+         */
         public EndlessScrollListener(ImageLoader imageLoader, boolean pauseOnScroll,
                                      boolean pauseOnFling) {
             super(imageLoader, pauseOnScroll, pauseOnFling);
         }
 
+        /**
+         * Sets the parent view.
+         *
+         * @param parentView View to be set to.
+         */
         public void setParentView(View parentView) {
             mParent = parentView;
         }
@@ -353,6 +388,9 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
             }
         }
 
+        /**
+         * Resets to base page to load.
+         */
         public void resetBoardPage() {
             currentPage = 1;
         }

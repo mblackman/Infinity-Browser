@@ -22,6 +22,7 @@ public class Post {
     public final String postBody;
     public final String numReplies;
     public final String boardLink;
+    public final String rootBoard;
     public final List<String> fullURLS;
     public final List<String> thumbURLS;
     public final List<String> fileNames;
@@ -59,6 +60,7 @@ public class Post {
         this.fileNames = fileNames;
         this.fileNumbers = fileNumbers;
         this.boardLink = boardLink;
+        this.rootBoard = boardLink.replace("https://8chan.co/", "").split("/")[0];
         this.isRootBoard = onRootBoard;
         this.Id = Long.parseLong(postNo);
         this.isThumbnail = true;
@@ -106,7 +108,7 @@ public class Post {
         // Post too long text removal
         Elements tooLongs = formattedText.getElementsByClass("toolong");
         for(Element text : tooLongs) {
-            text.text("...");
+            text.text("");
         }
 
         return formattedText.toString();

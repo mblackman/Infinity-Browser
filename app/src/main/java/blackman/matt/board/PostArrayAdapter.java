@@ -153,7 +153,7 @@ class PostArrayAdapter extends BaseAdapter {
             holder.replies.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mListener.onReplyClicked(post.boardLink, post.postNo);
+                    mListener.onReplyClicked(post.rootBoard, post.postNo);
                 }
             });
         } else {

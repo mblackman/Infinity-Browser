@@ -51,17 +51,18 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
 
     public interface PageLoaderResponse {
         public void setPageLoaded(Boolean isLoaded);
+
         public void sendErrorMessage(CharSequence error);
     }
 
     /**
      * Basic constructor to initialize the class.
      *
-     * @param parent Parent view who needs a loading.
-     * @param posts The posts container.
+     * @param parent  Parent view who needs a loading.
+     * @param posts   The posts container.
      * @param adapter Adapter for the list view that holds the posts.
      */
-    public PageLoader(View parent, List<Post> posts, PostArrayAdapter adapter, Boolean isRootBoard){
+    public PageLoader(View parent, List<Post> posts, PostArrayAdapter adapter, Boolean isRootBoard) {
         mProgress = (ProgressBar) parent.findViewById(R.id.progress_page_load);
         mProgressText = (TextView) parent.findViewById(R.id.tv_progress_page_load);
         mPosts = posts;
@@ -81,6 +82,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
 
     /**
      * Reads in urls sent by user to download the html from.
+     *
      * @param urls the urls sent by the user.
      * @return returns the html document
      */
@@ -97,7 +99,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
             e.printStackTrace();
         }
 
-        if(ochPage != null) {
+        if (ochPage != null) {
             // Gets all the parent posts on page
             Elements threads = ochPage.select("[class=thread]");
 
@@ -107,7 +109,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
                 try {
                     Post opPost = createPost(thread);
 
-                    if(!boardExists(opPost.Id)) {
+                    if (!boardExists(opPost.Id)) {
                         mPosts.add(opPost);
                     }
                 } catch (Exception e) {
@@ -123,7 +125,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
                         try {
                             Post replyPost = createPost(postReply);
 
-                            if(!boardExists(replyPost.Id)) {
+                            if (!boardExists(replyPost.Id)) {
                                 mPosts.add(replyPost);
                             }
                         } catch (Exception e) {
@@ -147,7 +149,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
      */
     @Override
     protected void onPostExecute(Boolean loadSuccess) {
-        if(loadSuccess) {
+        if (loadSuccess) {
             mResponse.setPageLoaded(true);
         } else {
             mResponse.setPageLoaded(false);
@@ -157,15 +159,19 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
         mProgressText.setVisibility(View.GONE);
     }
 
+    /**
+     * Checks if a board or post exists in the list.
+     *
+     * @param newPost The new posts id.
+     * @return If the board exists or not.
+     */
     private Boolean boardExists(final long newPost) {
         Boolean exists = false;
-
-        for(Post post : mPosts) {
-            if(post.Id.equals(newPost)) {
+        for (Post post : mPosts) {
+            if (post.Id.equals(newPost)) {
                 exists = true;
             }
         }
-
         return exists;
     }
 
@@ -183,6 +189,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
         Elements omitted;
         Elements subjects;
         Elements images;
+        Elements postReplies;
         Element post;
         Element imageFiles;
         Element postLink;
@@ -196,6 +203,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
         List<String> postImageFull = new ArrayList<String>();
         List<String> fileNumbers = new ArrayList<String>();
         List<String> fileInfos = new ArrayList<String>();
+        List<String> recievedReplies = new ArrayList<String>();
 
         // Start filtering
         post = postElement.select("div[class^=post]").first();
@@ -221,9 +229,14 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
             numReplies = "";
         }
 
-         images = postElement.getElementsByClass("files");
+        postReplies = post.select("a[class^=mentioned-]");
+        for(Element reply : postReplies) {
+            recievedReplies.add(reply.text());
+        }
 
-        if(!images.isEmpty()) {
+        images = postElement.getElementsByClass("files");
+
+        if (!images.isEmpty()) {
             imageFiles = images.first();
             singleFile = imageFiles.getElementsByClass("file");
             multiFiles = imageFiles.select("[class=file multifile]");

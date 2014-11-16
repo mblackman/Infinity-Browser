@@ -5,8 +5,5 @@
         android:icon="@drawable/menu_update"
         android:title="@string/action_update"
         android:showAsAction="ifRoom" />
-    <item android:id="@+id/action_boards"
-        android:icon="@drawable/menu_boards_icon"
-        android:title="@string/action_boards"
-        android:showAsAction="ifRoom" />
+
 </menu>

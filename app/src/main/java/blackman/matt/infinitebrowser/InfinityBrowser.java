@@ -114,10 +114,11 @@ public class InfinityBrowser extends Activity
             if(intent != null && intent.getData() != null) {
                 newBoard = Board.newInstance(intent.getDataString());
 
-                mTitle = intent.getDataString().replace("http://8chan.co", "")
+                mTitle = intent.getDataString().replace("https://8chan.co", "")
+                        .replace("http://8chan.co", "")
                         .replace("index.html", "");
             } else if(!defaultBoard.equals("")) {
-                String boardLink = "http://8chan.co/" + defaultBoard + "/";
+                String boardLink = "https://8chan.co/" + defaultBoard + "/";
 
                 newBoard = Board.newInstance(boardLink);
                 mTitle = "/" + defaultBoard.toLowerCase() + "/";
@@ -128,7 +129,7 @@ public class InfinityBrowser extends Activity
                 if(cursor.moveToNext()) {
                     String boardLink = cursor.getString(
                             cursor.getColumnIndex(DatabaseDef.Boards.BOARD_LINK)).toLowerCase();
-                    newBoard = Board.newInstance("http://8chan.co" + boardLink);
+                    newBoard = Board.newInstance("https://8chan.co" + boardLink);
                     mTitle = boardLink;
                 } else {
                     LinearLayout helpText = (LinearLayout) findViewById(R.id.ll_help_add_boards);
@@ -177,10 +178,15 @@ public class InfinityBrowser extends Activity
         setTitle(mTitle);
     }
 
+    /**
+     * Override to set the local title variable.
+     *
+     * @param title New title.
+     */
     @Override
     public void setTitle(CharSequence title) {
         mTitle = title;
-        getActionBar().setTitle(mTitle);
+        super.setTitle(mTitle);
     }
 
 
@@ -256,18 +262,25 @@ public class InfinityBrowser extends Activity
 
             fragmentTransaction.commit();
 
-            mTitle = boardRoot.replace("http://8chan.co", "") + threadNo;
+            mTitle = boardRoot.replace("https://8chan.co", "") + threadNo;
             setTitle(mTitle);
         }
     }
 
+    /**
+     * Sets up the options menu.
+     * @param menu The menu being created
+     * @return If the action was a success
+     */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         boolean result = super.onPrepareOptionsMenu(menu);
-        menu.findItem(R.id.action_settings).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        menu.findItem(R.id.action_settings).setOnMenuItemClickListener(
+                new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                InfinityBrowser.this.startActivity(new Intent(InfinityBrowser.this, SettingsActivity.class));
+                InfinityBrowser.this.startActivity(new Intent(InfinityBrowser.this,
+                        SettingsActivity.class));
                 return true;
             }
         });

@@ -27,6 +27,15 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <intent-filter android:label="@string/filter_intent_board_link" >
+                <action android:name="android.intent.action.VIEW" />
+                <!-- Accepts URIs that begin with "http://8chan.co/" -->
+                <data
+                    android:host="8chan.co"
+                    android:scheme="https" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         <activity
             android:name="blackman.matt.infinitebrowser.SettingsActivity"

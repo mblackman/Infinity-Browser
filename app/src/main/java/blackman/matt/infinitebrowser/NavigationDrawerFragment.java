@@ -22,7 +22,6 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.database.Cursor;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -38,14 +37,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import blackman.matt.board.Board;
-import blackman.matt.boardlist.BoardListActivity;
 import blackman.matt.boardlist.BoardListDatabase;
 
 /**
@@ -279,7 +276,7 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String boardLink = "http://8chan.co";
+                String boardLink = "https://8chan.co";
                 String boardRoot = "/tech/";
                 if(view instanceof TextView) {
                     boardRoot = ((TextView) view).getText().toString();

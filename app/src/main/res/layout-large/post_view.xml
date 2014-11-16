@@ -25,12 +25,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="false"
         android:layout_alignParentTop="false"
+        android:layout_toRightOf="@+id/tv_postno"
         android:text="@string/post_topic_sample_text"
         android:textColor="#0F0C5D"
         android:textSize="@dimen/post_header_font_size"
-        android:paddingRight="@dimen/post_header_word_spacing"
-        android:layout_toRightOf="@+id/tv_postno"
-        android:singleLine="true" />
+        android:paddingRight="@dimen/post_header_word_spacing" />
 
     <TextView
         android:id="@+id/tv_username"
@@ -41,18 +40,16 @@
         android:text="@string/post_name_sample_text"
         android:textColor="#ff117743"
         android:textSize="@dimen/post_header_font_size"
-        android:singleLine="true"
-        android:layout_toRightOf="@+id/tv_datetime"
-        android:layout_below="@+id/tv_postno"
-        android:paddingLeft="@dimen/post_header_word_spacing" />
+        android:layout_toRightOf="@+id/tv_topic"
+        android:paddingRight="@dimen/post_header_word_spacing" />
 
     <TextView
         android:id="@+id/tv_datetime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/tv_username"
         android:text="@string/post_date_sample_text"
-        android:textSize="@dimen/post_header_font_size"
-        android:layout_below="@+id/tv_postno" />
+        android:textSize="@dimen/post_header_font_size" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -61,8 +58,7 @@
         android:id="@+id/tv_post_image_filename"
         android:layout_below="@+id/tv_datetime"
         android:textSize="@dimen/post_header_font_size"
-        android:visibility="gone"
-        android:singleLine="true" />
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="fill_parent"
