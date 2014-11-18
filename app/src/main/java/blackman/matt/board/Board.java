@@ -48,7 +48,8 @@ import blackman.matt.infinitebrowser.R;
  * A main board or thread on 8chan. This will load and handle all of the posts on the board.
  *
  */
-public class Board extends Fragment implements PageLoader.PageLoaderResponse {
+public class Board extends Fragment implements PageLoader.PageLoaderResponse,
+        PostArrayAdapter.replyClickListener {
     // ARG for the board link to be sent in
     private static final String ARG_BOARD_LINK = "boardlink";
     private PageLoader mPageGetter;
@@ -114,7 +115,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
     }
 
     /**
-     * When the options menu is created this chooses the layout to inflate.
+     * When the options menu is created this chooses the postLayout to inflate.
      *
      * @param menu Menu to inflate
      * @param inflater The inflater.
@@ -172,7 +173,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        // Inflate the postLayout for this fragment
         mRootView = inflater.inflate(R.layout.fragment_board, container, false);
         View progress = inflater.inflate(R.layout.board_progress_message, mListView, false);
 
@@ -181,7 +182,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
 
         mPosts = new ArrayList<Post>();
         mAdapter = new PostArrayAdapter(getActivity());
-        mAdapter.updatePosts(mPosts, mListener);
+        mAdapter.updatePosts(mPosts, mListener, this);
 
         if(mBoardLink != null){
             mIsRootBoard = !mBoardLink.getPath().contains(".html");
@@ -302,6 +303,16 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse {
             }
         };
         thread.start();
+    }
+
+    /**
+     * Moves the post listview to a selected post.
+     *
+     * @param position Position of the post to move to.
+     */
+    @Override
+    public void gotoPost(int position) {
+        mListView.setSelection(position);
     }
 
     /**

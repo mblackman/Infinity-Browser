@@ -17,16 +17,24 @@
 package blackman.matt.board;
 
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +51,8 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
     private final TextView mProgressText;
     private final List<Post> mPosts;
     private final PostArrayAdapter mAdapter;
+
+    private List<Long> postIds = new ArrayList<Long>();
 
     private Boolean mIsOnRootPage;
     private String mPageUrl;
@@ -92,47 +102,62 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
         Document ochPage = null;
         Boolean pageLoaded;
         mPageUrl = url.toString();
+        long pageStart, pageEnd;
 
         try {
-            ochPage = Jsoup.connect(url.toString()).get();
+            HttpClient client = new DefaultHttpClient();
+            HttpGet request = new HttpGet(url.toString());
+            HttpResponse response = client.execute(request);
+
+            InputStream in = response.getEntity().getContent();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            StringBuilder str = new StringBuilder();
+            String line;
+            while((line = reader.readLine()) != null)
+            {
+                str.append(line);
+            }
+            in.close();
+            ochPage = Jsoup.parse(str.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        if (ochPage != null) {
-            // Gets all the parent posts on page
-            Elements threads = ochPage.select("[class=thread]");
 
-            // Looks through all the master posts
-            for (Element thread : threads) {
-                // Create main elements and post
-                try {
+        pageStart = android.os.SystemClock.uptimeMillis();
+
+        if (ochPage != null) {
+            try {
+                // Gets all the parent posts on page
+                Elements threads = ochPage.getElementsByClass("thread");
+
+                // Looks through all the master posts
+                for (Element thread : threads) {
+                    // Create main elements and post
                     Post opPost = createPost(thread);
 
-                    if (!boardExists(opPost.Id)) {
+                    if (!postIds.contains(opPost.Id)) {
                         mPosts.add(opPost);
+                        postIds.add(opPost.Id);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
 
-                // If you are in a thread it will load the replies
-                if (!mIsOnRootPage) {
-                    Elements postReplies = thread.select("[class=post reply]");
+                    // If you are in a thread it will load the replies
+                    if (!mIsOnRootPage) {
+                        Elements postReplies = thread.select("div.post.reply");
 
-                    // Looks through all the replies to an OP post
-                    for (Element postReply : postReplies) {
-                        try {
+                        // Looks through all the replies to an OP post
+                        for (Element postReply : postReplies) {
                             Post replyPost = createPost(postReply);
 
-                            if (!boardExists(replyPost.Id)) {
+                            if (!postIds.contains(replyPost.Id)) {
                                 mPosts.add(replyPost);
+                                postIds.add(replyPost.Id);
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
                     }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
             pageLoaded = true;
         } else {
@@ -140,6 +165,8 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
             mResponse.sendErrorMessage(text);
             pageLoaded = false;
         }
+        pageEnd = android.os.SystemClock.uptimeMillis();
+        Log.d("Board Created", "Excution time: " + (pageEnd - pageStart) + " ms");
         return pageLoaded;
     }
 
@@ -157,22 +184,6 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
         mAdapter.notifyDataSetChanged();
         mProgress.setVisibility(View.GONE);
         mProgressText.setVisibility(View.GONE);
-    }
-
-    /**
-     * Checks if a board or post exists in the list.
-     *
-     * @param newPost The new posts id.
-     * @return If the board exists or not.
-     */
-    private Boolean boardExists(final long newPost) {
-        Boolean exists = false;
-        for (Post post : mPosts) {
-            if (post.Id.equals(newPost)) {
-                exists = true;
-            }
-        }
-        return exists;
     }
 
     /**
@@ -206,7 +217,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
         List<String> recievedReplies = new ArrayList<String>();
 
         // Start filtering
-        post = postElement.select("div[class^=post]").first();
+        post = postElement.select("div.post").first();
 
         // Read through op post and get information
         postLink = post.getElementsByClass("post_no").first();

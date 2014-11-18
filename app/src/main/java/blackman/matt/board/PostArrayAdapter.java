@@ -18,9 +18,12 @@ package blackman.matt.board;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
+import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
+import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,6 +53,11 @@ class PostArrayAdapter extends BaseAdapter {
     private List<Post> mPosts = Collections.emptyList();
     private final Context mContext;
     private Board.OnReplyClickedListener mListener;
+    private replyClickListener mPostReplyClicked;
+
+    public interface replyClickListener {
+        public void gotoPost(int position);
+    }
 
     /**
      * Public constructor to handle taking in the list of views.
@@ -57,11 +65,14 @@ class PostArrayAdapter extends BaseAdapter {
      */
     public PostArrayAdapter(Context context) {
         mContext = context;
+
     }
 
-    public void updatePosts(List<Post> posts, Board.OnReplyClickedListener listener) {
+    public void updatePosts(List<Post> posts, Board.OnReplyClickedListener listener,
+                            replyClickListener replyListener) {
         mPosts = posts;
         mListener = listener;
+        mPostReplyClicked = replyListener;
         notifyDataSetChanged();
     }
 
@@ -111,6 +122,8 @@ class PostArrayAdapter extends BaseAdapter {
         final ViewHolder holder;
         //int maxWidth = mContext.getResources().getInteger(R.integer.post_thumbnail_size);
         //final ImageSize targetSize = new ImageSize(maxWidth, maxWidth);
+        Float replyPadding = mContext.getResources().getDimension(R.dimen.post_header_word_spacing);
+
 
         if(convertView == null) {
             convertView = LayoutInflater.from(mContext).inflate(R.layout.post_view, parent, false);
@@ -125,7 +138,8 @@ class PostArrayAdapter extends BaseAdapter {
             holder.topic = (TextView) convertView.findViewById(R.id.tv_topic);
             holder.postBody = (TextView) convertView.findViewById(R.id.tv_postText);
             holder.replies = (TextView) convertView.findViewById(R.id.tv_number_replies);
-            holder.layout = (LinearLayout) convertView.findViewById(R.id.ll_post_body);
+            holder.postLayout = (LinearLayout) convertView.findViewById(R.id.ll_post_body);
+            holder.replyLayout = (LinearLayout) convertView.findViewById(R.id.ll_post_replies);
             holder.progressImage = (ProgressBar) convertView.findViewById(R.id.progress_post_image);
 
             holder.replies.setTag(holder);
@@ -142,6 +156,32 @@ class PostArrayAdapter extends BaseAdapter {
         holder.topic.setText(post.topic);
         holder.postBody.setText(Html.fromHtml(post.postBody));
         holder.postBody.setMovementMethod(LinkMovementMethod.getInstance());
+
+        // Add replies to post
+        holder.replyLayout.removeAllViews();
+        for(String reply : post.repliedBy) {
+            TextView newReply = new TextView(mContext);
+            String replyNo = ">>" + reply;
+            SpannableString content = new SpannableString(replyNo);
+            content.setSpan(new UnderlineSpan(), 0, replyNo.length(), 0);
+            newReply.setText(content);
+            newReply.setTextColor(Color.BLUE);
+            newReply.setPadding(replyPadding.intValue(), 0, 0, 0);
+            newReply.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String postNo = ((TextView) v).getText().toString().replace(">>", "");
+                    int i = 0;
+                    for(Post post : mPosts) {
+                        if(post.postNo.equals(postNo)) {
+                            mPostReplyClicked.gotoPost(i);
+                        }
+                        i++;
+                    }
+                }
+            });
+            holder.replyLayout.addView(newReply);
+        }
 
         // Set up reply button
         if(post.isRootBoard) {
@@ -192,7 +232,7 @@ class PostArrayAdapter extends BaseAdapter {
                                 holder.image.setVisibility(View.VISIBLE);
                             }
                         });
-                holder.layout.setOrientation(LinearLayout.HORIZONTAL);
+                holder.postLayout.setOrientation(LinearLayout.HORIZONTAL);
             } else {
                 ImageAware imageAware = new ImageViewAware(holder.image, false);
                 ImageLoader.getInstance().displayImage(post.fullURLS.get(0), imageAware,
@@ -218,7 +258,7 @@ class PostArrayAdapter extends BaseAdapter {
                                 holder.image.setVisibility(View.VISIBLE);
                             }
                 });
-                holder.layout.setOrientation(LinearLayout.VERTICAL);
+                holder.postLayout.setOrientation(LinearLayout.VERTICAL);
             }
             holder.image.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -226,7 +266,7 @@ class PostArrayAdapter extends BaseAdapter {
                     final ViewHolder myHolder = (ViewHolder) v.getTag();
                     final Post myPost = getItem(position);
                     // If it is on big picture
-                    if(myHolder.layout.getOrientation() == LinearLayout.VERTICAL) {
+                    if(myHolder.postLayout.getOrientation() == LinearLayout.VERTICAL) {
                         String url = myPost.thumbURLS.get(0);
                         myPost.isThumbnail = true;
                         ImageLoader.getInstance().displayImage(url, myHolder.image,
@@ -251,7 +291,7 @@ class PostArrayAdapter extends BaseAdapter {
                                                                   Bitmap loadedImage) {
                                         myHolder.progressImage.setVisibility(View.GONE);
                                         ((ImageButton) view).setImageBitmap(loadedImage);
-                                        myHolder.layout.setOrientation(LinearLayout.HORIZONTAL);
+                                        myHolder.postLayout.setOrientation(LinearLayout.HORIZONTAL);
                                         myHolder.image.setVisibility(View.VISIBLE);
                                     }
                                 });
@@ -280,7 +320,7 @@ class PostArrayAdapter extends BaseAdapter {
                                                                   Bitmap loadedImage) {
                                         myHolder.progressImage.setVisibility(View.GONE);
                                         ((ImageButton) view).setImageBitmap(loadedImage);
-                                        myHolder.layout.setOrientation(LinearLayout.VERTICAL);
+                                        myHolder.postLayout.setOrientation(LinearLayout.VERTICAL);
                                         myHolder.image.setVisibility(View.VISIBLE);
                                     }
                                 });
@@ -296,10 +336,29 @@ class PostArrayAdapter extends BaseAdapter {
         return convertView;
     }
 
+    @Override
+    public void notifyDataSetChanged () {
+        super.notifyDataSetChanged();
+
+        // Start from last post and go up
+        for(int i = mPosts.size() - 1; i >= 0; i--) {
+            Post replyPost = mPosts.get(i);
+            for(String replied : replyPost.repliedTo) {
+                for(int j = i; j >= 0; j--) {
+                    Post post = mPosts.get(j);
+                    if(post.postNo.equals(replied) && !post.repliedBy.contains(replyPost.postNo)) {
+                        post.repliedBy.add(replyPost.postNo);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     static class ViewHolder {
         ImageButton image;
         TextView username, postDate, postNo, topic, postBody, replies, filename;
-        LinearLayout layout;
+        LinearLayout postLayout, replyLayout;
         ProgressBar progressImage;
     }
 }

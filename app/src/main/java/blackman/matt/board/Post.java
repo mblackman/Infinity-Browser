@@ -5,6 +5,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +31,8 @@ public class Post {
     public final List<String> fileNumbers;
     public final Boolean isRootBoard;
     public final Boolean hasImages;
+    public List<String> repliedTo;
+    public List<String> repliedBy;
     public Boolean isThumbnail;
     public final Long Id;
 
@@ -49,6 +53,8 @@ public class Post {
                 String postText, String numReplies, List<String> imageThumbs,
                 List<String> imageFull, List<String> fileNames, List<String> fileNumbers,
                 String boardLink, boolean onRootBoard) {
+        this.repliedTo = new ArrayList<String>();
+        this.repliedBy = new ArrayList<String>();
         this.userName = userName;
         this.postDate = postDate;
         this.postNo = postNumber;
@@ -102,6 +108,7 @@ public class Post {
         // Reply links
         Elements replyLinks = formattedText.select("a[onclick^=highlightReply");
         for(Element reply : replyLinks) {
+            repliedTo.add(reply.attr("href").split("#")[1]);
             boardLinks.attr("href", "http://8chan.co" + reply.attr("href"));
         }
 
