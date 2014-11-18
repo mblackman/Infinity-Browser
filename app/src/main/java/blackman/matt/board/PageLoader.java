@@ -26,6 +26,9 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -51,11 +54,28 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
     private final TextView mProgressText;
     private final List<Post> mPosts;
     private final PostArrayAdapter mAdapter;
+    private final Boolean mIsOnRootPage;
+    private String mRootBoard;
 
-    private List<Long> postIds = new ArrayList<Long>();
+    private List<String> postIds = new ArrayList<String>();
 
-    private Boolean mIsOnRootPage;
-    private String mPageUrl;
+    private static final String postNo = "no";
+    private static final String postSubject = "sub";
+    private static final String postComment = "com";
+    private static final String postReplies = "replies";
+    private static final String postName = "name";
+    private static final String postStickied = "sticky";
+    private static final String postLocked = "locked";
+    private static final String postTime = "time";
+    private static final String postLastModified = "last_modified";
+    private static final String postFileName = "filename";
+    private static final String postFileSiteName = "tim";
+    private static final String postFileExt = "ext";
+    private static final String postFileSize = "fsize";
+    private static final String postFileHeight = "h";
+    private static final String postFileWidth = "w";
+    private static final String postFileThumbHeight = "tn_h";
+    private static final String postFileThumbWidth = "tn_w";
 
     public PageLoaderResponse mResponse;
 
@@ -98,15 +118,14 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
      */
     @Override
     protected Boolean doInBackground(URL... urls) {
-        URL url = urls[0];
-        Document ochPage = null;
+        JSONObject ochPage = null;
         Boolean pageLoaded;
-        mPageUrl = url.toString();
-        long pageStart, pageEnd;
+        String pageUrl = urls[0].toString();
+        mRootBoard = urls[0].getPath().split("/")[1];
 
+        HttpClient client = new DefaultHttpClient();
+        HttpGet request = new HttpGet(pageUrl);
         try {
-            HttpClient client = new DefaultHttpClient();
-            HttpGet request = new HttpGet(url.toString());
             HttpResponse response = client.execute(request);
 
             InputStream in = response.getEntity().getContent();
@@ -118,46 +137,33 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
                 str.append(line);
             }
             in.close();
-            ochPage = Jsoup.parse(str.toString());
+            ochPage = new JSONObject(str.toString());
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
-
-        pageStart = android.os.SystemClock.uptimeMillis();
-
         if (ochPage != null) {
-            try {
-                // Gets all the parent posts on page
-                Elements threads = ochPage.getElementsByClass("thread");
-
-                // Looks through all the master posts
-                for (Element thread : threads) {
-                    // Create main elements and post
-                    Post opPost = createPost(thread);
-
-                    if (!postIds.contains(opPost.Id)) {
-                        mPosts.add(opPost);
-                        postIds.add(opPost.Id);
+            if(mIsOnRootPage) {
+                try {
+                    JSONArray threadsArray = ochPage.getJSONArray("threads");
+                    for(int i = 0; i < threadsArray.length(); i++) {
+                        mPosts.add(createPost(threadsArray.getJSONObject(i)
+                                .getJSONArray("posts").getJSONObject(0)));
                     }
-
-                    // If you are in a thread it will load the replies
-                    if (!mIsOnRootPage) {
-                        Elements postReplies = thread.select("div.post.reply");
-
-                        // Looks through all the replies to an OP post
-                        for (Element postReply : postReplies) {
-                            Post replyPost = createPost(postReply);
-
-                            if (!postIds.contains(replyPost.Id)) {
-                                mPosts.add(replyPost);
-                                postIds.add(replyPost.Id);
-                            }
-                        }
-                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } else {
+                try {
+                    JSONArray postsArray = ochPage.getJSONArray("posts");
+                    for(int i = 0; i < postsArray.length(); i++) {
+                        mPosts.add(createPost(postsArray.getJSONObject(i)));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
             pageLoaded = true;
         } else {
@@ -165,8 +171,6 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
             mResponse.sendErrorMessage(text);
             pageLoaded = false;
         }
-        pageEnd = android.os.SystemClock.uptimeMillis();
-        Log.d("Board Created", "Excution time: " + (pageEnd - pageStart) + " ms");
         return pageLoaded;
     }
 
@@ -190,97 +194,51 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
      * Takes information from HTML elements and creates the OP post of a board
      * or a thread and returns the newly created post.
      *
-     * @param postElement the post's HTML elements.
+     * @param postJson the post's JSON object.
      * @return the newly created post.
      */
-    private Post createPost(Element postElement) {
-        Post opPost;
-        Elements singleFile;
-        Elements multiFiles;
-        Elements omitted;
-        Elements subjects;
-        Elements images;
-        Elements postReplies;
-        Element post;
-        Element imageFiles;
-        Element postLink;
-        String postNumber;
-        String userName;
-        String postDate;
-        String postTopic;
-        String postText;
-        String numReplies;
-        List<String> postImageThumbs = new ArrayList<String>();
-        List<String> postImageFull = new ArrayList<String>();
-        List<String> fileNumbers = new ArrayList<String>();
-        List<String> fileInfos = new ArrayList<String>();
-        List<String> recievedReplies = new ArrayList<String>();
-
-        // Start filtering
-        post = postElement.select("div.post").first();
-
-        // Read through op post and get information
-        postLink = post.getElementsByClass("post_no").first();
-        postNumber = postLink.attr("id").replace("post_no_", "");
-        userName = post.getElementsByClass("name").first().text();
-        postDate = post.select("time").first().text();
-        postText = post.getElementsByClass("body").first().html();
-
-        subjects = post.getElementsByClass("subject");
-        if (!subjects.isEmpty()) {
-            postTopic = subjects.first().text();
-        } else {
-            postTopic = "";
-        }
-
-        omitted = post.getElementsByClass("omitted");
-        if (!omitted.isEmpty()) {
-            numReplies = omitted.first().text().replaceAll(" omitted. Click reply to view.", "");
-        } else {
-            numReplies = "";
-        }
-
-        postReplies = post.select("a[class^=mentioned-]");
-        for(Element reply : postReplies) {
-            recievedReplies.add(reply.text());
-        }
-
-        images = postElement.getElementsByClass("files");
-
-        if (!images.isEmpty()) {
-            imageFiles = images.first();
-            singleFile = imageFiles.getElementsByClass("file");
-            multiFiles = imageFiles.select("[class=file multifile]");
-
-            if (!multiFiles.isEmpty()) {
-                for (Element image : multiFiles) {
-                    String imageUrl = image.select("a").first().attr("href");
-                    String imageThumbnail = image.select("img").first().attr("src");
-                    String fileNumber = image.select("a").first().text();
-                    String fileInfo = image.getElementsByClass("unimportant").first().text();
-
-                    postImageThumbs.add(imageThumbnail);
-                    postImageFull.add(imageUrl);
-                    fileNumbers.add(fileNumber);
-                    fileInfos.add(fileInfo);
-                }
-            } else if (!singleFile.isEmpty()) {
-                Element image = singleFile.first();
-                String imageUrl = image.select("a").first().attr("href");
-                String imageThumbnail = image.select("img").first().attr("src");
-                String fileNumber = image.select("a").first().text();
-                String fileInfo = image.getElementsByClass("unimportant").first().text();
-
-                postImageThumbs.add(imageThumbnail);
-                postImageFull.add(imageUrl);
-                fileNumbers.add(fileNumber);
-                fileInfos.add(fileInfo);
-            }
-        }
-
+    private Post createPost(JSONObject postJson) {
+        List<ImageFile> images = new ArrayList<ImageFile>();
+        Post opPost = null;
         // Create new instance of post with elements
-        opPost = new Post(userName, postDate, postNumber, postTopic, postText, numReplies,
-                postImageThumbs, postImageFull, fileInfos, fileNumbers, mPageUrl, mIsOnRootPage);
+        try {
+            String fileName = postJson.optString(postFileName);
+            if(fileName != null && !fileName.equals("")) {
+                images.add(new ImageFile(mRootBoard, fileName,
+                        postJson.optString(postFileExt),
+                        postJson.getString(postFileSiteName),
+                        postJson.getInt(postFileWidth),
+                        postJson.getInt(postFileHeight),
+                        postJson.getInt(postFileThumbWidth),
+                        postJson.getInt(postFileThumbHeight)));
+            }
+
+            if(postJson.has("extra_files")) {
+                JSONArray multiFiles = postJson.getJSONArray("extra_files");
+                for (int i = 0; i < multiFiles.length(); i++) {
+                    JSONObject imageJson = multiFiles.getJSONObject(i);
+                    images.add(new ImageFile(mRootBoard,
+                            imageJson.getString(postFileName),
+                            imageJson.getString(postFileExt),
+                            imageJson.getString(postFileSiteName),
+                            imageJson.getInt(postFileWidth),
+                            imageJson.getInt(postFileHeight),
+                            imageJson.getInt(postFileThumbWidth),
+                            imageJson.getInt(postFileThumbHeight)));
+                }
+            }
+
+            opPost = new Post(postJson.getString(postName),
+                    postJson.getString(postTime),
+                    postJson.getString(postNo),
+                    postJson.optString(postSubject),
+                    postJson.optString(postComment),
+                    postJson.optString(postReplies),
+                    images,
+                    mRootBoard);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         return opPost;
     }

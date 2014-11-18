@@ -112,6 +112,7 @@ public class InfinityBrowser extends Activity
             Intent intent = getIntent();
             Board newBoard = null;
 
+            // TODO: Ensure intent loads properly
             if(intent != null && intent.getData() != null) {
                 newBoard = Board.newInstance(intent.getDataString());
 
@@ -119,9 +120,7 @@ public class InfinityBrowser extends Activity
                         .replace("http://8chan.co", "")
                         .replace("index.html", "");
             } else if(!defaultBoard.equals("")) {
-                String boardLink = "https://8chan.co/" + defaultBoard + "/";
-
-                newBoard = Board.newInstance(boardLink);
+                newBoard = Board.newInstance(defaultBoard);
                 mTitle = "/" + defaultBoard.toLowerCase() + "/";
             } else {
                 BoardListDatabase db = new BoardListDatabase(this);
@@ -130,7 +129,7 @@ public class InfinityBrowser extends Activity
                 if(cursor.moveToNext()) {
                     String boardLink = cursor.getString(
                             cursor.getColumnIndex(DatabaseDef.Boards.BOARD_LINK)).toLowerCase();
-                    newBoard = Board.newInstance("https://8chan.co" + boardLink);
+                    newBoard = Board.newInstance(boardLink.replaceAll("/", ""));
                     mTitle = boardLink;
                 } else {
                     helpText.setVisibility(View.VISIBLE);

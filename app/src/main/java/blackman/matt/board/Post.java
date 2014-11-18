@@ -22,19 +22,12 @@ public class Post {
     public final String postNo;
     public final String topic;
     public final String postBody;
-    public final String numReplies;
-    public final String boardLink;
     public final String rootBoard;
-    public final List<String> fullURLS;
-    public final List<String> thumbURLS;
-    public final List<String> fileNames;
-    public final List<String> fileNumbers;
-    public final Boolean isRootBoard;
-    public final Boolean hasImages;
+    public final String numReplies;
+    public final List<ImageFile> images;
     public List<String> repliedTo;
     public List<String> repliedBy;
     public Boolean isThumbnail;
-    public final Long Id;
 
     /**
      * Basic constructor
@@ -44,33 +37,22 @@ public class Post {
      * @param topic Topic of the post
      * @param postText Body of the post.
      * @param numReplies Replies to post.
-     * @param imageThumbs All the thumbnails on the post.
-     * @param imageFull All the full sized images on the post.
-     * @param boardLink Link to the board.
-     * @param onRootBoard If this is a OP post.
+     * @param boardRoot Link to the board.
      */
     public Post(String userName, String postDate, String postNumber, String topic,
-                String postText, String numReplies, List<String> imageThumbs,
-                List<String> imageFull, List<String> fileNames, List<String> fileNumbers,
-                String boardLink, boolean onRootBoard) {
+                String postText, String numReplies, List<ImageFile> images, String boardRoot) {
         this.repliedTo = new ArrayList<String>();
         this.repliedBy = new ArrayList<String>();
         this.userName = userName;
         this.postDate = postDate;
         this.postNo = postNumber;
         this.topic = topic;
+        this.images = images;
         this.postBody = formatPostBody(postText);
         this.numReplies = numReplies;
-        this.thumbURLS = imageThumbs;
-        this.fullURLS = imageFull;
-        this.fileNames = fileNames;
-        this.fileNumbers = fileNumbers;
-        this.boardLink = boardLink;
-        this.rootBoard = boardLink.replace("https://8chan.co/", "").split("/")[0];
-        this.isRootBoard = onRootBoard;
-        this.Id = Long.parseLong(postNo);
+        this.rootBoard = boardRoot;
+
         this.isThumbnail = true;
-        this.hasImages = !(thumbURLS.isEmpty() && fullURLS.isEmpty());
     }
 
     /**

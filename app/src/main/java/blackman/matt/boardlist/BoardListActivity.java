@@ -21,12 +21,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import blackman.matt.infinitebrowser.R;
 
@@ -283,6 +288,17 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
      * updating existing board entries.
      */
     private class GetBoardList extends AsyncTask<Void, Void, Void> {
+        private static final String boardURI = "uri";
+        private static final String boardTitle = "title";
+        private static final String boardSubtitle = "subtitle";
+        private static final String boardCreationDate = "time";
+        private static final String boardIndexed = "indexed";
+        private static final String boardPostsPerHour = "pph";
+        private static final String boardPostsPerDay = "ppd";
+        private static final String boardTotalPosts = "max";
+        private static final String boardUniqueIps = "uniq_ip";
+        private static final String boardCreatedAgo = "ago";
+
         @Override
         protected void onPreExecute() {
             mBoardList.setVisibility(View.INVISIBLE);
@@ -297,47 +313,47 @@ public class BoardListActivity extends Activity implements SearchView.OnQueryTex
          */
         @Override
         protected Void doInBackground(Void... params) {
-            Document boardPage = null;
-            String url = "http://8chan.co/boards.html";
+            JSONObject boardPage = null;
+            String url = "http://8chan.co/boards.json";
 
+            HttpClient client = new DefaultHttpClient();
+            HttpGet request = new HttpGet(url);
             try {
-                boardPage = Jsoup.connect(url).get();
+                HttpResponse response = client.execute(request);
+
+                InputStream in = response.getEntity().getContent();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                StringBuilder str = new StringBuilder();
+                String line;
+                while((line = reader.readLine()) != null)
+                {
+                    str.append(line);
+                }
+                in.close();
+
+                boardPage = new JSONObject(str.toString());
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
 
             if (boardPage != null) {
-                Elements boards = boardPage.select("tbody").first().children();
-
                 // Looks through all the boards
-                for (Element board : boards) {
-                    Elements boardItems;
-                    String nationality;
-                    String boardLink;
-                    String boardName;
-                    String postsInLastHour;
-                    String totalPosts;
-                    String uniqueIps;
-                    String dateCreated;
-
-                    boardItems = board.children();
-
-                    nationality = boardItems.get(0).select("img").attr("title");
-                    boardLink = boardItems.get(1).select("a").attr("href");
-                    boardName = boardItems.get(2).text();
-                    postsInLastHour = boardItems.get(3).text();
-                    totalPosts = boardItems.get(4).text();
-                    uniqueIps = boardItems.get(5).text();
-                    dateCreated = boardItems.get(6).text();
-
-                    list_db.insertBoard(boardName,
-                            nationality,
-                            boardLink,
-                            postsInLastHour,
-                            totalPosts,
-                            uniqueIps,
-                            dateCreated
-                    );
+                for (int i = 0; i < boardPage.length(); i++) {
+                    try {
+                        JSONObject board = boardPage.getJSONObject(Integer.toString(i));
+                        list_db.insertBoard(board.getString(boardTitle),
+                                "",
+                                board.getString(boardURI),
+                                board.getString(boardPostsPerHour),
+                                board.getString(boardTotalPosts),
+                                board.getString(boardUniqueIps),
+                                board.getString(boardCreationDate)
+                        );
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             return null;

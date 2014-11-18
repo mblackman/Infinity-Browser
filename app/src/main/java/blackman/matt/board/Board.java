@@ -51,12 +51,15 @@ import blackman.matt.infinitebrowser.R;
 public class Board extends Fragment implements PageLoader.PageLoaderResponse,
         PostArrayAdapter.replyClickListener {
     // ARG for the board link to be sent in
-    private static final String ARG_BOARD_LINK = "boardlink";
+    private static final String ARG_BOARD_ROOT = "boardroot";
+    private static final String ARG_BOARD_THREAD = "boardthread";
+
     private PageLoader mPageGetter;
     private boolean mIsRootBoard;
     private List<Post> mPosts;
     private PostArrayAdapter mAdapter;
-    private URL mBoardLink;
+    private String mBoardRoot;
+    private String mBoardThread;
     private View mRootView;
     private ListView mListView;
 
@@ -69,13 +72,13 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param boardLink the link to either the main board or a thread.
+     * @param boardRoot the link to either the main board or a thread.
      * @return A new instance of fragment Board.
      */
-    public static Board newInstance(String boardLink) {
+    public static Board newInstance(String boardRoot) {
         Board fragment = new Board();
         Bundle args = new Bundle();
-        args.putString(ARG_BOARD_LINK, boardLink);
+        args.putString(ARG_BOARD_ROOT, boardRoot);
         fragment.setArguments(args);
         return fragment;
     }
@@ -88,10 +91,10 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
      * @return A new instance of a fragment board.
      */
     public static Board newInstance(String boardRoot, String threadNo) {
-        String boardLink = "https://8chan.co/" + boardRoot + "/res/" + threadNo + ".html";
         Board fragment = new Board();
         Bundle args = new Bundle();
-        args.putString(ARG_BOARD_LINK, boardLink);
+        args.putString(ARG_BOARD_ROOT, boardRoot);
+        args.putString(ARG_BOARD_THREAD, threadNo);
         fragment.setArguments(args);
         return fragment;
     }
@@ -153,11 +156,8 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            try {
-                mBoardLink = new URL(getArguments().getString(ARG_BOARD_LINK));
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
+            mBoardRoot = getArguments().getString(ARG_BOARD_ROOT);
+            mBoardThread = getArguments().getString(ARG_BOARD_THREAD);
         }
     }
 
@@ -184,12 +184,22 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
         mAdapter = new PostArrayAdapter(getActivity());
         mAdapter.updatePosts(mPosts, mListener, this);
 
-        if(mBoardLink != null){
-            mIsRootBoard = !mBoardLink.getPath().contains(".html");
-            mPageGetter = new PageLoader(mRootView, mPosts, mAdapter, mIsRootBoard);
-            mPageGetter.mResponse = this;
-            mPageGetter.execute(mBoardLink);
+        mIsRootBoard = mBoardThread == null;
+
+        URL pageUrl = null;
+        try {
+            if (mIsRootBoard) {
+                pageUrl = new URL("https", "8chan.co", mBoardRoot + "/1.json");
+            } else {
+                pageUrl = new URL("https", "8chan.co", mBoardRoot + "/res/" + mBoardThread + ".json");
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
+
+        mPageGetter = new PageLoader(mRootView, mPosts, mAdapter, mIsRootBoard);
+        mPageGetter.mResponse = this;
+        mPageGetter.execute(pageUrl);
 
         mListView.setAdapter(mAdapter);
 
@@ -197,10 +207,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
         mScrollListener.setParentView(mRootView);
         mListView.setOnScrollListener(mScrollListener);
 
-        getActivity().getActionBar().setTitle(mBoardLink.toString()
-                .replace("https://8chan.co", "")
-                .replace("res/", "")
-                .replace(".html", ""));
+        getActivity().getActionBar().setTitle(mBoardRoot);
 
         return mRootView;
     }
@@ -228,10 +235,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().getActionBar().setTitle(mBoardLink.toString()
-                .replace("https://8chan.co", "")
-                .replace("res/", "")
-                .replace(".html", ""));
+        getActivity().getActionBar().setTitle(mBoardRoot);
     }
 
     /**
@@ -342,7 +346,19 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
 
         mPageGetter = new PageLoader(mRootView, mPosts, mAdapter, mIsRootBoard);
         mPageGetter.mResponse = this;
-        mPageGetter.execute(mBoardLink);
+
+        URL pageUrl = null;
+        try {
+            if (mIsRootBoard) {
+                pageUrl = new URL("https", "8chan.co", mBoardRoot + "/1.json");
+            } else {
+                pageUrl = new URL("https", "8chan.co", mBoardRoot + "/res/" + mBoardThread + ".json");
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        mPageGetter.execute(pageUrl);
     }
 
     /**
@@ -389,7 +405,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
                     (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleItemCount)) {
                 URL newPage;
                 try {
-                    newPage = new URL(mBoardLink.toString() + (++currentPage) + ".html");
+                    newPage = new URL("https", "8chan.co", mBoardRoot + "/" + currentPage + ".json");
                     mPageGetter = new PageLoader(mParent, mPosts, mAdapter, mIsRootBoard);
                     mPageGetter.mResponse = Board.this;
                     mPageGetter.execute(newPage);

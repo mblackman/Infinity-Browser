@@ -105,7 +105,7 @@ class PostArrayAdapter extends BaseAdapter {
      */
     @Override
     public long getItemId(int position) {
-        return mPosts.get(position).Id;
+        return Long.parseLong(mPosts.get(position).postNo);
     }
 
     /**
@@ -184,11 +184,11 @@ class PostArrayAdapter extends BaseAdapter {
         }
 
         // Set up reply button
-        if(post.isRootBoard) {
-            if(post.numReplies.equals("")) {
+        if(!post.numReplies.equals("")) {
+            if(post.numReplies.equals("0")) {
                 holder.replies.setText("Click to reply >>>");
             } else {
-                holder.replies.setText(post.numReplies + " >>>");
+                holder.replies.setText("Post has " + post.numReplies + " replies >>>");
             }
             holder.replies.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -201,15 +201,15 @@ class PostArrayAdapter extends BaseAdapter {
         }
 
         // Set up image button
-        if(post.hasImages) {
-            holder.filename.setText(post.fileNames.get(0) + " " + post.fileNumbers.get(0));
+        if(!post.images.isEmpty()) {
+            holder.filename.setText(post.images.get(0).getFileName());
             holder.filename.setVisibility(View.VISIBLE);
 
             holder.image.setImageBitmap(null);
 
             if(post.isThumbnail) {
                 ImageAware imageAware = new ImageViewAware(holder.image, false);
-                ImageLoader.getInstance().displayImage(post.thumbURLS.get(0), imageAware,
+                ImageLoader.getInstance().displayImage(post.images.get(0).getThumbnailUrl(), imageAware,
                         new SimpleImageLoadingListener() {
                             @Override
                             public void onLoadingStarted(String imageUri, View view) {
@@ -235,7 +235,7 @@ class PostArrayAdapter extends BaseAdapter {
                 holder.postLayout.setOrientation(LinearLayout.HORIZONTAL);
             } else {
                 ImageAware imageAware = new ImageViewAware(holder.image, false);
-                ImageLoader.getInstance().displayImage(post.fullURLS.get(0), imageAware,
+                ImageLoader.getInstance().displayImage(post.images.get(0).getFullUrl(), imageAware,
                         new SimpleImageLoadingListener() {
                             @Override
                             public void onLoadingStarted(String imageUri, View view) {
@@ -267,9 +267,9 @@ class PostArrayAdapter extends BaseAdapter {
                     final Post myPost = getItem(position);
                     // If it is on big picture
                     if(myHolder.postLayout.getOrientation() == LinearLayout.VERTICAL) {
-                        String url = myPost.thumbURLS.get(0);
                         myPost.isThumbnail = true;
-                        ImageLoader.getInstance().displayImage(url, myHolder.image,
+                        ImageLoader.getInstance().displayImage(post.images.get(0).getThumbnailUrl(),
+                                myHolder.image,
                                 new SimpleImageLoadingListener() {
                                     @Override
                                     public void onLoadingStarted(String imageUri, View view) {
@@ -296,9 +296,9 @@ class PostArrayAdapter extends BaseAdapter {
                                     }
                                 });
                     } else {
-                        String url = myPost.fullURLS.get(0);
                         myPost.isThumbnail = false;
-                        ImageLoader.getInstance().displayImage(url, myHolder.image,
+                        ImageLoader.getInstance().displayImage(post.images.get(0).getFullUrl(),
+                                myHolder.image,
                                 new SimpleImageLoadingListener() {
                                     @Override
                                     public void onLoadingStarted(String imageUri, View view) {
