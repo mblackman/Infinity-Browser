@@ -407,7 +407,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
                     (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleItemCount)) {
                 URL newPage;
                 try {
-                    newPage = new URL("https", "8chan.co", mBoardRoot + "/" + currentPage + ".json");
+                    newPage = new URL("https", "8chan.co", mBoardRoot + "/" + ++currentPage + ".json");
                     mPageGetter = new PageLoader(mParent, mPosts, mAdapter, mIsRootBoard);
                     mPageGetter.mResponse = Board.this;
                     mPageGetter.execute(newPage);

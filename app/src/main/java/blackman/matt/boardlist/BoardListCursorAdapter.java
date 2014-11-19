@@ -116,10 +116,10 @@ class BoardListCursorAdapter extends CursorAdapter {
         final int favoritedInt = cursor.getInt(4);
         final boolean isFavorited = favoritedInt > 0;
 
-        String htmlBoardLink = "<a href=\"https://8chan.co" +
+        String htmlBoardLink = "<a href=\"https://8chan.co/" +
                 boardLink.toLowerCase() +
                 "\">" +
-                boardLink +
+                "/" + boardLink + "/" +
                 "</a>";
 
         holder.boardNameTextView.setText(boardName);

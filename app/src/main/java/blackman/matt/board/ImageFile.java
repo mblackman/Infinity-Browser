@@ -79,7 +79,12 @@ public class ImageFile {
     }
 
     public String getFileInfo() {
-        return mWidth + " X " + mHeight + ", " + Math.round(mSize / 1024) + "KB, "
-                + mFileName + mExt;
+        if(mWidth == 0 || mHeight == 0) {
+            return Math.round(mSize / 1024) + "KB, " + mFileName + mExt;
+        }
+        else {
+            return mWidth + " X " + mHeight + ", " + Math.round(mSize / 1024) + "KB, "
+                    + mFileName + mExt;
+        }
     }
 }

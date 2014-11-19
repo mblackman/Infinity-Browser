@@ -278,20 +278,17 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String boardLink = "https://8chan.co";
                 String boardRoot = "/tech/";
                 if(view instanceof TextView) {
                     boardRoot = ((TextView) view).getText().toString();
                 }
 
-                boardLink = boardLink + boardRoot;
-
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-                Board newBoard = Board.newInstance(boardLink);
+                Board newBoard = Board.newInstance(boardRoot);
 
-                fragmentTransaction.replace(R.id.container, newBoard, boardLink);
+                fragmentTransaction.replace(R.id.container, newBoard, boardRoot);
                 fragmentTransaction.addToBackStack(null);
 
                 fragmentTransaction.commit();

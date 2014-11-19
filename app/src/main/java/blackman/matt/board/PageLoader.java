@@ -210,10 +210,10 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
                 images.add(new ImageFile(mRootBoard, fileName,
                         postJson.optString(postFileExt),
                         postJson.getString(postFileSiteName),
-                        postJson.getInt(postFileWidth),
-                        postJson.getInt(postFileHeight),
-                        postJson.getInt(postFileThumbWidth),
-                        postJson.getInt(postFileThumbHeight),
+                        postJson.optInt(postFileWidth),
+                        postJson.optInt(postFileHeight),
+                        postJson.optInt(postFileThumbWidth),
+                        postJson.optInt(postFileThumbHeight),
                         postJson.getInt(postFileSize)));
             }
 
@@ -225,10 +225,10 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
                             imageJson.getString(postFileName),
                             imageJson.getString(postFileExt),
                             imageJson.getString(postFileSiteName),
-                            imageJson.getInt(postFileWidth),
-                            imageJson.getInt(postFileHeight),
-                            imageJson.getInt(postFileThumbWidth),
-                            imageJson.getInt(postFileThumbHeight),
+                            imageJson.optInt(postFileWidth),
+                            imageJson.optInt(postFileHeight),
+                            imageJson.optInt(postFileThumbWidth),
+                            imageJson.optInt(postFileThumbHeight),
                             imageJson.getInt(postFileSize)));
                 }
             }

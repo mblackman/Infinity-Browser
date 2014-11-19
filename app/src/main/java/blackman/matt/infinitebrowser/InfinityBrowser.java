@@ -43,6 +43,9 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import blackman.matt.board.Board;
 import blackman.matt.boardlist.BoardListActivity;
 import blackman.matt.boardlist.BoardListDatabase;
@@ -116,7 +119,18 @@ public class InfinityBrowser extends Activity
 
             // TODO: Ensure intent loads properly
             if(intent != null && intent.getData() != null) {
-                newBoard = Board.newInstance(intent.getDataString());
+                Pattern patternRoot = Pattern.compile("(?<=8chan.co\\/)\\w*");
+                Pattern patternThread = Pattern.compile("(?<=\\/res\\/)\\w*");
+                Matcher rootMatch = patternRoot.matcher(intent.getDataString());
+                Matcher threadMatch = patternThread.matcher(intent.getDataString());
+                rootMatch.find();
+                String boardRoot = rootMatch.group(0);
+
+                if(threadMatch.find()) {
+                    newBoard = Board.newInstance(boardRoot, threadMatch.group(0));
+                } else {
+                    newBoard = Board.newInstance(boardRoot);
+                }
 
                 mTitle = intent.getDataString().replace("https://8chan.co", "")
                         .replace("http://8chan.co", "")
