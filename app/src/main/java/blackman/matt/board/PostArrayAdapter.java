@@ -30,10 +30,15 @@ import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -142,7 +147,7 @@ class PostArrayAdapter extends BaseAdapter {
             holder.postBody = (TextView) convertView.findViewById(R.id.tv_postText);
             holder.replies = (TextView) convertView.findViewById(R.id.tv_number_replies);
             holder.postLayout = (LinearLayout) convertView.findViewById(R.id.ll_post_body);
-            holder.replyLayout = (LinearLayout) convertView.findViewById(R.id.ll_post_replies);
+            holder.menu = (Button) convertView.findViewById(R.id.btn_post_menu);
             holder.progressImage = (ProgressBar) convertView.findViewById(R.id.progress_post_image);
 
             holder.replies.setTag(holder);
@@ -160,40 +165,49 @@ class PostArrayAdapter extends BaseAdapter {
         holder.postBody.setText(Html.fromHtml(post.postBody));
         holder.postBody.setMovementMethod(LinkMovementMethod.getInstance());
 
-        // Add replies to post
-        holder.replyLayout.removeAllViews();
-        for(String reply : post.repliedBy) {
-            TextView newReply = new TextView(mContext);
-            String replyNo = ">>" + reply;
-            SpannableString content = new SpannableString(replyNo);
-            content.setSpan(new UnderlineSpan(), 0, replyNo.length(), 0);
-            newReply.setText(content);
-            newReply.setTextColor(Color.BLUE);
-            newReply.setPadding(replyPadding.intValue(), 0, 0, 0);
-            newReply.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String postNo = ((TextView) v).getText().toString().replace(">>", "");
-                    int i = 0;
-                    for(Post post : mPosts) {
-                        if(post.postNo.equals(postNo)) {
-                            mPostReplyClicked.gotoPost(i);
-                        }
-                        i++;
+     /*   // Add replies to post
+        holder.menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popup = new PopupMenu(mContext, v);
+                popup.getMenuInflater().inflate();
+            }
+        });
+        ArrayAdapter<String> replies = new ArrayAdapter<String>(mContext, android.R.layout.simple_spinner_dropdown_item, post.repliedBy);
+        holder.spinner.setAdapter(replies);
+        holder.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String postNo = ((TextView) view).getText().toString();
+                int i = 0;
+                for (Post post : mPosts) {
+                    if (post.postNo.equals(postNo)) {
+                        mPostReplyClicked.gotoPost(i);
                     }
+                    i++;
                 }
-            });
-            holder.replyLayout.addView(newReply);
-        }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });*/
 
         // Set up reply button
         if(!post.numReplies.equals("")) {
             if(post.numReplies.equals("0")) {
                 holder.replies.setText("Click to reply >>>");
             } else {
-                holder.replies.setText("Post has " + post.numReplies + " replies >>>");
+                holder.replies.setText("Post has " + post.numReplies + " replies");
             }
             holder.replies.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.onReplyClicked(post.rootBoard, post.postNo);
+                }
+            });
+            holder.postBody.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     mListener.onReplyClicked(post.rootBoard, post.postNo);
@@ -361,7 +375,8 @@ class PostArrayAdapter extends BaseAdapter {
     static class ViewHolder {
         ImageButton image;
         TextView username, postDate, postNo, topic, postBody, replies, filename;
-        LinearLayout postLayout, replyLayout;
+        LinearLayout postLayout;
+        Button menu;
         ProgressBar progressImage;
     }
 }
