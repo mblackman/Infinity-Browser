@@ -1,3 +1,22 @@
+/*
+ * Infinity Browser 2014  Matt Blackman
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
+
 package blackman.matt.board;
 
 /**
@@ -8,7 +27,7 @@ package blackman.matt.board;
  */
 public class ImageFile {
     private final String mFileName, mRootBoard, mExt, mTim;
-    private final int mWidth, mHeight, mThumbWidth, mThumbHeight;
+    private final int mWidth, mHeight, mThumbWidth, mThumbHeight, mSize;
 
     /**
      * Base constructor used to get all the info 8chan supplies about files.
@@ -23,7 +42,7 @@ public class ImageFile {
      * @param thumbHeight Height of thumbnail.
      */
     public ImageFile(String rootBoard, String fileName, String ext, String tim, int width,
-                     int height, int thumbWidth, int thumbHeight) {
+                     int height, int thumbWidth, int thumbHeight, int fileSize) {
         this.mRootBoard = rootBoard;
         this.mFileName = fileName;
         this.mExt = ext;
@@ -32,6 +51,7 @@ public class ImageFile {
         this.mHeight = height;
         this.mThumbHeight = thumbHeight;
         this.mThumbWidth = thumbWidth;
+        this.mSize = fileSize;
     }
 
     /**
@@ -56,5 +76,10 @@ public class ImageFile {
      */
     public String getFileName() {
         return mFileName + mExt;
+    }
+
+    public String getFileInfo() {
+        return mWidth + " X " + mHeight + ", " + Math.round(mSize / 1024) + "KB, "
+                + mFileName + mExt;
     }
 }

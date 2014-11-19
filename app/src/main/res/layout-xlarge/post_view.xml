@@ -109,7 +109,7 @@
         android:clickable="true"
         android:text="@string/post_view_reply_text"
         android:textColor="@android:color/holo_blue_dark"
-        android:textSize="@dimen/omitted_replies_text_size"
+        android:textSize="@dimen/replies_text_size"
         android:layout_below="@+id/ll_post_body" />
 
 </RelativeLayout>

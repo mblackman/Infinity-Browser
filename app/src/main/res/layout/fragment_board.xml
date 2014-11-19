@@ -13,6 +13,7 @@
         android:choiceMode="none"
         android:drawSelectorOnTop="false"
         android:fastScrollAlwaysVisible="false"
-        android:fastScrollEnabled="false" />
+        android:fastScrollEnabled="false"
+        android:dividerHeight="@dimen/post_divider_height" />
 
 </LinearLayout>

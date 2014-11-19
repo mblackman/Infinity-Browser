@@ -109,7 +109,7 @@
 
     <TextView
         android:id="@+id/tv_number_replies"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="false"
         android:layout_alignParentEnd="false"
@@ -117,7 +117,9 @@
         android:clickable="true"
         android:text="@string/post_view_reply_text"
         android:textColor="@android:color/holo_blue_dark"
-        android:textSize="@dimen/omitted_replies_text_size"
-        android:layout_below="@+id/ll_post_body" />
+        android:textSize="@dimen/replies_text_size"
+        android:layout_below="@+id/ll_post_body"
+        android:gravity="right"
+        android:textIsSelectable="true" />
 
 </RelativeLayout>
