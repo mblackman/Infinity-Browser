@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/action_gallery"
+        android:icon="@drawable/menu_gallery"
+        android:title="@string/action_gallery"
+        android:showAsAction="ifRoom" />
+    <item android:id="@+id/action_refresh"
+        android:icon="@drawable/menu_update"
+        android:title="@string/action_update"
+        android:showAsAction="ifRoom" />
+</menu>

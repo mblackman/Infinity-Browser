@@ -2,4 +2,5 @@
 <resources>
     <integer name="post_thumbnail_size">160</integer>
     <integer name="max_post_lines">10</integer>
+    <integer name="gallery_rows">3</integer>
 </resources>

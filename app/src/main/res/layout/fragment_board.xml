@@ -8,12 +8,17 @@
 
     <ListView
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/lv_board_posts"
         android:choiceMode="none"
         android:drawSelectorOnTop="false"
         android:fastScrollAlwaysVisible="false"
         android:fastScrollEnabled="false"
         android:dividerHeight="@dimen/post_divider_height" />
+
+    <include
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        layout="@layout/board_progress_message" />
 
 </LinearLayout>

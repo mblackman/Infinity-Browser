@@ -20,7 +20,7 @@
 package blackman.matt.board;
 
 /**
- * Stores the infomation about a image on any board and returns different bits of information
+ * Stores the information about a image on any board and returns different bits of information
  * for the user.
  *
  * Created by Matt on 11/18/2014.
@@ -86,5 +86,14 @@ public class ImageFile {
             return mWidth + " X " + mHeight + ", " + Math.round(mSize / 1024) + "KB, "
                     + mFileName + mExt;
         }
+    }
+
+    /**
+     * Gets the files extension.
+     *
+     * @return The file extension.
+     */
+    public String getExtension() {
+        return mExt;
     }
 }

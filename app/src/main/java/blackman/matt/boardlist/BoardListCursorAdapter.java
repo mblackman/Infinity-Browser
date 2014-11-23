@@ -51,7 +51,7 @@ class BoardListCursorAdapter extends CursorAdapter {
     /**
      * A nice place to hold your views in.
      */
-    public static class ViewHolder {
+    private static class ViewHolder {
         public ToggleButton favButton;
         public TextView boardLinkTextView, boardNameTextView, boardValueTextView;
     }

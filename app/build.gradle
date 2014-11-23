@@ -15,8 +15,8 @@ android {
         applicationId "blackman.matt.infinitebrowser"
         minSdkVersion 16
         targetSdkVersion 20
-        versionCode 3
-        versionName "0.14.0"
+        versionCode 4
+        versionName "0.14.2"
     }
     buildTypes {
         release {

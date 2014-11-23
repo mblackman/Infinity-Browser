@@ -17,7 +17,7 @@
  */
 
 
-package blackman.matt.board;
+package blackman.matt.Utils;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -45,6 +45,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import blackman.matt.board.ImageFile;
+import blackman.matt.board.Post;
 import blackman.matt.infinitebrowser.R;
 
 /**
@@ -53,11 +55,8 @@ import blackman.matt.infinitebrowser.R;
  * This assumes you send it a link and doesn't check for null.
  */
 public class PageLoader extends AsyncTask<URL, Void, Boolean> {
-    private final ProgressBar mProgress;
-    private final TextView mProgressText;
-    private final List<Post> mPosts;
-    private final PostArrayAdapter mAdapter;
-    private final Boolean mIsOnRootPage;
+    private List<Post> mPosts;
+    private Boolean mIsOnRootPage;
     private String mRootBoard;
 
     private List<String> postIds = new ArrayList<String>();
@@ -80,27 +79,19 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
     private static final String postFileThumbHeight = "tn_h";
     private static final String postFileThumbWidth = "tn_w";
 
-    public PageLoaderResponse mResponse;
+    private PageLoadedNotifier mNotifier;
 
-    public interface PageLoaderResponse {
-        public void setPageLoaded(Boolean isLoaded);
-
-        public void sendErrorMessage(CharSequence error);
+    public interface PageLoadedNotifier {
+        public void pageLoaded();
     }
 
-    /**
-     * Basic constructor to initialize the class.
-     *
-     * @param parent  Parent view who needs a loading.
-     * @param posts   The posts container.
-     * @param adapter Adapter for the list view that holds the posts.
-     */
-    public PageLoader(View parent, List<Post> posts, PostArrayAdapter adapter, Boolean isRootBoard) {
-        mProgress = (ProgressBar) parent.findViewById(R.id.progress_page_load);
-        mProgressText = (TextView) parent.findViewById(R.id.tv_progress_page_load);
+    public PageLoader(List<Post> posts, Boolean isRootBoard) {
         mPosts = posts;
-        mAdapter = adapter;
         mIsOnRootPage = isRootBoard;
+    }
+
+    public void setNotifier(PageLoadedNotifier loaded) {
+        mNotifier = loaded;
     }
 
     /**
@@ -108,9 +99,6 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
      */
     @Override
     protected void onPreExecute() {
-        mProgress.setVisibility(View.VISIBLE);
-        mProgressText.setVisibility(View.VISIBLE);
-        mResponse.setPageLoaded(false);
     }
 
     /**
@@ -170,8 +158,6 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
             }
             pageLoaded = true;
         } else {
-            CharSequence text = "Error loading page...Try reloading the page.";
-            mResponse.sendErrorMessage(text);
             pageLoaded = false;
         }
         return pageLoaded;
@@ -183,14 +169,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
      */
     @Override
     protected void onPostExecute(Boolean loadSuccess) {
-        if (loadSuccess) {
-            mResponse.setPageLoaded(true);
-        } else {
-            mResponse.setPageLoaded(false);
-        }
-        mAdapter.notifyDataSetChanged();
-        mProgress.setVisibility(View.GONE);
-        mProgressText.setVisibility(View.GONE);
+        mNotifier.pageLoaded();
     }
 
     /**
@@ -233,7 +212,7 @@ public class PageLoader extends AsyncTask<URL, Void, Boolean> {
                 }
             }
 
-            opPost = new Post(postJson.getString(postName),
+            opPost = new Post(postJson.optString(postName),
                     postJson.getString(postTime),
                     postJson.getString(postNo),
                     postJson.optString(postSubject),

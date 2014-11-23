@@ -10,6 +10,7 @@
     <dimen name="post_body_font_size">14sp</dimen>
     <dimen name="post_header_word_spacing">2dp</dimen>
     <dimen name="drawer_item_height">30dp</dimen>
+    <dimen name="post_menu_button_size">18dp</dimen>
 
     <!-- Per the design guidelines, navigation drawers should be between 240dp and 320dp:
          https://developer.android.com/design/patterns/navigation-drawer.html -->
@@ -21,4 +22,6 @@
     <dimen name="list_card_board_name_size">12sp</dimen>
     <dimen name="drawer_board_text_size">32sp</dimen>
     <dimen name="post_divider_height">4dp</dimen>
+    <dimen name="gallery_column_width">90dp</dimen>
+    <dimen name="gallery_image_spacing">1dp</dimen>
 </resources>

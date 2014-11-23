@@ -22,4 +22,6 @@
     <dimen name="list_card_board_name_size">12sp</dimen>
     <dimen name="drawer_board_text_size">32sp</dimen>
     <dimen name="post_divider_height">4dp</dimen>
+    <dimen name="gallery_column_width">90dp</dimen>
+    <dimen name="gallery_image_spacing">1dp</dimen>
 </resources>

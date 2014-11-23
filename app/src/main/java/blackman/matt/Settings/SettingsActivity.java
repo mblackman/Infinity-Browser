@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package blackman.matt.infinitebrowser;
+package blackman.matt.Settings;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -34,6 +34,8 @@ import android.support.v4.app.NavUtils;
 
 
 import java.util.List;
+
+import blackman.matt.infinitebrowser.R;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On

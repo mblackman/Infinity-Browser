@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:id="@+id/gallery_container">
+
+    <GridView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/grid_gallery"
+        android:columnWidth="@dimen/gallery_column_width"
+        android:numColumns="auto_fit"
+        android:stretchMode="columnWidth"
+        android:gravity="center"
+        android:horizontalSpacing="@dimen/gallery_image_spacing"
+        android:verticalSpacing="@dimen/gallery_image_spacing"
+        android:minHeight="@dimen/gallery_column_width"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" />
+
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/gallery_dimmer"
+        android:background="@color/gallery_dim_black"
+        android:visibility="gone" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/gallery_expanded_image"
+        android:contentDescription="@string/gallery_expanded_image_description"
+        android:layout_alignWithParentIfMissing="false"
+        android:longClickable="true" />
+
+</RelativeLayout>

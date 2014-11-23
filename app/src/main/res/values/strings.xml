@@ -29,6 +29,12 @@
         <item>DESC</item>
         <item>ASC</item>
     </string-array>
+    <string-array name="image_popup_choices">
+        <item>Copy image URL</item>
+        <item>Save File</item>
+        <item>Open in browser</item>
+    </string-array>
+
 
     <string name="title_activity_board_list">Boards</string>
     <string name="Board_List_Progress_Text">Loading list of boards…</string>
@@ -45,5 +51,8 @@
     <string name="pref_title_madokafy">Mystery Hype Button</string>
     <string name="pref_description_madokafy">Add more magic to your experience</string>
     <string name="action_boards">Boards List</string>
+    <string name="title_activity_gallery">Gallery</string>
+    <string name="gallery_expanded_image_description">Placeholder for image expansion</string>
+    <string name="action_gallery">Open Gallery View</string>
 
 </resources>

@@ -19,6 +19,7 @@
 package blackman.matt.board;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.Looper;
@@ -42,6 +43,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import blackman.matt.Gallery.GalleryActivity;
 import blackman.matt.infinitebrowser.R;
 
 
@@ -50,18 +52,20 @@ import blackman.matt.infinitebrowser.R;
  * A main board or thread on 8chan. This will load and handle all of the posts on the board.
  *
  */
-public class Board extends Fragment implements PageLoader.PageLoaderResponse,
+public class Board extends Fragment implements BoardPageLoader.PageLoaderResponse,
         PostArrayAdapter.replyClickListener {
     // ARG for the board link to be sent in
     private static final String ARG_BOARD_ROOT = "boardroot";
     private static final String ARG_BOARD_THREAD = "boardthread";
+    private static final String ARG_BOARD_POST = "boardpostno";
 
-    private PageLoader mPageGetter;
+    private BoardPageLoader mPageGetter;
     private boolean mIsRootBoard;
     private List<Post> mPosts;
     private PostArrayAdapter mAdapter;
     private String mBoardRoot;
     private String mBoardThread;
+    private String mPostNo;
     private View mRootView;
     private ListView mListView;
 
@@ -102,6 +106,23 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
     }
 
     /**
+     * Creates a new instance of a board based on a given board and thread
+     *
+     * @param boardRoot Root of board EG /v/, /tech/, etc..
+     * @param threadNo The thread being initiated
+     * @return A new instance of a fragment board.
+     */
+    public static Board newInstance(String boardRoot, String threadNo, String postNo) {
+        Board fragment = new Board();
+        Bundle args = new Bundle();
+        args.putString(ARG_BOARD_ROOT, boardRoot);
+        args.putString(ARG_BOARD_THREAD, threadNo);
+        args.putString(ARG_BOARD_POST, postNo);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    /**
      * Auto-generated constructor full of nothing.
      */
     public Board() {
@@ -128,7 +149,11 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.board_menu, menu);
+        if(mIsRootBoard) {
+            inflater.inflate(R.menu.board_menu, menu);
+        } else {
+            inflater.inflate(R.menu.board_menu_with_gallery, menu);
+        }
     }
 
     /**
@@ -144,6 +169,13 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
             case R.id.action_refresh:
                 refreshBoard();
                 return true;
+            case R.id.action_gallery:
+                Intent intent = new Intent(getActivity(), GalleryActivity.class);
+                intent.putExtra(GalleryActivity.ARG_GALLERY_BOARD, mBoardRoot);
+                if(mBoardThread != null) {
+                    intent.putExtra(GalleryActivity.ARG_GALLERY_THREAD, mBoardThread);
+                }
+                startActivity(intent);
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -160,6 +192,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
         if (getArguments() != null) {
             mBoardRoot = getArguments().getString(ARG_BOARD_ROOT);
             mBoardThread = getArguments().getString(ARG_BOARD_THREAD);
+            mPostNo = getArguments().getString(ARG_BOARD_POST);
         }
     }
 
@@ -177,10 +210,8 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
                              Bundle savedInstanceState) {
         // Inflate the postLayout for this fragment
         mRootView = inflater.inflate(R.layout.fragment_board, container, false);
-        View progress = inflater.inflate(R.layout.board_progress_message, mListView, false);
 
         mListView = (ListView) mRootView.findViewById(R.id.lv_board_posts);
-        mListView.addFooterView(progress);
 
         mPosts = new ArrayList<Post>();
         mAdapter = new PostArrayAdapter(getActivity());
@@ -191,7 +222,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
         URL pageUrl = null;
         try {
             if (mIsRootBoard) {
-                pageUrl = new URL("https", "8chan.co", mBoardRoot + "/1.json");
+                pageUrl = new URL("https", "8chan.co", mBoardRoot + "/0.json");
             } else {
                 pageUrl = new URL("https", "8chan.co", mBoardRoot + "/res/" + mBoardThread + ".json");
             }
@@ -199,7 +230,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
             e.printStackTrace();
         }
 
-        mPageGetter = new PageLoader(mRootView, mPosts, mAdapter, mIsRootBoard);
+        mPageGetter = new BoardPageLoader(mRootView, mPosts, mAdapter, mIsRootBoard);
         mPageGetter.mResponse = this;
         mPageGetter.execute(pageUrl);
 
@@ -209,7 +240,15 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
         mScrollListener.setParentView(mRootView);
         mListView.setOnScrollListener(mScrollListener);
 
-        getActivity().getActionBar().setTitle(mBoardRoot);
+        if(mPostNo != null) {
+            mAdapter.gotoPost(mPostNo);
+        }
+
+        if(mBoardThread == null) {
+            getActivity().getActionBar().setTitle("/" + mBoardRoot + "/");
+        } else {
+            getActivity().getActionBar().setTitle("/" + mBoardRoot + "/" + mBoardThread + "/");
+        }
 
         return mRootView;
     }
@@ -237,7 +276,11 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().getActionBar().setTitle(mBoardRoot);
+        if(mBoardThread == null) {
+            getActivity().getActionBar().setTitle("/" + mBoardRoot + "/");
+        } else {
+            getActivity().getActionBar().setTitle("/" + mBoardRoot + "/" + mBoardThread + "/");
+        }
     }
 
     /**
@@ -346,13 +389,13 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
         mPosts.clear();
         mAdapter.notifyDataSetChanged();
 
-        mPageGetter = new PageLoader(mRootView, mPosts, mAdapter, mIsRootBoard);
+        mPageGetter = new BoardPageLoader(mRootView, mPosts, mAdapter, mIsRootBoard);
         mPageGetter.mResponse = this;
 
         URL pageUrl = null;
         try {
             if (mIsRootBoard) {
-                pageUrl = new URL("https", "8chan.co", mBoardRoot + "/1.json");
+                pageUrl = new URL("https", "8chan.co", mBoardRoot + "/0.json");
             } else {
                 pageUrl = new URL("https", "8chan.co", mBoardRoot + "/res/" + mBoardThread + ".json");
             }
@@ -368,7 +411,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
      * Now the page will load the next page on a board when the bottom is met.
      */
     public class EndlessScrollListener extends PauseOnScrollListener {
-        private int currentPage = 1;
+        private int currentPage = 0;
         private View mParent;
 
         /**
@@ -408,7 +451,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
                 URL newPage;
                 try {
                     newPage = new URL("https", "8chan.co", mBoardRoot + "/" + ++currentPage + ".json");
-                    mPageGetter = new PageLoader(mParent, mPosts, mAdapter, mIsRootBoard);
+                    mPageGetter = new BoardPageLoader(mParent, mPosts, mAdapter, mIsRootBoard);
                     mPageGetter.mResponse = Board.this;
                     mPageGetter.execute(newPage);
                 } catch (MalformedURLException e) {
@@ -421,7 +464,7 @@ public class Board extends Fragment implements PageLoader.PageLoaderResponse,
          * Resets to base page to load.
          */
         public void resetBoardPage() {
-            currentPage = 1;
+            currentPage = 0;
         }
     }
 }
