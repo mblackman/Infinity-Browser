@@ -7,7 +7,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import blackman.matt.Utils.PageLoader;
+import blackman.matt.utils.PageLoader;
 import blackman.matt.infinitebrowser.R;
 
 /**

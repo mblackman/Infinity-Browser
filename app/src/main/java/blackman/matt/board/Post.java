@@ -43,6 +43,8 @@ public class Post {
     public final String postBody;
     public final String rootBoard;
     public final String numReplies;
+    public final String omittedReplies;
+    public final String omittedImages;
     public final List<ImageFile> images;
     public List<String> repliedTo;
     public List<String> repliedBy;
@@ -59,7 +61,8 @@ public class Post {
      * @param boardRoot Link to the board.
      */
     public Post(String userName, String postDate, String postNumber, String topic,
-                String postText, String numReplies, List<ImageFile> images, String boardRoot) {
+                String postText, String numReplies, String omittedReplies, String omittedImages,
+                List<ImageFile> images, String boardRoot) {
         this.repliedTo = new ArrayList<String>();
         this.repliedBy = new ArrayList<String>();
         this.userName = userName;
@@ -69,6 +72,8 @@ public class Post {
         this.images = images;
         this.postBody = formatPostBody(postText);
         this.numReplies = numReplies;
+        this.omittedReplies = omittedReplies;
+        this.omittedImages = omittedImages;
         this.rootBoard = boardRoot;
 
         this.isThumbnail = true;

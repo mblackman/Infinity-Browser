@@ -43,7 +43,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import blackman.matt.Gallery.GalleryActivity;
+import blackman.matt.catalog.CatalogActivity;
+import blackman.matt.gallery.GalleryActivity;
 import blackman.matt.infinitebrowser.R;
 
 
@@ -170,12 +171,17 @@ public class Board extends Fragment implements BoardPageLoader.PageLoaderRespons
                 refreshBoard();
                 return true;
             case R.id.action_gallery:
-                Intent intent = new Intent(getActivity(), GalleryActivity.class);
-                intent.putExtra(GalleryActivity.ARG_GALLERY_BOARD, mBoardRoot);
+                Intent gallery = new Intent(getActivity(), GalleryActivity.class);
+                gallery.putExtra(GalleryActivity.ARG_GALLERY_BOARD, mBoardRoot);
                 if(mBoardThread != null) {
-                    intent.putExtra(GalleryActivity.ARG_GALLERY_THREAD, mBoardThread);
+                    gallery.putExtra(GalleryActivity.ARG_GALLERY_THREAD, mBoardThread);
                 }
-                startActivity(intent);
+                startActivity(gallery);
+               return true;
+            case R.id.action_catalog:
+                Intent catalog = new Intent(getActivity(), CatalogActivity.class);
+                catalog.putExtra(CatalogActivity.ARG_CATALOG_BOARD, mBoardRoot);
+                startActivity(catalog);
             default:
                 return super.onOptionsItemSelected(item);
         }

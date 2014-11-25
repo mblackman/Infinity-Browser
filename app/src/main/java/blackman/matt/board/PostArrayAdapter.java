@@ -20,29 +20,22 @@
 package blackman.matt.board;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
-import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
-import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -54,6 +47,7 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import java.util.Collections;
 import java.util.List;
 
+import blackman.matt.utils.ImageLongPressDialog;
 import blackman.matt.infinitebrowser.R;
 
 /**
@@ -254,6 +248,14 @@ class PostArrayAdapter extends BaseAdapter {
                 imageUrl = post.images.get(0).getFullUrl();
                 holder.postLayout.setOrientation(LinearLayout.VERTICAL);
             }
+
+            holder.image.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    new ImageLongPressDialog(mContext, post.images.get(0));
+                    return true;
+                }
+            });
 
             ImageLoader.getInstance().displayImage(imageUrl, imageAware,
                     new SimpleImageLoadingListener() {
