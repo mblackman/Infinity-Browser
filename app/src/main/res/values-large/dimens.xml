@@ -24,4 +24,6 @@
     <dimen name="post_divider_height">4dp</dimen>
     <dimen name="gallery_column_width">90dp</dimen>
     <dimen name="gallery_image_spacing">1dp</dimen>
+    <dimen name="catalog_column_width">110dp</dimen>
+    <dimen name="catalog_card_height">255dp</dimen>
 </resources>

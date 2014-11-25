@@ -54,5 +54,11 @@
     <string name="title_activity_gallery">Gallery</string>
     <string name="gallery_expanded_image_description">Placeholder for image expansion</string>
     <string name="action_gallery">Open Gallery View</string>
+    <string name="catalog_replies_example">R: 71 / I: 12</string>
+    <string name="catalog_topic_example">Making a catalog post on infinity</string>
+    <string name="catalog_comment_example">This is just a really longish string used to see what a catalog post is going to look like once I implement it into my app a derrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.</string>
+    <string name="action_catalog">Open board catalog</string>
+    <string name="title_activity_catalog">Catalog</string>
+    <string name="gallery_background_acc_text">Black background for expanded image</string>
 
 </resources>

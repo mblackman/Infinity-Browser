@@ -7,22 +7,18 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/grid_gallery"
-        android:columnWidth="@dimen/gallery_column_width"
-        android:numColumns="auto_fit"
-        android:stretchMode="columnWidth"
-        android:gravity="center"
-        android:horizontalSpacing="@dimen/gallery_image_spacing"
-        android:verticalSpacing="@dimen/gallery_image_spacing"
-        android:minHeight="@dimen/gallery_column_width"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" />
+        style="?galleryGrid"
+        android:horizontalSpacing="@dimen/catalog_column_spacing"
+        android:numColumns="@integer/catalog_num_columns"
+        android:verticalSpacing="@dimen/catalog_column_spacing" />
 
     <ImageView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/gallery_dimmer"
         android:background="@color/gallery_dim_black"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:contentDescription="@string/gallery_background_acc_text" />
 
     <ImageView
         android:layout_width="wrap_content"
@@ -31,5 +27,12 @@
         android:contentDescription="@string/gallery_expanded_image_description"
         android:layout_alignWithParentIfMissing="false"
         android:longClickable="true" />
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progress_gallery"
+        android:visibility="gone" />
 
 </RelativeLayout>

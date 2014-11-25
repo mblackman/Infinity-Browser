@@ -38,7 +38,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="blackman.matt.Settings.SettingsActivity"
+            android:name="blackman.matt.settings.SettingsActivity"
             android:label="@string/title_activity_settings" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -53,8 +53,16 @@
                 android:value="blackman.matt.infinitebrowser.InfinityBrowser" />
         </activity>
         <activity
-            android:name="blackman.matt.Gallery.GalleryActivity"
+            android:name="blackman.matt.gallery.GalleryActivity"
             android:label="@string/title_activity_gallery"
+            android:parentActivityName="blackman.matt.infinitebrowser.InfinityBrowser" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="blackman.matt.infinitebrowser.InfinityBrowser" />
+        </activity>
+        <activity
+            android:name="blackman.matt.catalog.CatalogActivity"
+            android:label="@string/title_activity_catalog"
             android:parentActivityName="blackman.matt.infinitebrowser.InfinityBrowser" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

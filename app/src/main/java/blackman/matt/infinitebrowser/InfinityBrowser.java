@@ -46,7 +46,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import blackman.matt.Settings.SettingsActivity;
+import blackman.matt.settings.SettingsActivity;
 import blackman.matt.board.Board;
 import blackman.matt.boardlist.BoardListActivity;
 import blackman.matt.boardlist.BoardListDatabase;

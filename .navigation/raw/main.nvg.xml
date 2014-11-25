@@ -20,7 +20,7 @@
     <entry>
       <key      
         class = "com.android.navigation.ActivityState"      
-        className = "blackman.matt.Settings.SettingsActivity">
+        className = "blackman.matt.settings.SettingsActivity">
         <location        
           idref = "point0"/>
       </key>

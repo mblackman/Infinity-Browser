@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="gallery_layout">
+        <item name="android:columnWidth">@dimen/gallery_column_width</item>
+        <item name="android:numColumns">auto_fit</item>
+        <item name="android:stretchMode">columnWidth</item>
+        <item name="android:gravity">center</item>
+        <item name="android:horizontalSpacing">@dimen/gallery_image_spacing</item>
+        <item name="android:minHeight">@dimen/gallery_column_width</item>
+        <item name="android:layout_alignParentLeft">true</item>
+        <item name="android:layout_alignParentTop">true</item>
+    </style>
+
+    <style name="Theme" parent="android:Theme">
+    </style>
+
+    <style name="Theme.Gallery">
+        <item name="galleryGrid">@style/gallery_layout</item>
+    </style>
+</resources>

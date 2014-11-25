@@ -3,4 +3,5 @@
     <integer name="post_thumbnail_size">160</integer>
     <integer name="max_post_lines">35</integer>
     <integer name="gallery_rows">3</integer>
+    <integer name="catalog_thumbnail_size">80</integer>
 </resources>

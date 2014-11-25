@@ -3,11 +3,11 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="blackman.matt.Settings.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="blackman.matt.settings.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
 
     <header
-        android:fragment="blackman.matt.Settings.SettingsActivity$DataSyncPreferenceFragment"
+        android:fragment="blackman.matt.settings.SettingsActivity$DataSyncPreferenceFragment"
         android:title="@string/pref_header_data_sync" />
 
 </preference-headers>
