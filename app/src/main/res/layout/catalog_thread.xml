@@ -20,18 +20,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/catalog_replies_example"
-        android:id="@+id/tv_catalog_replies" />
+        android:id="@+id/tv_catalog_replies"
+        android:textStyle="bold" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/catalog_topic_example"
-        android:id="@+id/tv_catalog_topic" />
+        android:id="@+id/tv_catalog_topic"
+        android:textColor="@color/topic"
+        android:gravity="fill_vertical"
+        android:textSize="@dimen/catalog_topic_text_size"
+        android:padding="@dimen/post_bar_small_padding" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/catalog_comment_example"
-        android:id="@+id/tv_catalog_comment" />
+        android:id="@+id/tv_catalog_comment"
+        android:padding="@dimen/post_bar_small_padding"
+        android:textSize="@dimen/catalog_comment_text_size" />
 
 </LinearLayout>

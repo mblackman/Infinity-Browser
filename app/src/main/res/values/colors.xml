@@ -5,4 +5,6 @@
     <color name="row_color_2">#68ffffff</color>
     <color name="post_menu_active">#624eff35</color>
     <color name="gallery_dim_black">#f0000000</color>
+    <color name="topic">#0F0C5D</color>
+    <color name="username">#ff117743</color>
 </resources>

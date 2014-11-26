@@ -2,7 +2,7 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/action_catalog"
-        android:icon="@drawable/menu_gallery"
+        android:icon="@drawable/menu_catalog"
         android:title="@string/action_catalog"
         android:showAsAction="ifRoom" />
     <item android:id="@+id/action_refresh"

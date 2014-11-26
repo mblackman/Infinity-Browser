@@ -26,4 +26,6 @@
     <dimen name="gallery_image_spacing">1dp</dimen>
     <dimen name="catalog_column_width">110dp</dimen>
     <dimen name="catalog_card_height">255dp</dimen>
+    <dimen name="catalog_comment_text_size">11sp</dimen>
+    <dimen name="catalog_topic_text_size">11sp</dimen>
 </resources>

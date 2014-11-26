@@ -68,6 +68,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="blackman.matt.infinitebrowser.InfinityBrowser" />
         </activity>
+        <activity
+            android:name="blackman.matt.infinitebrowser.AboutActivity"
+            android:label="@string/title_activity_about"
+            android:parentActivityName="blackman.matt.infinitebrowser.InfinityBrowser" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="blackman.matt.infinitebrowser.InfinityBrowser" />
+        </activity>
     </application>
 
 </manifest>

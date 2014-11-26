@@ -8,9 +8,8 @@
         android:layout_height="fill_parent"
         android:id="@+id/grid_gallery"
         style="?galleryGrid"
-        android:horizontalSpacing="@dimen/catalog_column_spacing"
         android:numColumns="@integer/catalog_num_columns"
-        android:verticalSpacing="@dimen/catalog_column_spacing" />
+        android:stretchMode="columnWidth" />
 
     <ImageView
         android:layout_width="fill_parent"

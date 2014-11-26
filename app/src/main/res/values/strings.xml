@@ -60,5 +60,7 @@
     <string name="action_catalog">Open board catalog</string>
     <string name="title_activity_catalog">Catalog</string>
     <string name="gallery_background_acc_text">Black background for expanded image</string>
+    <string name="action_about">About</string>
+    <string name="title_activity_about">About Activity</string>
 
 </resources>

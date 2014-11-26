@@ -11,6 +11,7 @@
     <dimen name="post_header_word_spacing">4dp</dimen>
     <dimen name="drawer_item_height">30dp</dimen>
     <dimen name="action_button_size">80dp</dimen>
+    <dimen name="post_menu_button_size">12dp</dimen>
 
     <!-- Per the design guidelines, navigation drawers should be between 240dp and 320dp:
          https://developer.android.com/design/patterns/navigation-drawer.html -->
@@ -27,4 +28,6 @@
     <dimen name="catalog_column_width">80dp</dimen>
     <dimen name="catalog_column_spacing">3dp</dimen>
     <dimen name="catalog_card_height">100dp</dimen>
+    <dimen name="catalog_comment_text_size">10sp</dimen>
+    <dimen name="catalog_topic_text_size">11sp</dimen>
 </resources>

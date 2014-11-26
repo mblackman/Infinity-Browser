@@ -2,5 +2,7 @@
 <resources>
     <integer name="post_thumbnail_size">160</integer>
     <integer name="max_post_lines">35</integer>
-    <integer name="gallery_rows">3</integer>
+    <integer name="gallery_rows">6</integer>
+    <integer name="catalog_num_columns">6</integer>
+    <integer name="gallery_num_columns">8</integer>
 </resources>
