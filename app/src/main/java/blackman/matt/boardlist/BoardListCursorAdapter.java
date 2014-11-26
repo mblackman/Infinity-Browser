@@ -19,9 +19,8 @@
 package blackman.matt.boardlist;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +28,7 @@ import android.widget.CursorAdapter;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import blackman.matt.infinitebrowser.InfinityBrowser;
 import blackman.matt.infinitebrowser.R;
 
 /**
@@ -107,7 +107,7 @@ class BoardListCursorAdapter extends CursorAdapter {
      * @param cursor Cursor for the query.
      */
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(View view, final Context context, Cursor cursor) {
         ViewHolder holder = (ViewHolder) view.getTag();
         final String boardName = cursor.getString(3);
         final String boardLink = cursor.getString(2);
@@ -116,15 +116,17 @@ class BoardListCursorAdapter extends CursorAdapter {
         final int favoritedInt = cursor.getInt(4);
         final boolean isFavorited = favoritedInt > 0;
 
-        String htmlBoardLink = "<a href=\"https://8chan.co/" +
-                boardLink.toLowerCase() +
-                "\">" +
-                "/" + boardLink + "/" +
-                "</a>";
-
         holder.boardNameTextView.setText(boardName);
-        holder.boardLinkTextView.setText(Html.fromHtml(htmlBoardLink));
-        holder.boardLinkTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        holder.boardLinkTextView.setText("/" + boardLink +"/");
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, InfinityBrowser.class);
+                intent.putExtra(InfinityBrowser.ARG_BOARD, boardLink);
+                context.startActivity(intent);
+            }
+        });
+
         holder.boardValueTextView.setText(displayColumn);
         holder.favButton.setChecked(isFavorited);
         holder.favButton.setOnClickListener(new View.OnClickListener() {

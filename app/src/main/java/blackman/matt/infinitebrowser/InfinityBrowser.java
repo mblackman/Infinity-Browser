@@ -61,6 +61,9 @@ import blackman.matt.boardlist.DatabaseDef;
 public class InfinityBrowser extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
         Board.OnReplyClickedListener {
+    public static final String ARG_BOARD = "board_root";
+    public static final String ARG_THREAD = "board_thread";
+
 
     private CharSequence mTitle;
 
@@ -119,7 +122,7 @@ public class InfinityBrowser extends Activity
             Intent intent = getIntent();
             String defaultBoard = preferences.getString("default_board", "").toLowerCase();
 
-            if(intent != null && intent.getData() != null) {
+            if(intent.getData() != null || intent.getExtras() != null) {
                 newBoard = loadFromIntent(intent);
 
             } else if(!defaultBoard.equals("")) {
@@ -148,30 +151,44 @@ public class InfinityBrowser extends Activity
      */
     private Board loadFromIntent(Intent intent) {
         Board newBoard;
-        Pattern patternRoot = Pattern.compile("(?<=8chan.co\\/)\\w*");
-        Pattern patternThread = Pattern.compile("(?<=\\/res\\/)\\w*");
-        Pattern patternPost = Pattern.compile("(?<=#|#[qQ])\\d*$");
+        String intentBoard = intent.getStringExtra(ARG_BOARD);
+        String intentThread = intent.getStringExtra(ARG_THREAD);
 
-        Matcher rootMatch = patternRoot.matcher(intent.getDataString());
-        Matcher threadMatch = patternThread.matcher(intent.getDataString());
-        Matcher postMatcher = patternPost.matcher(intent.getDataString());
-
-        rootMatch.find();
-        String boardRoot = rootMatch.group(0);
-
-        if(threadMatch.find()) {
-            if(postMatcher.find()) {
-                newBoard = Board.newInstance(boardRoot, threadMatch.group(0), postMatcher.group(0));
+        if(intentBoard != null) {
+            if(intentThread == null){
+                newBoard = Board.newInstance(intentBoard);
+                mTitle = "/" + intentBoard + "/";
             } else {
-                newBoard = Board.newInstance(boardRoot, threadMatch.group(0));
+                newBoard = Board.newInstance(intentBoard, intentThread);
+                mTitle = "/" + intentBoard + "/" + intentThread + "/";
             }
         } else {
-            newBoard = Board.newInstance(boardRoot);
-        }
+            Pattern patternRoot = Pattern.compile("(?<=8chan.co\\/)\\w*");
+            Pattern patternThread = Pattern.compile("(?<=\\/res\\/)\\w*");
+            Pattern patternPost = Pattern.compile("(?<=#|#[qQ])\\d*$");
 
-        mTitle = intent.getDataString().replace("https://8chan.co", "")
-                .replace("http://8chan.co", "")
-                .replace("index.html", "");
+            Matcher rootMatch = patternRoot.matcher(intent.getDataString());
+            Matcher threadMatch = patternThread.matcher(intent.getDataString());
+            Matcher postMatcher = patternPost.matcher(intent.getDataString());
+
+            rootMatch.find();
+            String boardRoot = rootMatch.group(0);
+
+            if (threadMatch.find()) {
+                if (postMatcher.find()) {
+                    newBoard = Board.newInstance(boardRoot, threadMatch.group(0),
+                            postMatcher.group(0));
+                } else {
+                    newBoard = Board.newInstance(boardRoot, threadMatch.group(0));
+                }
+            } else {
+                newBoard = Board.newInstance(boardRoot);
+            }
+
+            mTitle = intent.getDataString().replace("https://8chan.co", "")
+                    .replace("http://8chan.co", "")
+                    .replace("index.html", "");
+        }
 
         return newBoard;
     }
@@ -215,7 +232,7 @@ public class InfinityBrowser extends Activity
             newBoard = Board.newInstance(boardLink);
             mTitle = boardLink;
         } else {
-            findViewById(R.id.ll_help_add_boards).setVisibility(View.VISIBLE);
+            //findViewById(R.id.ll_help_add_boards).setVisibility(View.VISIBLE);
         }
         cursor.close();
         return newBoard;
@@ -302,6 +319,11 @@ public class InfinityBrowser extends Activity
             case R.id.action_boards:
                 Intent boardList = new Intent(this, BoardListActivity.class);
                 startActivity(boardList);
+                return true;
+            case R.id.action_about:
+                Intent about = new Intent(this, AboutActivity.class);
+                startActivity(about);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

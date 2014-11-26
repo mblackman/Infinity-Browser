@@ -16,12 +16,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package blackman.matt.reply;
+package blackman.matt.infinitebrowser;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.webkit.WebView;
 
 /**
- * The info of a post reply.
- *
- * Created by Matt on 11/18/2014.
+ * Displays the open source licenses used in this app.
+ * Created by Matt on 11/26/2014.
  */
-class PostReply {
+public class AboutActivity extends Activity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        WebView webView = new WebView(this);
+        webView.loadUrl("file:///android_asset/licenses.html");
+
+        setContentView(webView);
+    }
 }

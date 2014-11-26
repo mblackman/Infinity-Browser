@@ -19,13 +19,15 @@
 
 package blackman.matt.board;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,47 +38,93 @@ import java.util.regex.Pattern;
  * Created by Matt on 11/3/2014.
  */
 public class Post {
-    public final String userName;
-    public final String postDate;
-    public final String postNo;
-    public final String topic;
-    public final String postBody;
-    public final String rootBoard;
-    public final String numReplies;
-    public final String omittedReplies;
-    public final String omittedImages;
-    public final List<ImageFile> images;
+    private static final String jsonPostNo = "no";
+    private static final String postSubject = "sub";
+    private static final String postComment = "com";
+    private static final String postReplies = "replies";
+    private static final String postOmittedReplies = "omitted_posts";
+    private static final String postOmittedImages = "omitted_images";
+    private static final String postName = "name";
+    //private static final String postStickied = "sticky";
+    //private static final String postLocked = "locked";
+    private static final String postTime = "time";
+    //private static final String postLastModified = "last_modified";
+    private static final String postFileName = "filename";
+    private static final String postFileSiteName = "tim";
+    private static final String postFileExt = "ext";
+    private static final String postFileSize = "fsize";
+    private static final String postFileHeight = "h";
+    private static final String postFileWidth = "w";
+    private static final String postFileThumbHeight = "tn_h";
+    private static final String postFileThumbWidth = "tn_w";
+
+    public String userName;
+    public String postDate;
+    public String postNo;
+    public String topic;
+    public String postBody;
+    public String rootBoard;
+    public String numReplies;
+    public String omittedReplies;
+    public String omittedImages;
+    public List<ImageFile> images;
     public List<String> repliedTo;
     public List<String> repliedBy;
     public Boolean isThumbnail;
 
     /**
      * Basic constructor
-     * @param userName Post user name.
-     * @param postDate Date the post was made.
-     * @param postNumber Post's number.
-     * @param topic Topic of the post
-     * @param postText Body of the post.
-     * @param numReplies Replies to post.
-     * @param boardRoot Link to the board.
+     *
+     * @param object The json object being turned into a post.
+     * @param rootBoard The root board of the post.
      */
-    public Post(String userName, String postDate, String postNumber, String topic,
-                String postText, String numReplies, String omittedReplies, String omittedImages,
-                List<ImageFile> images, String boardRoot) {
+    public Post(JSONObject object, String rootBoard) {
         this.repliedTo = new ArrayList<String>();
         this.repliedBy = new ArrayList<String>();
-        this.userName = userName;
-        this.postDate = postDate;
-        this.postNo = postNumber;
-        this.topic = topic;
-        this.images = images;
-        this.postBody = formatPostBody(postText);
-        this.numReplies = numReplies;
-        this.omittedReplies = omittedReplies;
-        this.omittedImages = omittedImages;
-        this.rootBoard = boardRoot;
-
+        this.images = new ArrayList<ImageFile>();
+        this.rootBoard = rootBoard;
         this.isThumbnail = true;
+
+        try {
+            this.userName = object.optString(postName);
+            this.postDate = object.getString(postTime);
+            this.postNo = object.getString(jsonPostNo);
+            this.topic = object.optString(postSubject);
+            this.postBody = formatPostBody(object.optString(postComment));
+            this.numReplies = object.optString(postReplies);
+            this.omittedReplies = object.optString(postOmittedReplies);
+            this.omittedImages = object.optString(postOmittedImages);
+
+            String fileName = object.optString(postFileName);
+            if(fileName != null && !fileName.equals("")) {
+                images.add(new ImageFile(rootBoard, fileName,
+                        object.optString(postFileExt),
+                        object.getString(postFileSiteName),
+                        object.optInt(postFileWidth),
+                        object.optInt(postFileHeight),
+                        object.optInt(postFileThumbWidth),
+                        object.optInt(postFileThumbHeight),
+                        object.getInt(postFileSize)));
+            }
+
+            if(object.has("extra_files")) {
+                JSONArray multiFiles = object.getJSONArray("extra_files");
+                for (int i = 0; i < multiFiles.length(); i++) {
+                    JSONObject imageJson = multiFiles.getJSONObject(i);
+                    images.add(new ImageFile(rootBoard,
+                            imageJson.getString(postFileName),
+                            imageJson.getString(postFileExt),
+                            imageJson.getString(postFileSiteName),
+                            imageJson.optInt(postFileWidth),
+                            imageJson.optInt(postFileHeight),
+                            imageJson.optInt(postFileThumbWidth),
+                            imageJson.optInt(postFileThumbHeight),
+                            imageJson.getInt(postFileSize)));
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -125,5 +173,17 @@ public class Post {
         }
 
         return formattedText.toString();
+    }
+
+    public static ArrayList<Post> fromJson(JSONArray jsonArray, String rootBoard) {
+        ArrayList<Post> posts = new ArrayList<Post>();
+        for (int j = 0; j < jsonArray.length(); j++) {
+            try {
+                posts.add(new Post(jsonArray.getJSONObject(j), rootBoard));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return posts;
     }
 }

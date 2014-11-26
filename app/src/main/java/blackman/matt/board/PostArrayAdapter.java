@@ -138,10 +138,6 @@ class PostArrayAdapter extends BaseAdapter {
     public View getView(final int position, View convertView, ViewGroup parent) {
         final Post post = getItem(position);
         final ViewHolder holder;
-        //int maxWidth = mContext.getResources().getInteger(R.integer.post_thumbnail_size);
-        //final ImageSize targetSize = new ImageSize(maxWidth, maxWidth);
-        Float replyPadding = mContext.getResources().getDimension(R.dimen.post_header_word_spacing);
-
 
         if(convertView == null) {
             convertView = LayoutInflater.from(mContext).inflate(R.layout.post_view, parent, false);
@@ -192,7 +188,9 @@ class PostArrayAdapter extends BaseAdapter {
                         switch (item.getItemId()) {
                             case R.id.menu_replies:
                                new AlertDialog.Builder(mContext).setTitle("Replies")
-                                        .setAdapter(new ArrayAdapter<String>(mContext, android.R.layout.simple_list_item_1, post.repliedBy),
+                                        .setAdapter(new ArrayAdapter<String>(mContext,
+                                                        android.R.layout.simple_list_item_1,
+                                                        post.repliedBy),
                                                 new DialogInterface.OnClickListener() {
                                                     @Override
                                                     public void onClick(DialogInterface dialog, int which) {
@@ -216,18 +214,15 @@ class PostArrayAdapter extends BaseAdapter {
             } else {
                 holder.replies.setText("Post has no replies :'(");
             }
-            holder.replies.setOnClickListener(new View.OnClickListener() {
+            View.OnClickListener replyClick = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     mListener.onReplyClicked(post.rootBoard, post.postNo);
                 }
-            });
-            holder.postBody.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mListener.onReplyClicked(post.rootBoard, post.postNo);
-                }
-            });
+            };
+            convertView.setOnClickListener(replyClick);
+            holder.postBody.setOnClickListener(replyClick);
+            holder.replies.setOnClickListener(replyClick);
         } else {
             holder.replies.setVisibility(View.GONE);
         }
@@ -268,7 +263,8 @@ class PostArrayAdapter extends BaseAdapter {
                         public void onLoadingFailed(String imageUri, View view,
                                                     FailReason failReason) {
                             holder.progressImage.setVisibility(View.GONE);
-                            Drawable error = mContext.getResources().getDrawable(R.drawable.deadico);
+                            Drawable error = mContext.getResources()
+                                    .getDrawable(R.drawable.deadico);
                             view.setVisibility(View.VISIBLE);
                             ((ImageButton) view).setImageDrawable(error);
                         }
@@ -308,7 +304,8 @@ class PostArrayAdapter extends BaseAdapter {
                                 public void onLoadingFailed(String imageUri, View view,
                                                             FailReason failReason) {
                                     myHolder.progressImage.setVisibility(View.GONE);
-                                    Drawable error = mContext.getResources().getDrawable(R.drawable.deadico);
+                                    Drawable error = mContext.getResources()
+                                            .getDrawable(R.drawable.deadico);
                                     view.setVisibility(View.VISIBLE);
                                     ((ImageButton) view).setImageDrawable(error);
                                 }

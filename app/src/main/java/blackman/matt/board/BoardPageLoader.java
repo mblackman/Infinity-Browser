@@ -11,14 +11,13 @@ import blackman.matt.utils.PageLoader;
 import blackman.matt.infinitebrowser.R;
 
 /**
+ * Loads a boards page for a whole thread.
  * Created by Matt on 11/20/2014.
  */
 public class BoardPageLoader extends PageLoader {
     private final ProgressBar mProgress;
     private final TextView mProgressText;
     private final PostArrayAdapter mAdapter;
-
-    private List<String> postIds = new ArrayList<String>();
 
     public PageLoaderResponse mResponse;
 

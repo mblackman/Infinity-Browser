@@ -1,17 +1,18 @@
 package blackman.matt.catalog;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -22,12 +23,16 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import java.util.List;
 
 import blackman.matt.board.Post;
+import blackman.matt.infinitebrowser.InfinityBrowser;
 import blackman.matt.infinitebrowser.R;
+import blackman.matt.utils.ImageLongPressDialog;
 
 /**
+ * Adapter for the array of posts in the catalog.
+ *
  * Created by Matt on 11/24/2014.
  */
-public class CatalogAdapter extends BaseAdapter {
+class CatalogAdapter extends BaseAdapter {
     private final ImageSize THUMBNAILSIZE;
     private final int THUMBSIZE;
     private Context mContext;
@@ -72,6 +77,10 @@ public class CatalogAdapter extends BaseAdapter {
             holder.topic = (TextView) convertView.findViewById(R.id.tv_catalog_topic);
             holder.comment = (TextView) convertView.findViewById(R.id.tv_catalog_comment);
 
+            holder.image.setLayoutParams(new LinearLayout.LayoutParams(THUMBSIZE, THUMBSIZE));
+            holder.progress.setLayoutParams(new LinearLayout.LayoutParams(THUMBSIZE, THUMBSIZE));
+            convertView.setLayoutParams(new AbsListView.LayoutParams(THUMBSIZE, THUMBSIZE * 2));
+
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -81,10 +90,25 @@ public class CatalogAdapter extends BaseAdapter {
         String numImages = post.omittedImages;
 
         holder.replies.setText("R: " + numReplies + " / I: " + numImages);
-        holder.topic.setText(post.topic);
+
+        if(post.topic.equals("")) {
+            holder.topic.setVisibility(View.GONE);
+        } else {
+            holder.topic.setVisibility(View.VISIBLE);
+            holder.topic.setText(post.topic);
+        }
+
         holder.comment.setText(Html.fromHtml(post.postBody));
         holder.image.setImageBitmap(null);
-        holder.image.setLayoutParams(new LinearLayout.LayoutParams(THUMBSIZE, THUMBSIZE));
+
+
+        holder.image.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                new ImageLongPressDialog(mContext, post.images.get(0));
+                return true;
+            }
+        });
 
         ImageLoader.getInstance().loadImage(post.images.get(0).getThumbnailUrl(), THUMBNAILSIZE,
                 new SimpleImageLoadingListener() {
@@ -110,6 +134,19 @@ public class CatalogAdapter extends BaseAdapter {
                         holder.image.setVisibility(View.VISIBLE);
                     }
                 });
+
+        View.OnClickListener gotoThread = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mContext, InfinityBrowser.class);
+                intent.putExtra(InfinityBrowser.ARG_BOARD, post.rootBoard);
+                intent.putExtra(InfinityBrowser.ARG_THREAD, post.postNo);
+                mContext.startActivity(intent);
+            }
+        };
+
+        holder.image.setOnClickListener(gotoThread);
+        convertView.setOnClickListener(gotoThread);
 
         return convertView;
     }

@@ -242,7 +242,7 @@ public class Board extends Fragment implements BoardPageLoader.PageLoaderRespons
 
         mListView.setAdapter(mAdapter);
 
-        mScrollListener = new EndlessScrollListener(ImageLoader.getInstance(), true, true);
+        mScrollListener = new EndlessScrollListener();
         mScrollListener.setParentView(mRootView);
         mListView.setOnScrollListener(mScrollListener);
 
@@ -251,8 +251,10 @@ public class Board extends Fragment implements BoardPageLoader.PageLoaderRespons
         }
 
         if(mBoardThread == null) {
+            //noinspection ConstantConditions
             getActivity().getActionBar().setTitle("/" + mBoardRoot + "/");
         } else {
+            //noinspection ConstantConditions
             getActivity().getActionBar().setTitle("/" + mBoardRoot + "/" + mBoardThread + "/");
         }
 
@@ -283,8 +285,10 @@ public class Board extends Fragment implements BoardPageLoader.PageLoaderRespons
     public void onResume() {
         super.onResume();
         if(mBoardThread == null) {
+            //noinspection ConstantConditions
             getActivity().getActionBar().setTitle("/" + mBoardRoot + "/");
         } else {
+            //noinspection ConstantConditions
             getActivity().getActionBar().setTitle("/" + mBoardRoot + "/" + mBoardThread + "/");
         }
     }
@@ -422,14 +426,9 @@ public class Board extends Fragment implements BoardPageLoader.PageLoaderRespons
 
         /**
          * Override constructor.
-         *
-         * @param imageLoader The current loader of images.
-         * @param pauseOnScroll If loading should be paused when scrolled.
-         * @param pauseOnFling If loading should be paused on fling.
          */
-        public EndlessScrollListener(ImageLoader imageLoader, boolean pauseOnScroll,
-                                     boolean pauseOnFling) {
-            super(imageLoader, pauseOnScroll, pauseOnFling);
+        public EndlessScrollListener() {
+            super(ImageLoader.getInstance(), true, true);
         }
 
         /**
